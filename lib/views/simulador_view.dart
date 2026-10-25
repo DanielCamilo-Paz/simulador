@@ -1,101 +1,112 @@
 import 'package:flutter/material.dart';
-import '../controllers/practica_controller.dart';
-import '../models/practica.dart';
-import 'pantalla_llamada_sim.dart';
+import 'detalle_practica_view.dart';
 
-class SimuladorView extends StatefulWidget {
-  final Practica practica;
-  const SimuladorView({super.key, required this.practica});
-
-  @override
-  State<SimuladorView> createState() => _SimuladorViewState();
-}
-
-class _SimuladorViewState extends State<SimuladorView> {
-  late PracticaController ctrl;
-  String? mensaje;
-
-  @override
-  void initState() {
-    super.initState();
-    ctrl = PracticaController();
-    ctrl.cargarPractica(widget.practica);
-  }
-
-  void _abrirTelefono() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => PantallaLlamadaSimulada(
-          alCompletar: (numero) {
-            setState(() {
-              bool ok = ctrl.verificarAccion("llamar");
-              mensaje = ok
-                  ? "✅ ¡Bien hecho! Marcaste $numero y completaste la llamada"
-                  : "❌ Inténtalo de nuevo";
-            });
-          },
-        ),
-      ),
-    );
-  }
+class SimuladorView extends StatelessWidget {
+  const SimuladorView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.practica.tema)),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: ctrl.termino ? _pantallaResultado() : _pantallaPaso(),
+      appBar: AppBar(title: const Text('Seleccionar practica')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          const Text(
+            'Funciones basicas',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+
+          // ✅ Realizar Llamada
+          _tarjeta(
+            icono: Icons.phone,
+            titulo: 'Realizar Llamada telefonica',
+            desc: 'Aprende a realizar una llamada a algun contacto cercano',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const DetallePracticaView()),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+
+          // ✅ Realizar Foto o Video
+          _tarjeta(
+            icono: Icons.camera_alt,
+            titulo: 'Realizar Foto o Video',
+            desc: 'Aprende a realizar una foto o a un video, aprendiendo lo basico en opciones de camara',
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Próximamente: disponible pronto')),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+
+          // ✅ Colocar recordatorio
+          _tarjeta(
+            icono: Icons.access_time,
+            titulo: 'Colocar recordatorio',
+            desc: 'Aprende a colocar un recordatorio en la fecha y hora que gustes, personalizando nombre y tono',
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Próximamente: disponible pronto')),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+
+          // ✅ Editar, Eliminar Foto
+          _tarjeta(
+            icono: Icons.photo_library,
+            titulo: 'Editar, Eliminar Foto',
+            desc: 'Aprende a entrar a galeria para asi mirar tus fotos y poder decidir si eliminarlas o editarlas a tu gusto',
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Próximamente: disponible pronto')),
+              );
+            },
+          ),
+          const SizedBox(height: 24),
+
+          const Text(
+            'Apps de mensajeria',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+
+          // ✅ Enviar mensaje WhatsApp
+          _tarjeta(
+            icono: Icons.message,
+            titulo: 'Enviar mensaje whatsapp',
+            desc: 'Aprende a realizar un mensaje por la aplicacion de whatsapp para asi poder hablar con tus seres cercanos',
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Próximamente: disponible pronto')),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
 
-  Widget _pantallaPaso() {
-    final paso = ctrl.pasoActual!;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text("Paso ${ctrl.indicePasoActual + 1}",
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 25),
-        Text(paso.instruccion, style: const TextStyle(fontSize: 22)),
-        const SizedBox(height: 35),
-        ElevatedButton(
-          onPressed: _abrirTelefono,
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 25),
-            textStyle: const TextStyle(fontSize: 22),
-            backgroundColor: Colors.green[700],
-          ),
-          child: const Text("📞 ABRIR TELÉFONO"),
-        ),
-        const SizedBox(height: 25),
-        if (mensaje != null)
-          Text(mensaje!, style: const TextStyle(fontSize: 20)),
-      ],
-    );
-  }
-
-  Widget _pantallaResultado() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text("🎉 ¡Práctica terminada!", style: TextStyle(fontSize: 32)),
-          const SizedBox(height: 25),
-          Text("Avance: ${ctrl.porcentaje.toStringAsFixed(0)}%",
-              style: const TextStyle(fontSize: 26)),
-          const SizedBox(height: 35),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 22),
-              textStyle: const TextStyle(fontSize: 22),
-            ),
-            child: const Text("Volver al inicio"),
-          ),
-        ],
+  Widget _tarjeta({
+    required IconData icono,
+    required String titulo,
+    required String desc,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      color: Colors.grey[200],
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: ListTile(
+        leading: Icon(icono, size: 34, color: Colors.black54),
+        title: Text(titulo, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(desc, style: const TextStyle(fontSize: 13)),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: onTap,
       ),
     );
   }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'views/inicio_view.dart';
+import 'views/simulador_view.dart';
 
 void main() {
   runApp(const MiApp());
@@ -11,12 +11,12 @@ class MiApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Simulador Celular",
+      title: 'Simulador Celular',
       theme: ThemeData(
         primarySwatch: Colors.teal,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const InicioView(),
+      home: const SimuladorView(),  // ← De una vez la lista de prácticas
       debugShowCheckedModeBanner: false,
     );
   }

@@ -1,45 +1,74 @@
+import 'package:flutter/material.dart';
 import '../models/practica.dart';
 import '../models/paso.dart';
 
-class PracticaController {
-  Practica? practicaActual;
-  int indicePasoActual = 0;
-  int aciertos = 0;
-  List<String> mensajes = [];
+class PracticaController extends ChangeNotifier {
+  int pasoActual = 0;
 
-  void cargarPractica(Practica practica) {
-    practicaActual = practica;
-    indicePasoActual = 0;
-    aciertos = 0;
-    mensajes.clear();
+  final List<Practica> listaPracticas = [
+    Practica(
+      id: 'llamada',
+      titulo: 'Realizar Llamada telefónica',
+      descripcion: 'Aprende a realizar una llamada a algún contacto cercano',
+      duracion: '5 minutos',
+      nivel: 'Fácil',
+      icono: Icons.phone,
+      pasos: [
+        Paso(numero: 1, instruccion: 'Selecciona un contacto de la lista'),
+        Paso(numero: 2, instruccion: 'Presiona el botón Llamar'),
+      ],
+    ),
+    Practica(
+      id: 'foto',
+      titulo: 'Realizar Foto o Video',
+      descripcion: 'Aprende a tomar una foto o video, básico en opciones de cámara',
+      duracion: '5 minutos',
+      nivel: 'Fácil',
+      icono: Icons.camera_alt,
+    ),
+    Practica(
+      id: 'alarma',
+      titulo: 'Colocar recordatorio',
+      descripcion: 'Aprende a colocar un recordatorio en la fecha y hora que gustes',
+      duracion: '5 minutos',
+      nivel: 'Fácil',
+      icono: Icons.access_time,
+    ),
+    Practica(
+      id: 'galeria',
+      titulo: 'Editar, Eliminar Foto',
+      descripcion: 'Aprende a entrar a galería para mirar tus fotos y decidir eliminar o editar',
+      duracion: '5 minutos',
+      nivel: 'Fácil',
+      icono: Icons.photo_library,
+    ),
+    Practica(
+      id: 'whatsapp',
+      titulo: 'Enviar mensaje WhatsApp',
+      descripcion: 'Aprende a enviar un mensaje por WhatsApp sin necesidad de saber escribir',
+      duracion: '5 minutos',
+      nivel: 'Fácil',
+      icono: Icons.message,
+    ),
+  ];
+
+  Practica? practicaSeleccionada;
+
+  void seleccionarPractica(Practica p) {
+    practicaSeleccionada = p;
+    pasoActual = 0;
+    notifyListeners();
   }
 
-  Paso? get pasoActual =>
-      (practicaActual != null && indicePasoActual < practicaActual!.pasos.length)
-          ? practicaActual!.pasos[indicePasoActual]
-          : null;
-
-  bool verificarAccion(String accionUsuario) {
-    if (pasoActual == null) return false;
-
-    bool correcta = accionUsuario.trim().toLowerCase() ==
-        pasoActual!.accionEsperada.trim().toLowerCase();
-
-    if (correcta) {
-      aciertos++;
-      mensajes.add(pasoActual!.mensajeCorrecto);
-      indicePasoActual++;
-    } else {
-      mensajes.add(pasoActual!.mensajeIncorrecto);
+  void avanzarPaso() {
+    if (practicaSeleccionada != null && pasoActual < practicaSeleccionada!.pasos.length - 1) {
+      pasoActual++;
+      notifyListeners();
     }
-    return correcta;
   }
 
-  bool get termino =>
-      practicaActual != null && indicePasoActual >= practicaActual!.pasos.length;
-
-  double get porcentaje =>
-      practicaActual != null && practicaActual!.pasos.isNotEmpty
-          ? (aciertos / practicaActual!.pasos.length) * 100
-          : 0;
+  bool get practicaTerminada {
+    if (practicaSeleccionada == null) return false;
+    return pasoActual >= practicaSeleccionada!.pasos.length - 1;
+  }
 }
