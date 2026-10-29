@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'pantalla_llamada_sim.dart';
 import 'pantalla_camara_sim.dart';
+import 'pantalla_recordatorio_sim.dart';
+import 'pantalla_galeria_sim.dart';
 
 class SimuladorView extends StatelessWidget {
   const SimuladorView({super.key});
@@ -11,8 +13,8 @@ class SimuladorView extends StatelessWidget {
       backgroundColor: const Color(0xFFF7F9FA),
       appBar: AppBar(
         title: const Text(
-            'Seleccionar practica',
-            style: TextStyle(fontWeight: FontWeight.bold)
+          'Seleccionar practica',
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: const Color(0xFFF7F9FA),
       ),
@@ -21,13 +23,11 @@ class SimuladorView extends StatelessWidget {
         children: [
           const Text(
             'Funciones basicas',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
 
+          //  Realizar Llamada
           _tarjeta(
             icono: Icons.phone,
             titulo: 'Realizar Llamada telefonica',
@@ -36,14 +36,13 @@ class SimuladorView extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const PantallaLlamadaSim(),
-                ),
+                MaterialPageRoute(builder: (_) => const PantallaLlamadaSim()),
               );
             },
           ),
           const SizedBox(height: 12),
 
+          //  Realizar Foto o Video
           _tarjeta(
             icono: Icons.camera_alt,
             titulo: 'Realizar Foto o Video',
@@ -52,53 +51,55 @@ class SimuladorView extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const PantallaCamaraSim(),
-                ),
+                MaterialPageRoute(builder: (_) => const PantallaCamaraSim()),
               );
             },
           ),
           const SizedBox(height: 12),
 
+          // Colocar Recordatorio
           _tarjeta(
             icono: Icons.access_time,
             titulo: 'Colocar recordatorio',
             desc: 'Aprende a colocar un recordatorio en la fecha y hora que gustes, personalizando nombre y tono',
             colorIcono: const Color(0xFF92AFBC),
             onTap: () {
-              _proximamente(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PantallaRecordatorioSim()),
+              );
             },
           ),
           const SizedBox(height: 12),
 
+          // Editar, Eliminar Foto — AHORA FUNCIONA
           _tarjeta(
             icono: Icons.photo_library,
             titulo: 'Editar, Eliminar Foto',
             desc: 'Aprende a entrar a galeria para asi mirar tus fotos y poder decidir si eliminarlas o editarlas a tu gusto',
             colorIcono: const Color(0xFF92AFBC),
             onTap: () {
-              _proximamente(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PantallaGaleriaSim()),
+              );
             },
           ),
           const SizedBox(height: 24),
 
           const Text(
             'Apps de mensajeria',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
 
+          // ⏳ WhatsApp
           _tarjeta(
             icono: Icons.message,
             titulo: 'Enviar mensaje whatsapp',
             desc: 'Aprende a realizar un mensaje por la aplicacion de whatsapp para asi poder hablar con tus seres cercanos',
             colorIcono: const Color(0xFF92AFBC),
-            onTap: () {
-              _proximamente(context);
-            },
+            onTap: () => _proximamente(context),
           ),
         ],
       ),
@@ -107,9 +108,7 @@ class SimuladorView extends StatelessWidget {
 
   void _proximamente(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Próximamente: disponible pronto'),
-      ),
+      const SnackBar(content: Text('Próximamente: disponible pronto')),
     );
   }
 
@@ -129,10 +128,7 @@ class SimuladorView extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         leading: Container(
           width: 58,
           height: 58,
@@ -140,30 +136,17 @@ class SimuladorView extends StatelessWidget {
             color: colorIcono,
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Icon(
-            icono,
-            size: 40,
-            color: Colors.white,
-          ),
+          child: Icon(icono, size: 40, color: Colors.white),
         ),
         title: Text(
           titulo,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 17,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
         ),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 6),
-          child: Text(
-            desc,
-            style: const TextStyle(fontSize: 14),
-          ),
+          child: Text(desc, style: const TextStyle(fontSize: 14)),
         ),
-        trailing: const Icon(
-          Icons.arrow_forward_ios,
-          size: 25,
-        ),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 25),
         onTap: onTap,
       ),
     );
