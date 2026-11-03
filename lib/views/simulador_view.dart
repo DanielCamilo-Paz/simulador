@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'pantalla_llamada_sim.dart';
-import 'pantalla_camara_sim.dart';
-import 'pantalla_recordatorio_sim.dart';
-import 'pantalla_galeria_sim.dart';
+import 'detalle_practica_llamada_view.dart';
+import 'detalle_camara_view.dart';
+import 'detalle_reloj_view.dart';
+import 'detalle_galeria_view.dart';
+import 'detalle_calendario_view.dart';
 
 class SimuladorView extends StatelessWidget {
   const SimuladorView({super.key});
@@ -27,7 +28,7 @@ class SimuladorView extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          //  Realizar Llamada
+          // 📞 Realizar Llamada → Detalles
           _tarjeta(
             icono: Icons.phone,
             titulo: 'Realizar Llamada telefonica',
@@ -36,13 +37,15 @@ class SimuladorView extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const PantallaLlamadaSim()),
+                MaterialPageRoute(
+                  builder: (_) => const DetallePracticaView(),
+                ),
               );
             },
           ),
           const SizedBox(height: 12),
 
-          //  Realizar Foto o Video
+          // 📷 Cámara → Detalles
           _tarjeta(
             icono: Icons.camera_alt,
             titulo: 'Realizar Foto o Video',
@@ -51,28 +54,32 @@ class SimuladorView extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const PantallaCamaraSim()),
+                MaterialPageRoute(
+                  builder: (_) => const DetalleCamaraView(),
+                ),
               );
             },
           ),
           const SizedBox(height: 12),
 
-          // Colocar Recordatorio
+          // ⏰ Reloj → Detalles
           _tarjeta(
             icono: Icons.access_time,
-            titulo: 'Colocar recordatorio',
-            desc: 'Aprende a colocar un recordatorio en la fecha y hora que gustes, personalizando nombre y tono',
+            titulo: 'Colocar alarmas o cronometro',
+            desc: 'Aprende a colocar una alarma en la fecha y hora que gustes, a visualizar la hora y aprender a utilizar el cronometro del celular',
             colorIcono: const Color(0xFF92AFBC),
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const PantallaRecordatorioSim()),
+                MaterialPageRoute(
+                  builder: (_) => const DetalleRelojView(),
+                ),
               );
             },
           ),
           const SizedBox(height: 12),
 
-          // Editar, Eliminar Foto — AHORA FUNCIONA
+          // 🖼️ Galería → Detalles
           _tarjeta(
             icono: Icons.photo_library,
             titulo: 'Editar, Eliminar Foto',
@@ -81,7 +88,26 @@ class SimuladorView extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const PantallaGaleriaSim()),
+                MaterialPageRoute(
+                  builder: (_) => const DetalleGaleriaView(),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 24),
+
+          // 📅 Calendario → Detalles
+          _tarjeta(
+            icono: Icons.calendar_month,
+            titulo: 'Colocar recordatorio en calendario',
+            desc: 'Aprende a visualizar el calendario y poder poner un recordatorio el dia y hora que quieras',
+            colorIcono: const Color(0xFF92AFBC),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const DetalleCalendarioView(),
+                ),
               );
             },
           ),
@@ -93,11 +119,11 @@ class SimuladorView extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // ⏳ WhatsApp
+          // 💬 WhatsApp → En espera / Próximamente
           _tarjeta(
             icono: Icons.message,
-            titulo: 'Enviar mensaje whatsapp',
-            desc: 'Aprende a realizar un mensaje por la aplicacion de whatsapp para asi poder hablar con tus seres cercanos',
+            titulo: 'Enviar mensaje WhatsApp',
+            desc: 'Próximamente: disponible pronto',
             colorIcono: const Color(0xFF92AFBC),
             onTap: () => _proximamente(context),
           ),
@@ -128,7 +154,10 @@ class SimuladorView extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
         leading: Container(
           width: 58,
           height: 58,
@@ -140,11 +169,17 @@ class SimuladorView extends StatelessWidget {
         ),
         title: Text(
           titulo,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 17,
+          ),
         ),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 6),
-          child: Text(desc, style: const TextStyle(fontSize: 14)),
+          child: Text(
+            desc,
+            style: const TextStyle(fontSize: 14),
+          ),
         ),
         trailing: const Icon(Icons.arrow_forward_ios, size: 25),
         onTap: onTap,
