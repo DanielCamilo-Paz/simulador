@@ -1,20 +1,41 @@
 
 import 'package:flutter/material.dart';
 
-import 'detalle_practica_llamada_view.dart';
-import 'detalle_camara_view.dart';
-import 'detalle_reloj_view.dart';
-import 'detalle_galeria_view.dart';
-import 'detalle_calendario_view.dart';
-import 'detalle_whatsapp_view.dart';
-import 'pantalla_whatsapp_sim.dart';
+import '../../controllers/progreso_controller.dart';
 
-class SimuladorView extends StatelessWidget {
+import '../llamada/detalle_practica_llamada_view.dart';
+import '../galeria/detalle_camara_view.dart';
+import '../reloj/detalle_reloj_view.dart';
+import '../galeria/detalle_galeria_view.dart';
+import '../calendario/detalle_calendario_view.dart';
+import '../whatsapp/detalle_whatsapp_view.dart';
+
+class SimuladorView extends StatefulWidget {
   const SimuladorView({super.key});
 
+  @override
+  State<SimuladorView> createState() => _SimuladorViewState();
+}
+
+class _SimuladorViewState extends State<SimuladorView> {
   static const Color fondo = Color(0xFFF7F9FA);
   static const Color colorTarjeta = Color(0xFFBECCD2);
   static const Color colorIcono = Color(0xFF92AFBC);
+
+  // Controlador compartido de las prácticas.
+  late final ProgresoController progresoController;
+
+  @override
+  void initState() {
+    super.initState();
+    progresoController = ProgresoController();
+  }
+
+  @override
+  void dispose() {
+    progresoController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +92,9 @@ class SimuladorView extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const DetalleRelojView(),
+                  builder: (_) => DetalleRelojView(
+                    progresoController: progresoController,
+                  ),
                 ),
               );
             },
@@ -97,7 +120,9 @@ class SimuladorView extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const DetalleCalendarioView(),
+                  builder: (_) => DetalleCalendarioView(
+                    progresoController: progresoController,
+                  ),
                 ),
               );
             },

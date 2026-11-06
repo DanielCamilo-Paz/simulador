@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'views/simulador_view.dart';
+import 'views/principal/simulador_view.dart';
 
 void main() {
   runApp(const MiApp());

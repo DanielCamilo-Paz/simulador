@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
-import 'pantalla_reloj_sim.dart';
 
-class DetalleRelojView extends StatelessWidget {
-  const DetalleRelojView({super.key});
+import 'package:flutter/material.dart';
+import '../llamada/pantalla_llamada_sim.dart';
+
+class DetallePracticaView extends StatelessWidget {
+  const DetallePracticaView({super.key});
 
   static const Color azulFondo = Color(0xFFBECCD2);
   static const Color azulIcono = Color(0xFF92AFBC);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,16 +30,16 @@ class DetalleRelojView extends StatelessWidget {
           children: [
             const SizedBox(height: 10),
 
-            // Icono principal
+            // Icono principal con bordes redondeados
             Container(
               width: 140,
               height: 140,
               decoration: BoxDecoration(
-                color: azulIcono,
+                color: const Color(0xFF92AFBC),
                 borderRadius: BorderRadius.circular(30),
               ),
               child: const Icon(
-                Icons.watch_later_rounded,
+                Icons.phone_rounded,
                 size: 90,
                 color: Colors.white,
               ),
@@ -48,7 +48,7 @@ class DetalleRelojView extends StatelessWidget {
             const SizedBox(height: 24),
 
             const Text(
-              'Reloj, Alarmas y Cronómetro',
+              'Realizar llamada\ntelefónica',
               style: TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
@@ -60,9 +60,8 @@ class DetalleRelojView extends StatelessWidget {
             const SizedBox(height: 12),
 
             const Text(
-              'Aprende a ver la hora actual, crear y editar alarmas. '
-                  'Conoce la hora de otras ciudades del mundo, '
-                  'y usa el cronómetro.',
+              'Aprende a hacer una llamada telefónica '
+                  'al contacto que tú desees.',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.black54,
@@ -73,7 +72,7 @@ class DetalleRelojView extends StatelessWidget {
 
             const SizedBox(height: 32),
 
-            // Información de la práctica
+            // Información de la lección
             Container(
               padding: const EdgeInsets.symmetric(
                 vertical: 20,
@@ -89,7 +88,7 @@ class DetalleRelojView extends StatelessWidget {
                   _dato(
                     Icons.access_time_rounded,
                     'Duración',
-                    '10 minutos',
+                    '5 minutos',
                   ),
                   _dato(
                     Icons.trending_up_rounded,
@@ -102,7 +101,7 @@ class DetalleRelojView extends StatelessWidget {
 
             const Spacer(),
 
-            // Botón para empezar
+            // Botón principal redondeado
             SizedBox(
               width: double.infinity,
               height: 62,
@@ -119,16 +118,22 @@ class DetalleRelojView extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const PantallaRelojSim(),
+                      builder: (_) => const PantallaLlamadaSim(),
                     ),
                   );
                 },
-                child: const Text(
-                  'Comenzar lección',
-                  style: TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(width: 10),
+                    Text(
+                      'Comenzar lección',
+                      style: TextStyle(
+                        fontSize: 19,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -177,4 +182,3 @@ class DetalleRelojView extends StatelessWidget {
     );
   }
 }
-

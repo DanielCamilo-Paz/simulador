@@ -1,30 +1,17 @@
 
 import 'package:flutter/material.dart';
 
-class EventoCalendario {
-  String titulo;
-  DateTime fechaInicio;
-  DateTime fechaFin;
-  bool todoElDia;
-  String repeticion;
-  String recordatorio;
-  String tipoRecordatorio;
-  String descripcion;
-
-  EventoCalendario({
-    required this.titulo,
-    required this.fechaInicio,
-    required this.fechaFin,
-    required this.todoElDia,
-    required this.repeticion,
-    required this.recordatorio,
-    required this.tipoRecordatorio,
-    required this.descripcion,
-  });
-}
+import '../../controllers/calendario_controller.dart';
+import '../../controllers/progreso_controller.dart';
+import '../../models/calendario/evento_model.dart';
 
 class PantallaCalendarioSim extends StatefulWidget {
-  const PantallaCalendarioSim({super.key});
+  final ProgresoController progresoController;
+
+  const PantallaCalendarioSim({
+    super.key,
+    required this.progresoController,
+  });
 
   @override
   State<PantallaCalendarioSim> createState() =>
@@ -36,10 +23,18 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
   final Color fondo = const Color(0xFFF7F9FA);
   final Color verde = const Color(0xFF299764);
 
+  late final CalendarioController calendarioController;
+
   DateTime mesActual = DateTime.now();
   DateTime fechaSeleccionada = DateTime.now();
 
-  final List<EventoCalendario> eventos = [];
+  int leccionActual = 0;
+  int pasoActual = 0;
+
+  final Set<String> accionesCompletadas = {};
+
+  EventoCalendario? eventoCreado;
+  EventoCalendario? eventoEditado;
 
   final List<String> meses = [
     'Enero', 'Febrero', 'Marzo', 'Abril',
@@ -51,6 +46,24 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
     'L', 'M', 'X', 'J', 'V', 'S', 'D'
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    calendarioController = CalendarioController();
+    calendarioController.addListener(actualizarPantalla);
+  }
+
+  @override
+  void dispose() {
+    calendarioController.removeListener(actualizarPantalla);
+    calendarioController.dispose();
+    super.dispose();
+  }
+
+  void actualizarPantalla() {
+    if (mounted) setState(() {});
+  }
+
   String formatoFecha(DateTime fecha) {
     return '${fecha.day} de ${meses[fecha.month - 1]} de ${fecha.year}';
   }
@@ -61,53 +74,214 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
         a.day == b.day;
   }
 
-  bool eventoCorresponde(EventoCalendario evento, DateTime fecha) {
-    final inicio = DateTime(
-      evento.fechaInicio.year,
-      evento.fechaInicio.month,
-      evento.fechaInicio.day,
-    );
+  List<EventoCalendario> eventosDelDia(DateTime fecha) {
+    return calendarioController.eventosDelDia(fecha);
+  }
 
-    final fin = DateTime(
-      evento.fechaFin.year,
-      evento.fechaFin.month,
-      evento.fechaFin.day,
-    );
+  List<EventoCalendario> obtenerTodosLosEventos() {
+    return calendarioController.obtenerEventos();
+  }
 
-    final dia = DateTime(fecha.year, fecha.month, fecha.day);
+  void completarProgreso(String actividad) {
+    widget.progresoController.completarActividadCalendario(actividad);
+  }
 
-    if (dia.isBefore(inicio)) return false;
+  // ------------------------------------------------------------
+  // LECCIONES Y PASOS
+  // ------------------------------------------------------------
 
-    switch (evento.repeticion) {
-      case 'Todos los días':
-        return !dia.isAfter(fin) || mismaFecha(dia, inicio);
+  final List<List<Map<String, String>>> lecciones = [
+    [
+      {
+        'titulo': 'Avanza al siguiente mes',
+        'mensaje':
+        'Observa las flechas que aparecen junto al nombre del mes. Pulsa la flecha derecha para avanzar al siguiente mes.',
+        'accion': 'Pulsa la flecha derecha del calendario.',
+      },
+      {
+        'titulo': 'Regresa al mes anterior',
+        'mensaje':
+        'Ahora vamos a regresar. Busca la flecha izquierda y presiónala para volver al mes anterior.',
+        'accion': 'Pulsa la flecha izquierda del calendario.',
+      },
+      {
+        'titulo': 'Selecciona un día',
+        'mensaje':
+        'El calendario permite seleccionar cualquier día. Toca uno de los números que aparecen en el mes.',
+        'accion': 'Selecciona un día del calendario.',
+      },
+      {
+        'titulo': 'Regresa a la fecha de hoy',
+        'mensaje':
+        'Cuando quieras volver a la fecha actual, puedes utilizar el botón Ir a hoy.',
+        'accion': 'Pulsa el botón Ir a hoy.',
+      },
+    ],
+    [
+      {
+        'titulo': 'Crea tu primer evento',
+        'mensaje':
+        'Ahora aprenderás a guardar una actividad en el calendario. Puedes registrar una cita, una reunión o cualquier otro compromiso.',
+        'accion': 'Pulsa el botón + y guarda un evento.',
+      },
+    ],
+    [
+      {
+        'titulo': 'Consulta tus eventos',
+        'mensaje':
+        'Los eventos aparecen cuando seleccionas el día en el que están programados. Busca la fecha de tu evento y tócala.',
+        'accion': 'Selecciona el día donde guardaste tu evento.',
+      },
+    ],
+    [
+      {
+        'titulo': 'Edita un evento',
+        'mensaje':
+        'Si necesitas cambiar la información de un evento, puedes hacerlo desde el menú de tres puntos que aparece en su tarjeta.',
+        'accion': 'Abre el menú del evento, selecciona Editar y guarda los cambios.',
+      },
+      {
+        'titulo': 'Elimina un evento',
+        'mensaje':
+        'También puedes eliminar un evento que ya no necesitas. Hazlo desde el menú de tres puntos.',
+        'accion': 'Abre el menú del evento y selecciona Eliminar.',
+      },
+    ],
+  ];
 
-      case 'Cada semana':
-        return dia.weekday == inicio.weekday &&
-            (evento.fechaFin.isAfter(evento.fechaInicio) ||
-                mismaFecha(dia, inicio));
+  final List<String> nombresLecciones = [
+    'Conocer el calendario',
+    'Crear un evento',
+    'Consultar eventos',
+    'Editar y eliminar eventos',
+  ];
 
-      case 'Cada mes':
-        return dia.day == inicio.day &&
-            (dia.year < evento.fechaFin.year ||
-                (dia.year == evento.fechaFin.year &&
-                    dia.month <= evento.fechaFin.month));
-
-      case 'Cada año':
-        return dia.day == inicio.day &&
-            dia.month == inicio.month &&
-            dia.year <= evento.fechaFin.year;
-
+  String obtenerIdProgreso() {
+    switch (leccionActual) {
+      case 0:
+        return 'navegar_calendario';
+      case 1:
+        return 'crear_evento';
+      case 2:
+        return 'consultar_evento';
       default:
-        return !dia.isBefore(inicio) && !dia.isAfter(fin);
+        return 'editar_eliminar_evento';
     }
   }
 
-  List<EventoCalendario> eventosDelDia(DateTime fecha) {
-    return eventos
-        .where((evento) => eventoCorresponde(evento, fecha))
-        .toList();
+  String obtenerClavePaso() {
+    if (leccionActual == 0) {
+      return [
+        'avanzar_mes',
+        'retroceder_mes',
+        'seleccionar_dia',
+        'ir_hoy',
+      ][pasoActual];
+    }
+
+    if (leccionActual == 1) return 'crear_evento';
+    if (leccionActual == 2) return 'consultar_evento';
+
+    return pasoActual == 0 ? 'editar_evento' : 'eliminar_evento';
   }
+
+  bool pasoCompletado() {
+    return accionesCompletadas.contains(obtenerClavePaso());
+  }
+
+  void registrarAccion(String accion) {
+    if (accionesCompletadas.contains(accion)) return;
+
+    setState(() {
+      accionesCompletadas.add(accion);
+    });
+  }
+
+  void siguientePaso() {
+    if (!pasoCompletado()) return;
+
+    if (pasoActual < lecciones[leccionActual].length - 1) {
+      setState(() {
+        pasoActual++;
+      });
+      return;
+    }
+
+    completarProgreso(obtenerIdProgreso());
+
+    if (leccionActual < lecciones.length - 1) {
+      setState(() {
+        leccionActual++;
+        pasoActual = 0;
+      });
+    } else {
+      mostrarFinalizacion();
+    }
+  }
+
+  void pasoAnterior() {
+    if (pasoActual > 0) {
+      setState(() {
+        pasoActual--;
+      });
+    } else if (leccionActual > 0) {
+      setState(() {
+        leccionActual--;
+        pasoActual = lecciones[leccionActual].length - 1;
+      });
+    }
+  }
+
+  void mostrarFinalizacion() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: const Text(
+          '¡Felicitaciones!',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.celebration,
+              color: Color(0xFF299764),
+              size: 65,
+            ),
+            SizedBox(height: 15),
+            Text(
+              'Has terminado las prácticas del calendario. ¡Muy buen trabajo!',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 17),
+            ),
+          ],
+        ),
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: verde,
+              foregroundColor: Colors.white,
+              minimumSize: const Size(double.infinity, 48),
+            ),
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              Navigator.pop(context);
+            },
+            child: const Text('Finalizar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ------------------------------------------------------------
+  // NAVEGACIÓN DEL CALENDARIO
+  // ------------------------------------------------------------
 
   void cambiarMes(int cantidad) {
     setState(() {
@@ -117,7 +291,48 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
         1,
       );
     });
+
+    if (leccionActual == 0) {
+      if (cantidad > 0 && pasoActual == 0) {
+        registrarAccion('avanzar_mes');
+      } else if (cantidad < 0 && pasoActual == 1) {
+        registrarAccion('retroceder_mes');
+      }
+    }
   }
+
+  void seleccionarDia(DateTime fecha) {
+    setState(() {
+      fechaSeleccionada = fecha;
+    });
+
+    if (leccionActual == 0 && pasoActual == 2) {
+      registrarAccion('seleccionar_dia');
+    }
+
+    if (leccionActual == 2 && eventosDelDia(fecha).isNotEmpty) {
+      registrarAccion('consultar_evento');
+    }
+  }
+
+  void irHoy() {
+    setState(() {
+      fechaSeleccionada = DateTime.now();
+      mesActual = DateTime(
+        DateTime.now().year,
+        DateTime.now().month,
+        1,
+      );
+    });
+
+    if (leccionActual == 0 && pasoActual == 3) {
+      registrarAccion('ir_hoy');
+    }
+  }
+
+  // ------------------------------------------------------------
+  // SELECTORES DE FECHA Y HORA
+  // ------------------------------------------------------------
 
   Future<void> seleccionarFecha(
       BuildContext context,
@@ -157,10 +372,15 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
     }
   }
 
+  // ------------------------------------------------------------
+  // FORMULARIO PARA CREAR Y EDITAR EVENTOS
+  // ------------------------------------------------------------
+
   Future<void> mostrarFormulario({EventoCalendario? evento}) async {
     final tituloController = TextEditingController(
       text: evento?.titulo ?? '',
     );
+
     final descripcionController = TextEditingController(
       text: evento?.descripcion ?? '',
     );
@@ -168,6 +388,7 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
     bool todoElDia = evento?.todoElDia ?? false;
 
     DateTime fechaInicio = evento?.fechaInicio ?? fechaSeleccionada;
+
     DateTime fechaFin = evento?.fechaFin ??
         DateTime(
           fechaSeleccionada.year,
@@ -181,6 +402,7 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
 
     String repeticion = evento?.repeticion ?? 'Nunca';
     String recordatorio = evento?.recordatorio ?? '10 minutos antes';
+
     String tipoRecordatorio =
         evento?.tipoRecordatorio ?? 'Alarma';
 
@@ -315,9 +537,7 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 18),
-
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
                         title: const Text(
@@ -332,14 +552,12 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
                           });
                         },
                       ),
-
                       const SizedBox(height: 10),
                       const Text(
                         'Fecha de inicio',
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 8),
-
                       campoFecha('Comienza', fechaInicio, () async {
                         await seleccionarFecha(
                           context,
@@ -362,7 +580,6 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
                           },
                         );
                       }),
-
                       if (!todoElDia) ...[
                         const SizedBox(height: 10),
                         campoHora('Hora de inicio', horaInicio, () async {
@@ -379,19 +596,22 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
                                   hora.hour,
                                   hora.minute,
                                 );
+
+                                if (fechaFin.isBefore(fechaInicio)) {
+                                  fechaFin = fechaInicio;
+                                  horaFin = hora;
+                                }
                               });
                             },
                           );
                         }),
                       ],
-
                       const SizedBox(height: 18),
                       const Text(
                         'Fecha de finalización',
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 8),
-
                       campoFecha('Termina', fechaFin, () async {
                         await seleccionarFecha(
                           context,
@@ -409,7 +629,6 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
                           },
                         );
                       }),
-
                       if (!todoElDia) ...[
                         const SizedBox(height: 10),
                         campoHora('Hora de finalización', horaFin, () async {
@@ -431,14 +650,12 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
                           );
                         }),
                       ],
-
                       const SizedBox(height: 20),
                       const Text(
                         'Repetir',
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 8),
-
                       DropdownButtonFormField<String>(
                         value: repeticion,
                         isExpanded: true,
@@ -469,14 +686,12 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
                           }
                         },
                       ),
-
                       const SizedBox(height: 20),
                       const Text(
                         'Recordatorio',
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 8),
-
                       DropdownButtonFormField<String>(
                         value: recordatorio,
                         isExpanded: true,
@@ -498,8 +713,8 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
                           '1 día antes',
                         ].map((opcion) {
                           return DropdownMenuItem(
-                            value: opcion,
-                            child: Text(opcion),
+                              value: opcion,
+                              child: Text(opcion),
                           );
                         }).toList(),
                         onChanged: (valor) {
@@ -510,7 +725,6 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
                           }
                         },
                       ),
-
                       if (recordatorio != 'Sin recordatorio') ...[
                         const SizedBox(height: 15),
                         const Text(
@@ -543,7 +757,6 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
                           },
                         ),
                       ],
-
                       const SizedBox(height: 20),
                       const Text(
                         'Descripción',
@@ -562,7 +775,6 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 10),
                       const Text(
                         'Este recordatorio es una práctica simulada dentro de la aplicación.',
@@ -624,16 +836,27 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
                       descripcion: descripcionController.text.trim(),
                     );
 
-                    setState(() {
-                      if (evento == null) {
-                        eventos.add(nuevoEvento);
-                      } else {
-                        final indice = eventos.indexOf(evento);
-                        if (indice != -1) {
-                          eventos[indice] = nuevoEvento;
-                        }
-                      }
+                    if (evento == null) {
+                      calendarioController.agregarEvento(nuevoEvento);
+                      eventoCreado = nuevoEvento;
 
+                      if (leccionActual == 1) {
+                        registrarAccion('crear_evento');
+                      }
+                    } else {
+                      calendarioController.editarEvento(
+                        evento,
+                        nuevoEvento,
+                      );
+
+                      eventoEditado = nuevoEvento;
+
+                      if (leccionActual == 3 && pasoActual == 0) {
+                        registrarAccion('editar_evento');
+                      }
+                    }
+
+                    setState(() {
                       fechaSeleccionada = fechaInicio;
                       mesActual = DateTime(
                         fechaInicio.year,
@@ -660,25 +883,32 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
     descripcionController.dispose();
   }
 
+  // ------------------------------------------------------------
+  // ELIMINAR EVENTOS
+  // ------------------------------------------------------------
+
   void eliminarEvento(EventoCalendario evento) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Eliminar evento'),
         content: const Text(
           '¿Estás seguro de que deseas eliminar este evento?',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancelar'),
           ),
           TextButton(
             onPressed: () {
-              setState(() {
-                eventos.remove(evento);
-              });
-              Navigator.pop(context);
+              calendarioController.eliminarEvento(evento);
+
+              if (leccionActual == 3 && pasoActual == 1) {
+                registrarAccion('eliminar_evento');
+              }
+
+              Navigator.pop(dialogContext);
             },
             child: const Text(
               'Eliminar',
@@ -689,6 +919,10 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
       ),
     );
   }
+
+  // ------------------------------------------------------------
+  // CALENDARIO VISUAL
+  // ------------------------------------------------------------
 
   Widget construirCalendario() {
     final primerDia = DateTime(
@@ -704,7 +938,9 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
     ).day;
 
     final espaciosIniciales = primerDia.weekday - 1;
-    final totalCasillas = ((espaciosIniciales + diasMes) / 7).ceil() * 7;
+
+    final totalCasillas =
+        ((espaciosIniciales + diasMes) / 7).ceil() * 7;
 
     return Column(
       children: [
@@ -753,11 +989,7 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
             final tieneEventos = eventosDelDia(fecha).isNotEmpty;
 
             return InkWell(
-              onTap: () {
-                setState(() {
-                  fechaSeleccionada = fecha;
-                });
-              },
+              onTap: () => seleccionarDia(fecha),
               borderRadius: BorderRadius.circular(30),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -801,6 +1033,10 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
       ],
     );
   }
+
+  // ------------------------------------------------------------
+  // TARJETAS DE EVENTOS
+  // ------------------------------------------------------------
 
   Widget construirEvento(EventoCalendario evento) {
     return Card(
@@ -866,6 +1102,17 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
                         ),
                       ),
                     ),
+                  if (evento.recordatorio != 'Sin recordatorio')
+                    Padding(
+                      padding: const EdgeInsets.only(top: 5),
+                      child: Text(
+                        'Recordatorio: ${evento.recordatorio}',
+                        style: const TextStyle(
+                          color: Colors.black54,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -907,6 +1154,178 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
     );
   }
 
+  // ------------------------------------------------------------
+  // PANEL DE INSTRUCCIONES
+  // ------------------------------------------------------------
+
+  Widget construirPanelInstrucciones() {
+    final paso = lecciones[leccionActual][pasoActual];
+    final completado = pasoCompletado();
+
+    return Card(
+      elevation: 2,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: azul.withOpacity(0.5)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.school, color: verde, size: 27),
+                const SizedBox(width: 9),
+                Expanded(
+                  child: Text(
+                    'Lección ${leccionActual + 1} de ${lecciones.length}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                Text(
+                  '${pasoActual + 1}/${lecciones[leccionActual].length}',
+                  style: const TextStyle(
+                    color: Colors.black54,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: LinearProgressIndicator(
+                value: (pasoActual + 1) /
+                    lecciones[leccionActual].length,
+                minHeight: 7,
+                backgroundColor: fondo,
+                valueColor: AlwaysStoppedAnimation<Color>(verde),
+              ),
+            ),
+            const SizedBox(height: 17),
+            Text(
+              nombresLecciones[leccionActual],
+              style: TextStyle(
+                fontSize: 14,
+                color: verde,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              paso['titulo']!,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              paso['mensaje']!,
+              style: const TextStyle(
+                fontSize: 16,
+                height: 1.4,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(13),
+              decoration: BoxDecoration(
+                color: fondo,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.touch_app, color: azul, size: 25),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      paso['accion']!,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Icon(
+                  completado ? Icons.check_circle : Icons.pending_actions,
+                  color: completado ? verde : Colors.orange,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    completado
+                        ? '¡Muy bien! Has completado este paso.'
+                        : 'Realiza la acción indicada para continuar.',
+                    style: TextStyle(
+                      color: completado ? verde : Colors.black54,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: leccionActual == 0 && pasoActual == 0
+                        ? null
+                        : pasoAnterior,
+                    icon: const Icon(Icons.arrow_back),
+                    label: const Text('Anterior'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: azul,
+                      minimumSize: const Size(0, 48),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: completado ? siguientePaso : null,
+                    icon: const Icon(Icons.arrow_forward),
+                    label: Text(
+                      leccionActual == 3 &&
+                          pasoActual == 1
+                          ? 'Finalizar'
+                          : 'Siguiente',
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: verde,
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: Colors.grey.shade300,
+                      minimumSize: const Size(0, 48),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ------------------------------------------------------------
+  // PANTALLA PRINCIPAL
+  // ------------------------------------------------------------
+
   @override
   Widget build(BuildContext context) {
     final listaEventos = eventosDelDia(fechaSeleccionada);
@@ -917,21 +1336,18 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
         backgroundColor: azul,
         foregroundColor: Colors.white,
         elevation: 0,
+        leading: IconButton(
+          tooltip: 'Regresar',
+          icon: const Icon(Icons.arrow_back, size: 28),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: const Text(
-          'Calendario',
+          'Práctica de calendario',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 21,
+            fontSize: 20,
           ),
         ),
-        actions: [
-          IconButton(
-            tooltip: 'Añadir evento',
-            icon: const Icon(Icons.add, size: 30),
-            onPressed: () => mostrarFormulario(),
-          ),
-          const SizedBox(width: 8),
-        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -939,6 +1355,9 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              construirPanelInstrucciones(),
+              const SizedBox(height: 20),
+
               Card(
                 color: Colors.white,
                 elevation: 1,
@@ -961,12 +1380,20 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
                             ),
                           ),
                           IconButton(
+                            tooltip: 'Mes anterior',
                             onPressed: () => cambiarMes(-1),
-                            icon: const Icon(Icons.chevron_left, size: 30),
+                            icon: const Icon(
+                              Icons.chevron_left,
+                              size: 30,
+                            ),
                           ),
                           IconButton(
+                            tooltip: 'Mes siguiente',
                             onPressed: () => cambiarMes(1),
-                            icon: const Icon(Icons.chevron_right, size: 30),
+                            icon: const Icon(
+                              Icons.chevron_right,
+                              size: 30,
+                            ),
                           ),
                         ],
                       ),
@@ -975,12 +1402,7 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              fechaSeleccionada = DateTime.now();
-                              mesActual = DateTime.now();
-                            });
-                          },
+                          onPressed: irHoy,
                           icon: const Icon(Icons.today, size: 18),
                           label: const Text('Ir a hoy'),
                           style: TextButton.styleFrom(
@@ -995,12 +1417,28 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
 
               const SizedBox(height: 22),
 
-              Text(
-                formatoFecha(fechaSeleccionada),
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      formatoFecha(fechaSeleccionada),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  if (leccionActual == 1)
+                    IconButton(
+                      tooltip: 'Añadir evento',
+                      onPressed: () => mostrarFormulario(),
+                      icon: Icon(
+                        Icons.add_circle,
+                        color: verde,
+                        size: 34,
+                      ),
+                    ),
+                ],
               ),
 
               const SizedBox(height: 14),
@@ -1027,22 +1465,27 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
                           fontSize: 16,
                           color: Colors.black54,
                         ),
+                        textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 12),
-                      ElevatedButton.icon(
-                        onPressed: () => mostrarFormulario(),
-                        icon: const Icon(Icons.add),
-                        label: const Text('Añadir evento'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: azul,
-                          foregroundColor: Colors.white,
+                      if (leccionActual == 1) ...[
+                        const SizedBox(height: 12),
+                        ElevatedButton.icon(
+                          onPressed: () => mostrarFormulario(),
+                          icon: const Icon(Icons.add),
+                          label: const Text('Añadir evento'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: azul,
+                            foregroundColor: Colors.white,
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 )
               else
                 ...listaEventos.map(construirEvento),
+
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -1050,4 +1493,3 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
     );
   }
 }
-
