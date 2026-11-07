@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class PantallaLlamadaSim extends StatefulWidget {
@@ -37,6 +36,123 @@ class _PantallaLlamadaSimState extends State<PantallaLlamadaSim> {
 
   final List<Map<String, String>> _recientes = [];
 
+  bool _guiaIniciada = false;
+  bool _marcadoCompletado = false;
+  bool _contactoCompletado = false;
+  bool _recientesCompletado = false;
+
+  int get _pasosCompletados =>
+      [_marcadoCompletado, _contactoCompletado, _recientesCompletado]
+          .where((paso) => paso)
+          .length;
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_guiaIniciada) {
+        _guiaIniciada = true;
+        _mostrarGuiaInicial();
+      }
+    });
+  }
+
+  Future<void> _mostrarAyuda({
+    required String titulo,
+    required String mensaje,
+    required IconData icono,
+    String boton = 'Entendido',
+  }) async {
+    if (!mounted) return;
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: fondo,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(22),
+        ),
+        icon: Icon(icono, color: azul, size: 42),
+        title: Text(
+          titulo,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          mensaje,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 16, height: 1.4),
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: azul,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 28,
+                vertical: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            child: Text(boton),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _mostrarGuiaInicial() async {
+    await _mostrarAyuda(
+      titulo: '¡Vamos a practicar con el teléfono!',
+      mensaje:
+      'Aprenderás a marcar un número, llamar a un contacto guardado '
+          'y consultar las llamadas recientes. Todas las llamadas son '
+          'simuladas dentro de esta práctica.',
+      icono: Icons.phone_android_rounded,
+      boton: 'Comenzar',
+    );
+
+    if (!mounted) return;
+
+    await _mostrarPasoMarcar();
+  }
+
+  Future<void> _mostrarPasoMarcar() async {
+    await _mostrarAyuda(
+      titulo: 'Paso 1 de 3: marcar un número',
+      mensaje:
+      'Usa el teclado para escribir un número de teléfono. '
+          'Cuando termines, toca el botón verde de llamada.',
+      icono: Icons.dialpad_rounded,
+    );
+  }
+
+  Future<void> _mostrarPasoContacto() async {
+    await _mostrarAyuda(
+      titulo: 'Paso 2 de 3: llamar a un contacto',
+      mensaje:
+      'Ahora entra en Contactos, elige una persona de la lista y '
+          'selecciónala para simular una llamada.',
+      icono: Icons.contacts_rounded,
+    );
+  }
+
+  Future<void> _mostrarPasoRecientes() async {
+    await _mostrarAyuda(
+      titulo: 'Paso 3 de 3: mirar recientes',
+      mensaje:
+      'En Recientes puedes consultar las llamadas que realizaste. '
+          'Toca esta pestaña y observa los registros de la práctica.',
+      icono: Icons.history_rounded,
+    );
+  }
+
   void _agregarNumero(String digito) {
     setState(() {
       _numero += digito;
@@ -68,8 +184,16 @@ class _PantallaLlamadaSimState extends State<PantallaLlamadaSim> {
     });
   }
 
-  void _llamarNumero() {
-    if (_numero.isEmpty) return;
+  // Paso 1: marcar un número.
+  Future<void> _llamarNumero() async {
+    if (_numero.isEmpty) {
+      await _mostrarAyuda(
+        titulo: 'Escribe un número',
+        mensaje: 'Primero utiliza el teclado para ingresar un número.',
+        icono: Icons.info_outline,
+      );
+      return;
+    }
 
     final numeroMarcado = _numero;
 
@@ -80,19 +204,100 @@ class _PantallaLlamadaSimState extends State<PantallaLlamadaSim> {
 
     setState(() {
       _numero = '';
+      _marcadoCompletado = true;
     });
+
+    await _mostrarAyuda(
+      titulo: '¡Muy bien! Número marcado',
+      mensaje:
+      'Realizaste tu primera llamada simulada. Ahora aprenderás '
+          'a llamar a alguien que ya está guardado en Contactos.',
+      icono: Icons.check_circle_outline,
+      boton: 'Continuar',
+    );
+
+    if (!mounted) return;
+
+    setState(() => _pestana = 1);
+
+    await _mostrarPasoContacto();
   }
 
-  void _seleccionarContacto(String nombre) {
+  // Paso 2: llamar a un contacto guardado.
+  Future<void> _seleccionarContacto(String nombre) async {
     final numero = _numeros[nombre]!;
 
     _registrarLlamada(
       nombre: nombre,
       numero: numero,
     );
+
+    setState(() {
+      _contactoCompletado = true;
+    });
+
+    await _mostrarAyuda(
+      titulo: '¡Llamada realizada!',
+      mensaje:
+      'Simulaste una llamada a $nombre. Ahora vamos a revisar '
+          'dónde puedes consultar las llamadas que has realizado.',
+      icono: Icons.check_circle_outline,
+      boton: 'Ver recientes',
+    );
+
+    if (!mounted) return;
+
+    setState(() => _pestana = 2);
+
+    await _mostrarPasoRecientes();
   }
 
-  //Encabezado
+  // Paso 3: consultar llamadas recientes.
+  Future<void> _cambiarPestana(int indice) async {
+    setState(() => _pestana = indice);
+
+    if (indice == 2 &&
+        _contactoCompletado &&
+        _recientes.isNotEmpty &&
+        !_recientesCompletado) {
+      setState(() => _recientesCompletado = true);
+
+      await _mostrarAyuda(
+        titulo: '¡Práctica completada!',
+        mensaje:
+        '¡Excelente! Aprendiste a marcar un número, llamar a un '
+            'contacto guardado y consultar las llamadas recientes.',
+        icono: Icons.celebration_outlined,
+        boton: 'Finalizar',
+      );
+    } else if (indice == 1 && !_marcadoCompletado) {
+      await _mostrarAyuda(
+        titulo: 'Primero marca un número',
+        mensaje:
+        'Para seguir el orden de la práctica, vuelve a Marcar, '
+            'escribe un número y toca el botón de llamada.',
+        icono: Icons.info_outline,
+      );
+    } else if (indice == 2 && !_contactoCompletado) {
+      await _mostrarAyuda(
+        titulo: 'Completa primero la llamada a un contacto',
+        mensaje:
+        'Para terminar la práctica, entra en Contactos y selecciona '
+            'a una persona. Después podrás revisar las llamadas en Recientes.',
+        icono: Icons.history_rounded,
+      );
+    } else if (indice == 2 && _recientes.isEmpty) {
+      await _mostrarAyuda(
+        titulo: 'Todavía no hay llamadas',
+        mensaje:
+        'Primero realiza una llamada desde Marcar o Contactos. '
+            'Después podrás verla en Recientes.',
+        icono: Icons.history_rounded,
+      );
+    }
+  }
+
+  // Encabezado principal.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,24 +314,58 @@ class _PantallaLlamadaSimState extends State<PantallaLlamadaSim> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
+
       body: SafeArea(
-        child: IndexedStack(
-          index: _pestana,
+        child: Column(
           children: [
-            _vistaMarcar(),
-            _vistaContactos(),
-            _vistaRecientes(),
+            // Barra de progreso de la práctica.
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 8, 18, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Progreso de la práctica',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      Text('$_pasosCompletados de 3 pasos'),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: LinearProgressIndicator(
+                      value: _pasosCompletados / 3,
+                      minHeight: 9,
+                      backgroundColor: Colors.black12,
+                      color: azul,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            Expanded(
+              child: IndexedStack(
+                index: _pestana,
+                children: [
+                  _vistaMarcar(),
+                  _vistaContactos(),
+                  _vistaRecientes(),
+                ],
+              ),
+            ),
           ],
         ),
       ),
-      //Navbar Inferior
+
+      // Barra de navegación inferior.
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _pestana,
-        onTap: (indice) {
-          setState(() {
-            _pestana = indice;
-          });
-        },
+        onTap: _cambiarPestana,
         backgroundColor: Colors.white,
         selectedItemColor: const Color(0xFF587887),
         unselectedItemColor: Colors.black54,
@@ -151,7 +390,7 @@ class _PantallaLlamadaSimState extends State<PantallaLlamadaSim> {
     );
   }
 
-  // Marcar Telefono
+  // Pantalla para marcar un número.
   Widget _vistaMarcar() {
     final teclas = [
       ['1', ''],
@@ -174,9 +413,13 @@ class _PantallaLlamadaSimState extends State<PantallaLlamadaSim> {
           padding: EdgeInsets.fromLTRB(16, 30, 16, 50),
           child: Text(
             'Escribe un número de teléfono',
-            style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
+
         Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: 20,
@@ -208,7 +451,9 @@ class _PantallaLlamadaSimState extends State<PantallaLlamadaSim> {
             ],
           ),
         ),
+
         const Divider(indent: 30, endIndent: 30),
+
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(
@@ -260,6 +505,7 @@ class _PantallaLlamadaSimState extends State<PantallaLlamadaSim> {
             ),
           ),
         ),
+
         Padding(
           padding: const EdgeInsets.fromLTRB(30, 4, 30, 50),
           child: SizedBox(
@@ -280,7 +526,7 @@ class _PantallaLlamadaSimState extends State<PantallaLlamadaSim> {
     );
   }
 
-  //Lista de contactos
+  // Lista de contactos.
   Widget _vistaContactos() {
     return Column(
       children: [
@@ -288,9 +534,13 @@ class _PantallaLlamadaSimState extends State<PantallaLlamadaSim> {
           padding: EdgeInsets.all(16),
           child: Text(
             'Elige a quién deseas llamar',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
+
         Expanded(
           child: ListView.separated(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -329,7 +579,7 @@ class _PantallaLlamadaSimState extends State<PantallaLlamadaSim> {
                   subtitle: Text(_numeros[nombre]!),
                   trailing: const Icon(
                     Icons.call,
-                    color: const Color(0xFF79929E),
+                    color: Color(0xFF79929E),
                     size: 28,
                   ),
                   onTap: () => _seleccionarContacto(nombre),
@@ -345,7 +595,7 @@ class _PantallaLlamadaSimState extends State<PantallaLlamadaSim> {
     );
   }
 
-  //Llamadas Recientes
+  // Pantalla de llamadas recientes.
   Widget _vistaRecientes() {
     if (_recientes.isEmpty) {
       return const Center(
@@ -354,7 +604,11 @@ class _PantallaLlamadaSimState extends State<PantallaLlamadaSim> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.history_rounded, size: 72, color: azul),
+              Icon(
+                Icons.history_rounded,
+                size: 72,
+                color: azul,
+              ),
               SizedBox(height: 16),
               Text(
                 'Todavía no hay llamadas',
@@ -385,10 +639,14 @@ class _PantallaLlamadaSimState extends State<PantallaLlamadaSim> {
             alignment: Alignment.centerLeft,
             child: Text(
               'Llamadas recientes',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
+
         Expanded(
           child: ListView.separated(
             padding: const EdgeInsets.symmetric(horizontal: 16),
