@@ -1,6 +1,10 @@
 
 import 'package:flutter/material.dart';
 
+import '../../controllers/whatsapp_controller.dart';
+import '../../models/whatsapp/leccion_whatsapp_model.dart';
+import 'seleccion_lecciones_view.dart';
+
 const Color verdeWhatsapp = Color(0xFF075E54);
 const Color verdeClaro = Color(0xFF25D366);
 const Color fondoWhatsapp = Color(0xFFF0F2F5);
@@ -41,8 +45,43 @@ const List<Map<String, dynamic>> contactosDemo = [
 // PANTALLA INICIAL
 // -----------------------------------------------------------------------------
 
-class PantallaWhatsappSim extends StatelessWidget {
-  const PantallaWhatsappSim({super.key});
+class PantallaWhatsappSim extends StatefulWidget {
+  final WhatsappController controller;
+
+  const PantallaWhatsappSim({
+    super.key,
+    required this.controller,
+  });
+
+  @override
+  State<PantallaWhatsappSim> createState() =>
+      _PantallaWhatsappSimState();
+}
+
+class _PantallaWhatsappSimState extends State<PantallaWhatsappSim> {
+
+  void _abrirLecciones() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SeleccionLeccionesView(
+          controller: widget.controller,
+          onSeleccionarLeccion: (LeccionWhatsappModel leccion) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => PantallaLeccionSim(
+                  tipo: leccion.tipo,
+                  titulo: leccion.titulo,
+                  controller: widget.controller,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,22 +146,18 @@ class PantallaWhatsappSim extends StatelessWidget {
                   _TarjetaOpcion(
                     icono: Icons.school_rounded,
                     color: verdeClaro,
-                    titulo: 'Comenzar lección',
+                    titulo: 'Ver las actividades',
                     descripcion:
                     'Elige una actividad y aprende paso a paso.',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const SeleccionLeccionesSim(),
-                        ),
-                      );
-                    },
+                    onTap: _abrirLecciones,
                   ),
                   const SizedBox(height: 20),
                   const Row(
                     children: [
-                      Icon(Icons.lightbulb_outline, color: verdeWhatsapp),
+                      Icon(
+                        Icons.lightbulb_outline,
+                        color: verdeWhatsapp,
+                      ),
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -205,201 +240,9 @@ class _TarjetaOpcion extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: Colors.grey),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// -----------------------------------------------------------------------------
-// SELECCIÓN DE LECCIONES
-// -----------------------------------------------------------------------------
-
-class SeleccionLeccionesSim extends StatelessWidget {
-  const SeleccionLeccionesSim({super.key});
-
-  static const List<Map<String, dynamic>> lecciones = [
-    {
-      'tipo': 'mensajes',
-      'titulo': 'Enviar mensajes',
-      'descripcion': 'Aprende a escribir y enviar un mensaje.',
-      'icono': Icons.message_rounded,
-      'color': Color(0xFF299D70),
-    },
-    {
-      'tipo': 'audios',
-      'titulo': 'Enviar audios',
-      'descripcion': 'Graba y envía un mensaje de voz.',
-      'icono': Icons.mic_rounded,
-      'color': Color(0xFF4788C7),
-    },
-    {
-      'tipo': 'llamadas',
-      'titulo': 'Hacer llamadas',
-      'descripcion': 'Aprende a llamar a tus contactos.',
-      'icono': Icons.call_rounded,
-      'color': Color(0xFF279B86),
-    },
-    {
-      'tipo': 'fotos',
-      'titulo': 'Enviar fotos',
-      'descripcion': 'Elige una foto y compártela en un chat.',
-      'icono': Icons.photo_camera_rounded,
-      'color': Color(0xFFB57BC0),
-    },
-    {
-      'tipo': 'estados',
-      'titulo': 'Ver y publicar estados',
-      'descripcion': 'Comparte una foto o un mensaje en tu estado.',
-      'icono': Icons.donut_large_rounded,
-      'color': Color(0xFFD39B42),
-    },
-    {
-      'tipo': 'contactos',
-      'titulo': 'Buscar contactos',
-      'descripcion': 'Encuentra a una persona en WhatsApp.',
-      'icono': Icons.search_rounded,
-      'color': Color(0xFF5485B8),
-    },
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: fondoWhatsapp,
-      appBar: AppBar(
-        backgroundColor: verdeWhatsapp,
-        foregroundColor: Colors.white,
-        title: const Text('Elige una lección'),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          const Text(
-            '¿Qué te gustaría practicar?',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: textoOscuro,
-            ),
-          ),
-          const SizedBox(height: 7),
-          const Text(
-            'Selecciona una actividad para comenzar.',
-            style: TextStyle(color: Colors.black54),
-          ),
-          const SizedBox(height: 17),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: lecciones.length,
-            gridDelegate:
-            const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 0.82,
-            ),
-            itemBuilder: (context, index) {
-              final leccion = lecciones[index];
-
-              return _TarjetaLeccion(
-                icono: leccion['icono'] as IconData,
-                color: leccion['color'] as Color,
-                titulo: leccion['titulo'] as String,
-                descripcion: leccion['descripcion'] as String,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => PantallaLeccionSim(
-                        tipo: leccion['tipo'] as String,
-                        titulo: leccion['titulo'] as String,
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// -----------------------------------------------------------------------------
-// TARJETA VERTICAL PARA LAS LECCIONES
-// -----------------------------------------------------------------------------
-
-class _TarjetaLeccion extends StatelessWidget {
-  final IconData icono;
-  final Color color;
-  final String titulo;
-  final String descripcion;
-  final VoidCallback onTap;
-
-  const _TarjetaLeccion({
-    required this.icono,
-    required this.color,
-    required this.titulo,
-    required this.descripcion,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      color: Colors.white,
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(17),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(17),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 10,
-            vertical: 13,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: 27,
-                backgroundColor: color.withOpacity(0.15),
-                child: Icon(icono, color: color, size: 29),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                titulo,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  color: textoOscuro,
-                ),
-              ),
-              const SizedBox(height: 7),
-              Text(
-                descripcion,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.black54,
-                  fontSize: 12,
-                  height: 1.25,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Icon(
-                Icons.arrow_forward_rounded,
-                color: color,
-                size: 20,
+              const Icon(
+                Icons.chevron_right,
+                color: Colors.grey,
               ),
             ],
           ),
@@ -416,21 +259,29 @@ class _TarjetaLeccion extends StatelessWidget {
 class PantallaLeccionSim extends StatefulWidget {
   final String tipo;
   final String titulo;
+  final WhatsappController controller;
 
   const PantallaLeccionSim({
     super.key,
     required this.tipo,
     required this.titulo,
+    required this.controller,
   });
 
   @override
-  State<PantallaLeccionSim> createState() => _PantallaLeccionSimState();
+  State<PantallaLeccionSim> createState() =>
+      _PantallaLeccionSimState();
 }
 
 class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
-  final TextEditingController mensajeController = TextEditingController();
-  final TextEditingController busquedaController = TextEditingController();
-  final TextEditingController estadoController = TextEditingController();
+  final TextEditingController mensajeController =
+  TextEditingController();
+
+  final TextEditingController busquedaController =
+  TextEditingController();
+
+  final TextEditingController estadoController =
+  TextEditingController();
 
   String contacto = '';
   String instruccion = '';
@@ -479,9 +330,11 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
 
       case 'audios':
         if (contacto.isEmpty) {
-          instruccion = 'Elige un contacto para enviarle un mensaje de voz.';
+          instruccion =
+          'Elige un contacto para enviarle un mensaje de voz.';
         } else if (!grabando && !audioEnviado) {
-          instruccion = 'Pulsa el micrófono para comenzar a grabar tu audio.';
+          instruccion =
+          'Pulsa el micrófono para comenzar a grabar tu audio.';
         } else if (grabando) {
           instruccion =
           'Estás grabando. Pulsa el botón de detener para enviar el audio.';
@@ -493,9 +346,11 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
 
       case 'llamadas':
         if (contacto.isEmpty) {
-          instruccion = 'Selecciona el contacto al que deseas llamar.';
+          instruccion =
+          'Selecciona el contacto al que deseas llamar.';
         } else if (!llamadaActiva && !llamadaFinalizada) {
-          instruccion = 'Pulsa el teléfono para iniciar la llamada.';
+          instruccion =
+          'Pulsa el teléfono para iniciar la llamada.';
         } else if (llamadaActiva) {
           instruccion =
           'Estás en una llamada simulada. Pulsa el botón rojo para colgar.';
@@ -507,20 +362,24 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
 
       case 'fotos':
         if (contacto.isEmpty) {
-          instruccion = 'Elige primero a quién quieres enviar una foto.';
+          instruccion =
+          'Elige primero a quién quieres enviar una foto.';
         } else if (fotoSeleccionada == null) {
           instruccion =
           'Pulsa el botón + y selecciona Galería para elegir una foto.';
         } else if (!fotoEnviada) {
-          instruccion = 'Revisa la foto y pulsa Enviar para compartirla.';
+          instruccion =
+          'Revisa la foto y pulsa Enviar para compartirla.';
         } else {
-          instruccion = '¡Foto enviada! Ya aparece en tu conversación.';
+          instruccion =
+          '¡Foto enviada! Ya aparece en tu conversación.';
         }
         break;
 
       case 'estados':
         if (estadoPublicado == null && fotoEstado == null) {
-          instruccion = 'Pulsa “Mi estado” para crear una publicación.';
+          instruccion =
+          'Pulsa “Mi estado” para crear una publicación.';
         } else {
           instruccion =
           '¡Tu estado está publicado! Ya puedes verlo en Novedades.';
@@ -544,6 +403,10 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
       contacto = nombre;
       _actualizarInstruccion();
     });
+
+    if (widget.tipo == 'contactos') {
+      widget.controller.marcarCompletada('contactos');
+    }
   }
 
   void _enviarMensaje() {
@@ -553,6 +416,8 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
       mensajeEnviado = true;
       _actualizarInstruccion();
     });
+
+    widget.controller.marcarCompletada('mensajes');
   }
 
   void _iniciarLlamada() {
@@ -569,6 +434,8 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
       llamadaFinalizada = true;
       _actualizarInstruccion();
     });
+
+    widget.controller.marcarCompletada('llamadas');
   }
 
   // ---------------------------------------------------------------------------
@@ -679,6 +546,10 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
       }
       _actualizarInstruccion();
     });
+
+    if (paraEstado) {
+      widget.controller.marcarCompletada('estados');
+    }
   }
 
   void _publicarEstadoTexto() {
@@ -689,6 +560,8 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
       fotoEstado = null;
       _actualizarInstruccion();
     });
+
+    widget.controller.marcarCompletada('estados');
   }
 
   @override
@@ -735,7 +608,9 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
       case 'contactos':
         return _leccionContactos();
       default:
-        return const Center(child: Text('Lección no disponible'));
+        return const Center(
+          child: Text('Lección no disponible'),
+        );
     }
   }
 
@@ -825,7 +700,10 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
             backgroundColor: verdeClaro,
             child: IconButton(
               onPressed: mensajeEnviado ? null : _enviarMensaje,
-              icon: const Icon(Icons.send, color: Colors.white),
+              icon: const Icon(
+                Icons.send,
+                color: Colors.white,
+              ),
             ),
           ),
         ],
@@ -858,17 +736,24 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
             esMio: true,
             hora: '10:31',
           ),
-        if (audioEnviado) const _BurbujaAudio(esMio: true),
+        if (audioEnviado)
+          const _BurbujaAudio(esMio: true),
       ],
       campo: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 9,
+        ),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(30),
         ),
         child: Row(
           children: [
-            const Icon(Icons.emoji_emotions_outlined, color: Colors.grey),
+            const Icon(
+              Icons.emoji_emotions_outlined,
+              color: Colors.grey,
+            ),
             const SizedBox(width: 12),
             const Expanded(
               child: Text(
@@ -891,6 +776,10 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
                     }
                     _actualizarInstruccion();
                   });
+
+                  if (audioEnviado) {
+                    widget.controller.marcarCompletada('audios');
+                  }
                 },
                 icon: Icon(
                   grabando ? Icons.stop : Icons.mic,
@@ -921,10 +810,13 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
         const SizedBox(height: 35),
         CircleAvatar(
           radius: 55,
-          backgroundColor: Colors.blueGrey.shade100,
+          backgroundColor: Colors.blueGrey,
           child: Text(
             contacto[0],
-            style: const TextStyle(fontSize: 42, color: verdeWhatsapp),
+            style: const TextStyle(
+              fontSize: 42,
+              color: verdeWhatsapp,
+            ),
           ),
         ),
         const SizedBox(height: 18),
@@ -936,12 +828,18 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
           ),
         ),
         const SizedBox(height: 8),
-        const Text('Disponible', style: TextStyle(color: Colors.black54)),
+        const Text(
+          'Disponible',
+          style: TextStyle(color: Colors.black54),
+        ),
         const Spacer(),
         if (llamadaFinalizada)
           const Text(
             'Llamada finalizada',
-            style: TextStyle(color: Colors.black54, fontSize: 16),
+            style: TextStyle(
+              color: Colors.black54,
+              fontSize: 16,
+            ),
           ),
         Padding(
           padding: const EdgeInsets.all(25),
@@ -953,7 +851,8 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              onPressed: llamadaFinalizada ? null : _iniciarLlamada,
+              onPressed:
+              llamadaFinalizada ? null : _iniciarLlamada,
               icon: const Icon(Icons.call),
               label: const Text('Llamar'),
             ),
@@ -975,7 +874,10 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
               backgroundColor: Colors.white24,
               child: Text(
                 contacto.isEmpty ? '?' : contacto[0],
-                style: const TextStyle(color: Colors.white, fontSize: 48),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 48,
+                ),
               ),
             ),
             const SizedBox(height: 20),
@@ -990,15 +892,27 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
             const SizedBox(height: 10),
             const Text(
               'Llamada simulada...',
-              style: TextStyle(color: Colors.white70, fontSize: 16),
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 16,
+              ),
             ),
             const Spacer(),
             const Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _BotonLlamada(icono: Icons.mic_off, texto: 'Silenciar'),
-                _BotonLlamada(icono: Icons.volume_up, texto: 'Altavoz'),
-                _BotonLlamada(icono: Icons.videocam, texto: 'Video'),
+                _BotonLlamada(
+                  icono: Icons.mic_off,
+                  texto: 'Silenciar',
+                ),
+                _BotonLlamada(
+                  icono: Icons.volume_up,
+                  texto: 'Altavoz',
+                ),
+                _BotonLlamada(
+                  icono: Icons.videocam,
+                  texto: 'Video',
+                ),
               ],
             ),
             const SizedBox(height: 35),
@@ -1087,8 +1001,13 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
                     fotoEnviada = true;
                     _actualizarInstruccion();
                   });
+
+                  widget.controller.marcarCompletada('fotos');
                 },
-                icon: const Icon(Icons.send, color: Colors.white),
+                icon: const Icon(
+                  Icons.send,
+                  color: Colors.white,
+                ),
               ),
             ),
         ],
@@ -1157,7 +1076,9 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
                             (fotoEstado == null
                                 ? 'Añade una actualización'
                                 : 'Foto: $fotoEstado'),
-                        style: const TextStyle(color: Colors.black54),
+                        style: const TextStyle(
+                          color: Colors.black54,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1227,7 +1148,10 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
               ListTile(
                 leading: const CircleAvatar(
                   backgroundColor: Color(0xFF6D5BA6),
-                  child: Icon(Icons.text_fields, color: Colors.white),
+                  child: Icon(
+                    Icons.text_fields,
+                    color: Colors.white,
+                  ),
                 ),
                 title: const Text('Crear estado de texto'),
                 onTap: () {
@@ -1238,7 +1162,10 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
               ListTile(
                 leading: const CircleAvatar(
                   backgroundColor: Color(0xFF3D967D),
-                  child: Icon(Icons.photo, color: Colors.white),
+                  child: Icon(
+                    Icons.photo,
+                    color: Colors.white,
+                  ),
                 ),
                 title: const Text('Compartir una foto'),
                 onTap: () {
@@ -1266,14 +1193,18 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
                 left: 20,
                 right: 20,
                 top: 25,
-                bottom: MediaQuery.of(contextModal).viewInsets.bottom + 25,
+                bottom:
+                MediaQuery.of(contextModal).viewInsets.bottom + 25,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Text(
                     'Crear estado',
-                    style: TextStyle(color: Colors.white, fontSize: 20),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                    ),
                   ),
                   const SizedBox(height: 20),
                   TextField(
@@ -1446,10 +1377,16 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
               if (widget.tipo == 'llamadas')
                 IconButton(
                   onPressed: _iniciarLlamada,
-                  icon: const Icon(Icons.call, color: Colors.white),
+                  icon: const Icon(
+                    Icons.call,
+                    color: Colors.white,
+                  ),
                 ),
               if (widget.tipo != 'llamadas')
-                const Icon(Icons.more_vert, color: Colors.white),
+                const Icon(
+                  Icons.more_vert,
+                  color: Colors.white,
+                ),
             ],
           ),
         ),
@@ -1501,7 +1438,9 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
 class _PanelInstruccion extends StatelessWidget {
   final String texto;
 
-  const _PanelInstruccion({required this.texto});
+  const _PanelInstruccion({
+    required this.texto,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1512,12 +1451,18 @@ class _PanelInstruccion extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFFE0F2E9),
         borderRadius: BorderRadius.circular(13),
-        border: Border.all(color: const Color(0xFFB9DDC8)),
+        border: Border.all(
+          color: const Color(0xFFB9DDC8),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.lightbulb, color: verdeWhatsapp, size: 25),
+          const Icon(
+            Icons.lightbulb,
+            color: verdeWhatsapp,
+            size: 25,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -1588,12 +1533,17 @@ class _FilaContacto extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       contacto['mensaje'] as String,
-                      style: const TextStyle(color: Colors.black54),
+                      style: const TextStyle(
+                        color: Colors.black54,
+                      ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: Colors.grey),
+              const Icon(
+                Icons.chevron_right,
+                color: Colors.grey,
+              ),
             ],
           ),
         ),
@@ -1620,19 +1570,25 @@ class _BurbujaChat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: esMio ? Alignment.centerRight : Alignment.centerLeft,
+      alignment:
+      esMio ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         constraints: const BoxConstraints(maxWidth: 290),
         margin: const EdgeInsets.symmetric(vertical: 5),
         padding: const EdgeInsets.fromLTRB(12, 9, 9, 6),
         decoration: BoxDecoration(
-          color: esMio ? const Color(0xFFD9FDD3) : Colors.white,
+          color: esMio
+              ? const Color(0xFFD9FDD3)
+              : Colors.white,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text(texto, style: const TextStyle(fontSize: 16)),
+            Text(
+              texto,
+              style: const TextStyle(fontSize: 16),
+            ),
             const SizedBox(height: 4),
             Row(
               mainAxisSize: MainAxisSize.min,
@@ -1668,25 +1624,33 @@ class _BurbujaChat extends StatelessWidget {
 class _BurbujaAudio extends StatelessWidget {
   final bool esMio;
 
-  const _BurbujaAudio({required this.esMio});
+  const _BurbujaAudio({
+    required this.esMio,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: esMio ? Alignment.centerRight : Alignment.centerLeft,
+      alignment:
+      esMio ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 6),
         padding: const EdgeInsets.all(12),
         width: 260,
         decoration: BoxDecoration(
-          color: esMio ? const Color(0xFFD9FDD3) : Colors.white,
+          color: esMio
+              ? const Color(0xFFD9FDD3)
+              : Colors.white,
           borderRadius: BorderRadius.circular(12),
         ),
         child: const Row(
           children: [
             CircleAvatar(
               backgroundColor: verdeWhatsapp,
-              child: Icon(Icons.play_arrow, color: Colors.white),
+              child: Icon(
+                Icons.play_arrow,
+                color: Colors.white,
+              ),
             ),
             SizedBox(width: 10),
             Expanded(
@@ -1857,7 +1821,10 @@ class _FotoDemo extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 39)),
+            Text(
+              emoji,
+              style: const TextStyle(fontSize: 39),
+            ),
             const SizedBox(height: 5),
             Text(
               nombre,
@@ -1896,7 +1863,10 @@ class _FilaEstado extends StatelessWidget {
         padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: verdeClaro, width: 2),
+          border: Border.all(
+            color: verdeClaro,
+            width: 2,
+          ),
         ),
         child: CircleAvatar(
           backgroundColor: color,
@@ -1936,7 +1906,10 @@ class _BotonLlamada extends StatelessWidget {
         CircleAvatar(
           radius: 26,
           backgroundColor: Colors.white24,
-          child: Icon(icono, color: Colors.white),
+          child: Icon(
+            icono,
+            color: Colors.white,
+          ),
         ),
         const SizedBox(height: 7),
         Text(
