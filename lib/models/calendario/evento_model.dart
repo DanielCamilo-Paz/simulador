@@ -1,4 +1,3 @@
-
 class EventoCalendario {
   String titulo;
   DateTime fechaInicio;

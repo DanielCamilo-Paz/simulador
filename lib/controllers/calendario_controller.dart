@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../models/calendario/evento_model.dart';
@@ -16,10 +15,7 @@ class CalendarioController extends ChangeNotifier {
         a.day == b.day;
   }
 
-  bool eventoCorresponde(
-      EventoCalendario evento,
-      DateTime fecha,
-      ) {
+  bool eventoCorresponde(EventoCalendario evento, DateTime fecha) {
     final inicio = DateTime(
       evento.fechaInicio.year,
       evento.fechaInicio.month,
@@ -32,37 +28,29 @@ class CalendarioController extends ChangeNotifier {
       evento.fechaFin.day,
     );
 
-    final dia = DateTime(
-      fecha.year,
-      fecha.month,
-      fecha.day,
-    );
+    final dia = DateTime(fecha.year, fecha.month, fecha.day);
 
     if (dia.isBefore(inicio)) return false;
 
     switch (evento.repeticion) {
       case 'Todos los días':
-        return !dia.isAfter(fin) || mismaFecha(dia, inicio);
+        return !dia.isAfter(fin);
 
       case 'Cada semana':
         return dia.weekday == inicio.weekday &&
-            (evento.fechaFin.isAfter(evento.fechaInicio) ||
-                mismaFecha(dia, inicio));
+            !dia.isAfter(fin);
 
       case 'Cada mes':
         return dia.day == inicio.day &&
-            (dia.year < evento.fechaFin.year ||
-                (dia.year == evento.fechaFin.year &&
-                    dia.month <= evento.fechaFin.month));
+            !dia.isAfter(fin);
 
       case 'Cada año':
         return dia.day == inicio.day &&
             dia.month == inicio.month &&
-            dia.year <= evento.fechaFin.year;
+            !dia.isAfter(fin);
 
       default:
-        return !dia.isBefore(inicio) &&
-            !dia.isAfter(fin);
+        return !dia.isBefore(inicio) && !dia.isAfter(fin);
     }
   }
 
@@ -83,10 +71,10 @@ class CalendarioController extends ChangeNotifier {
       ) {
     final indice = _eventos.indexOf(eventoAnterior);
 
-    if (indice != -1) {
-      _eventos[indice] = eventoNuevo;
-      notifyListeners();
-    }
+    if (indice == -1) return;
+
+    _eventos[indice] = eventoNuevo;
+    notifyListeners();
   }
 
   void eliminarEvento(EventoCalendario evento) {

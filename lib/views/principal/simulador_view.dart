@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 import '../../controllers/progreso_controller.dart';
 
 import '../llamada/detalle_practica_llamada_view.dart';
-import '../galeria/detalle_camara_view.dart';
+import '../camara/detalle_camara_view.dart';
 import '../reloj/detalle_reloj_view.dart';
-import '../galeria/detalle_galeria_view.dart';
 import '../calendario/detalle_calendario_view.dart';
 import '../whatsapp/detalle_whatsapp_view.dart';
 
@@ -74,7 +73,7 @@ class _SimuladorViewState extends State<SimuladorView> {
 
           _tarjeta(
             icono: Icons.camera_alt,
-            titulo: 'Cámara',
+            titulo: 'Cámara y galeria',
             onTap: () {
               Navigator.push(
                 context,
@@ -95,19 +94,6 @@ class _SimuladorViewState extends State<SimuladorView> {
                   builder: (_) => DetalleRelojView(
                     progresoController: progresoController,
                   ),
-                ),
-              );
-            },
-          ),
-
-          _tarjeta(
-            icono: Icons.photo_library,
-            titulo: 'Galería de fotos',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const DetalleGaleriaView(),
                 ),
               );
             },

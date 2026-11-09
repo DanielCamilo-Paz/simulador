@@ -1,3 +1,4 @@
+// lib/views/calendario/pantalla_calendario_sim.dart
 
 import 'package:flutter/material.dart';
 
@@ -23,7 +24,7 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
   final Color fondo = const Color(0xFFF7F9FA);
   final Color verde = const Color(0xFF299764);
 
-  late final CalendarioController calendarioController;
+  late CalendarioController calendarioController;
 
   DateTime mesActual = DateTime.now();
   DateTime fechaSeleccionada = DateTime.now();
@@ -33,202 +34,287 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
 
   final Set<String> accionesCompletadas = {};
 
-  EventoCalendario? eventoCreado;
-  EventoCalendario? eventoEditado;
-
-  final List<String> meses = [
-    'Enero', 'Febrero', 'Marzo', 'Abril',
-    'Mayo', 'Junio', 'Julio', 'Agosto',
-    'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-  ];
-
-  final List<String> diasSemana = [
-    'L', 'M', 'X', 'J', 'V', 'S', 'D'
+  final List<Map<String, dynamic>> lecciones = [
+    {
+      'titulo': 'Conocer el calendario',
+      'descripcion': 'Aprende a moverte por los meses y seleccionar fechas.',
+      'id': 'navegar_calendario',
+      'pasos': [
+        {
+          'clave': 'avanzar_mes',
+          'titulo': 'Avanzar al siguiente mes',
+          'instruccion':
+          'Observa las flechas que aparecen junto al nombre del mes. Pulsa la flecha hacia la derecha para avanzar al siguiente mes.',
+          'exito': '¡Muy bien! Has avanzado al siguiente mes.',
+        },
+        {
+          'clave': 'retroceder_mes',
+          'titulo': 'Regresar al mes anterior',
+          'instruccion':
+          'Ahora pulsa la flecha hacia la izquierda para regresar al mes anterior.',
+          'exito': '¡Excelente! Has regresado al mes anterior.',
+        },
+        {
+          'clave': 'seleccionar_dia',
+          'titulo': 'Seleccionar un día',
+          'instruccion':
+          'Pulsa cualquier número del calendario para seleccionar una fecha. El día seleccionado quedará resaltado.',
+          'exito': '¡Perfecto! Ya sabes seleccionar una fecha.',
+        },
+        {
+          'clave': 'ir_hoy',
+          'titulo': 'Volver al día de hoy',
+          'instruccion':
+          'Pulsa el botón Hoy para regresar rápidamente a la fecha actual.',
+          'exito': '¡Muy bien! Ya sabes volver al día de hoy.',
+        },
+      ],
+    },
+    {
+      'titulo': 'Crear un evento',
+      'descripcion': 'Aprende a guardar una actividad en el calendario.',
+      'id': 'crear_evento',
+      'pasos': [
+        {
+          'clave': 'crear_evento',
+          'titulo': 'Crear un evento',
+          'instruccion':
+          'Pulsa el botón de agregar. Escribe un título para tu evento, selecciona la fecha y la hora, y guarda la actividad.',
+          'exito':
+          '¡Evento creado! Tu actividad ya aparece en el calendario.',
+        },
+      ],
+    },
+    {
+      'titulo': 'Consultar eventos',
+      'descripcion': 'Aprende a revisar las actividades guardadas.',
+      'id': 'consultar_evento',
+      'pasos': [
+        {
+          'clave': 'consultar_evento',
+          'titulo': 'Consultar un evento',
+          'instruccion':
+          'Selecciona en el calendario el día en el que guardaste el evento. Después revisa la información que aparece debajo del calendario.',
+          'exito':
+          '¡Muy bien! Has consultado correctamente los eventos de una fecha.',
+        },
+      ],
+    },
+    {
+      'titulo': 'Editar y eliminar eventos',
+      'descripcion': 'Aprende a modificar o borrar una actividad.',
+      'id': 'editar_eliminar_evento',
+      'pasos': [
+        {
+          'clave': 'editar_evento',
+          'titulo': 'Editar un evento',
+          'instruccion':
+          'Busca el evento que creaste. Pulsa los tres puntos que aparecen a su lado, selecciona Editar, modifica algún dato y guarda los cambios.',
+          'exito': '¡Cambios guardados! Has editado correctamente tu evento.',
+        },
+        {
+          'clave': 'eliminar_evento',
+          'titulo': 'Eliminar un evento',
+          'instruccion':
+          'Pulsa nuevamente los tres puntos del evento, selecciona Eliminar y confirma que deseas borrarlo.',
+          'exito': '¡Listo! Has eliminado correctamente el evento.',
+        },
+      ],
+    },
   ];
 
   @override
   void initState() {
     super.initState();
+
     calendarioController = CalendarioController();
-    calendarioController.addListener(actualizarPantalla);
+    calendarioController.addListener(_actualizarPantalla);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) mostrarInstruccion();
+    });
   }
 
   @override
   void dispose() {
-    calendarioController.removeListener(actualizarPantalla);
+    calendarioController.removeListener(_actualizarPantalla);
     calendarioController.dispose();
     super.dispose();
   }
 
-  void actualizarPantalla() {
+  void _actualizarPantalla() {
     if (mounted) setState(() {});
   }
 
-  String formatoFecha(DateTime fecha) {
-    return '${fecha.day} de ${meses[fecha.month - 1]} de ${fecha.year}';
+  Map<String, dynamic> get pasoActualData {
+    return lecciones[leccionActual]['pasos'][pasoActual];
   }
-
-  bool mismaFecha(DateTime a, DateTime b) {
-    return a.year == b.year &&
-        a.month == b.month &&
-        a.day == b.day;
-  }
-
-  List<EventoCalendario> eventosDelDia(DateTime fecha) {
-    return calendarioController.eventosDelDia(fecha);
-  }
-
-  List<EventoCalendario> obtenerTodosLosEventos() {
-    return calendarioController.obtenerEventos();
-  }
-
-  void completarProgreso(String actividad) {
-    widget.progresoController.completarActividadCalendario(actividad);
-  }
-
-  // ------------------------------------------------------------
-  // LECCIONES Y PASOS
-  // ------------------------------------------------------------
-
-  final List<List<Map<String, String>>> lecciones = [
-    [
-      {
-        'titulo': 'Avanza al siguiente mes',
-        'mensaje':
-        'Observa las flechas que aparecen junto al nombre del mes. Pulsa la flecha derecha para avanzar al siguiente mes.',
-        'accion': 'Pulsa la flecha derecha del calendario.',
-      },
-      {
-        'titulo': 'Regresa al mes anterior',
-        'mensaje':
-        'Ahora vamos a regresar. Busca la flecha izquierda y presiónala para volver al mes anterior.',
-        'accion': 'Pulsa la flecha izquierda del calendario.',
-      },
-      {
-        'titulo': 'Selecciona un día',
-        'mensaje':
-        'El calendario permite seleccionar cualquier día. Toca uno de los números que aparecen en el mes.',
-        'accion': 'Selecciona un día del calendario.',
-      },
-      {
-        'titulo': 'Regresa a la fecha de hoy',
-        'mensaje':
-        'Cuando quieras volver a la fecha actual, puedes utilizar el botón Ir a hoy.',
-        'accion': 'Pulsa el botón Ir a hoy.',
-      },
-    ],
-    [
-      {
-        'titulo': 'Crea tu primer evento',
-        'mensaje':
-        'Ahora aprenderás a guardar una actividad en el calendario. Puedes registrar una cita, una reunión o cualquier otro compromiso.',
-        'accion': 'Pulsa el botón + y guarda un evento.',
-      },
-    ],
-    [
-      {
-        'titulo': 'Consulta tus eventos',
-        'mensaje':
-        'Los eventos aparecen cuando seleccionas el día en el que están programados. Busca la fecha de tu evento y tócala.',
-        'accion': 'Selecciona el día donde guardaste tu evento.',
-      },
-    ],
-    [
-      {
-        'titulo': 'Edita un evento',
-        'mensaje':
-        'Si necesitas cambiar la información de un evento, puedes hacerlo desde el menú de tres puntos que aparece en su tarjeta.',
-        'accion': 'Abre el menú del evento, selecciona Editar y guarda los cambios.',
-      },
-      {
-        'titulo': 'Elimina un evento',
-        'mensaje':
-        'También puedes eliminar un evento que ya no necesitas. Hazlo desde el menú de tres puntos.',
-        'accion': 'Abre el menú del evento y selecciona Eliminar.',
-      },
-    ],
-  ];
-
-  final List<String> nombresLecciones = [
-    'Conocer el calendario',
-    'Crear un evento',
-    'Consultar eventos',
-    'Editar y eliminar eventos',
-  ];
 
   String obtenerIdProgreso() {
-    switch (leccionActual) {
-      case 0:
-        return 'navegar_calendario';
-      case 1:
-        return 'crear_evento';
-      case 2:
-        return 'consultar_evento';
-      default:
-        return 'editar_eliminar_evento';
-    }
+    return lecciones[leccionActual]['id'] as String;
   }
 
-  String obtenerClavePaso() {
-    if (leccionActual == 0) {
-      return [
-        'avanzar_mes',
-        'retroceder_mes',
-        'seleccionar_dia',
-        'ir_hoy',
-      ][pasoActual];
-    }
+  void mostrarInstruccion() {
+    if (!mounted) return;
 
-    if (leccionActual == 1) return 'crear_evento';
-    if (leccionActual == 2) return 'consultar_evento';
+    final paso = pasoActualData;
 
-    return pasoActual == 0 ? 'editar_evento' : 'eliminar_evento';
-  }
-
-  bool pasoCompletado() {
-    return accionesCompletadas.contains(obtenerClavePaso());
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22),
+          ),
+          icon: Icon(
+            Icons.calendar_month_rounded,
+            color: azul,
+            size: 42,
+          ),
+          title: Text(
+            paso['titulo'],
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
+          ),
+          content: Text(
+            paso['instruccion'],
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 15,
+              height: 1.5,
+            ),
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: verde,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 35,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(13),
+                ),
+              ),
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text(
+                'Entendido',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void registrarAccion(String accion) {
-    if (accionesCompletadas.contains(accion)) return;
+    if (!mounted) return;
+
+    final claveEsperada = pasoActualData['clave'] as String;
+
+    if (accion != claveEsperada ||
+        accionesCompletadas.contains(accion)) {
+      return;
+    }
 
     setState(() {
       accionesCompletadas.add(accion);
     });
+
+    mostrarConfirmacionAccion();
   }
 
-  void siguientePaso() {
-    if (!pasoCompletado()) return;
+  void mostrarConfirmacionAccion() {
+    final paso = pasoActualData;
 
-    if (pasoActual < lecciones[leccionActual].length - 1) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22),
+          ),
+          icon: Icon(
+            Icons.check_circle_rounded,
+            color: verde,
+            size: 48,
+          ),
+          title: const Text(
+            '¡Muy bien!',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            paso['exito'],
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 15,
+              height: 1.5,
+            ),
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: verde,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 30,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(13),
+                ),
+              ),
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                avanzarDespuesDeAccion();
+              },
+              child: const Text(
+                'Continuar',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void avanzarDespuesDeAccion() {
+    if (!mounted) return;
+
+    final cantidadPasos =
+        (lecciones[leccionActual]['pasos'] as List).length;
+
+    if (pasoActual < cantidadPasos - 1) {
       setState(() {
         pasoActual++;
       });
+      mostrarInstruccion();
       return;
     }
 
-    completarProgreso(obtenerIdProgreso());
+    widget.progresoController.completarActividadCalendario(
+      obtenerIdProgreso(),
+    );
 
     if (leccionActual < lecciones.length - 1) {
       setState(() {
         leccionActual++;
         pasoActual = 0;
       });
+      mostrarInstruccion();
     } else {
       mostrarFinalizacion();
-    }
-  }
-
-  void pasoAnterior() {
-    if (pasoActual > 0) {
-      setState(() {
-        pasoActual--;
-      });
-    } else if (leccionActual > 0) {
-      setState(() {
-        leccionActual--;
-        pasoActual = lecciones[leccionActual].length - 1;
-      });
     }
   }
 
@@ -236,52 +322,44 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: const Text(
-          '¡Felicitaciones!',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.celebration,
-              color: Color(0xFF299764),
-              size: 65,
-            ),
-            SizedBox(height: 15),
-            Text(
-              'Has terminado las prácticas del calendario. ¡Muy buen trabajo!',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 17),
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22),
+          ),
+          icon: Icon(
+            Icons.emoji_events_rounded,
+            color: verde,
+            size: 52,
+          ),
+          title: const Text(
+            '¡Felicitaciones!',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: const Text(
+            'Has completado todas las prácticas del calendario. Ahora sabes consultar fechas, crear eventos y administrar tus actividades.',
+            textAlign: TextAlign.center,
+            style: TextStyle(height: 1.5),
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: verde,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(13),
+                ),
+              ),
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Finalizar'),
             ),
           ],
-        ),
-        actions: [
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: verde,
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 48),
-            ),
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              Navigator.pop(context);
-            },
-            child: const Text('Finalizar'),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
-
-  // ------------------------------------------------------------
-  // NAVEGACIÓN DEL CALENDARIO
-  // ------------------------------------------------------------
 
   void cambiarMes(int cantidad) {
     setState(() {
@@ -292,37 +370,33 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
       );
     });
 
-    if (leccionActual == 0) {
-      if (cantidad > 0 && pasoActual == 0) {
-        registrarAccion('avanzar_mes');
-      } else if (cantidad < 0 && pasoActual == 1) {
-        registrarAccion('retroceder_mes');
-      }
+    if (leccionActual == 0 && cantidad > 0) {
+      registrarAccion('avanzar_mes');
+    } else if (leccionActual == 0 && cantidad < 0) {
+      registrarAccion('retroceder_mes');
     }
   }
 
-  void seleccionarDia(DateTime fecha) {
+  void seleccionarFecha(DateTime fecha) {
     setState(() {
       fechaSeleccionada = fecha;
+      mesActual = DateTime(fecha.year, fecha.month, 1);
     });
 
     if (leccionActual == 0 && pasoActual == 2) {
       registrarAccion('seleccionar_dia');
-    }
-
-    if (leccionActual == 2 && eventosDelDia(fecha).isNotEmpty) {
+    } else if (leccionActual == 2 &&
+        calendarioController.eventosDelDia(fecha).isNotEmpty) {
       registrarAccion('consultar_evento');
     }
   }
 
   void irHoy() {
+    final hoy = DateTime.now();
+
     setState(() {
-      fechaSeleccionada = DateTime.now();
-      mesActual = DateTime(
-        DateTime.now().year,
-        DateTime.now().month,
-        1,
-      );
+      fechaSeleccionada = hoy;
+      mesActual = DateTime(hoy.year, hoy.month, 1);
     });
 
     if (leccionActual == 0 && pasoActual == 3) {
@@ -330,220 +404,128 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
     }
   }
 
-  // ------------------------------------------------------------
-  // SELECTORES DE FECHA Y HORA
-  // ------------------------------------------------------------
+  String nombreMes(int mes) {
+    const meses = [
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre',
+    ];
 
-  Future<void> seleccionarFecha(
-      BuildContext context,
-      DateTime fecha,
-      Function(DateTime) actualizar,
+    return meses[mes - 1];
+  }
+
+  String formatoFecha(DateTime fecha) {
+    return '${fecha.day} de ${nombreMes(fecha.month)} de ${fecha.year}';
+  }
+
+  Future<DateTime?> seleccionarDia(
+      DateTime fechaInicial,
       ) async {
-    final elegida = await showDatePicker(
+    return showDatePicker(
       context: context,
-      initialDate: fecha,
+      initialDate: fechaInicial,
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
-      helpText: 'Seleccionar fecha',
-      cancelText: 'Cancelar',
-      confirmText: 'Aceptar',
+      locale: const Locale('es', 'CO'),
     );
-
-    if (elegida != null) {
-      actualizar(elegida);
-    }
   }
 
-  Future<void> seleccionarHora(
-      BuildContext context,
-      TimeOfDay hora,
-      Function(TimeOfDay) actualizar,
+  Future<TimeOfDay?> seleccionarHora(
+      TimeOfDay horaInicial,
       ) async {
-    final elegida = await showTimePicker(
+    return showTimePicker(
       context: context,
-      initialTime: hora,
-      helpText: 'Seleccionar hora',
-      cancelText: 'Cancelar',
-      confirmText: 'Aceptar',
+      initialTime: horaInicial,
     );
-
-    if (elegida != null) {
-      actualizar(elegida);
-    }
   }
 
-  // ------------------------------------------------------------
-  // FORMULARIO PARA CREAR Y EDITAR EVENTOS
-  // ------------------------------------------------------------
+  Future<EventoCalendario?> mostrarFormularioEvento([
+    EventoCalendario? evento,
+  ]) async {
+    final esEdicion = evento != null;
 
-  Future<void> mostrarFormulario({EventoCalendario? evento}) async {
     final tituloController = TextEditingController(
       text: evento?.titulo ?? '',
     );
-
     final descripcionController = TextEditingController(
       text: evento?.descripcion ?? '',
     );
 
+    DateTime fechaInicio =
+        evento?.fechaInicio ?? fechaSeleccionada;
+    DateTime fechaFin =
+        evento?.fechaFin ?? fechaSeleccionada;
+
+    TimeOfDay horaInicio = evento != null
+        ? TimeOfDay.fromDateTime(evento.fechaInicio)
+        : const TimeOfDay(hour: 9, minute: 0);
+
+    TimeOfDay horaFin = evento != null
+        ? TimeOfDay.fromDateTime(evento.fechaFin)
+        : const TimeOfDay(hour: 10, minute: 0);
+
     bool todoElDia = evento?.todoElDia ?? false;
-
-    DateTime fechaInicio = evento?.fechaInicio ?? fechaSeleccionada;
-
-    DateTime fechaFin = evento?.fechaFin ??
-        DateTime(
-          fechaSeleccionada.year,
-          fechaSeleccionada.month,
-          fechaSeleccionada.day,
-          10,
-        );
-
-    TimeOfDay horaInicio = TimeOfDay.fromDateTime(fechaInicio);
-    TimeOfDay horaFin = TimeOfDay.fromDateTime(fechaFin);
-
     String repeticion = evento?.repeticion ?? 'Nunca';
-    String recordatorio = evento?.recordatorio ?? '10 minutos antes';
-
+    String recordatorio =
+        evento?.recordatorio ?? 'Sin recordatorio';
     String tipoRecordatorio =
         evento?.tipoRecordatorio ?? 'Alarma';
 
-    await showDialog(
+    final resultado = await showDialog<EventoCalendario>(
       context: context,
+      barrierDismissible: false,
       builder: (dialogContext) {
         return StatefulBuilder(
-          builder: (context, actualizarDialogo) {
-            Widget campoFecha(
-                String titulo,
-                DateTime fecha,
-                VoidCallback accion,
-                ) {
-              return InkWell(
-                onTap: accion,
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: fondo,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: azul),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.calendar_month, color: azul),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              titulo,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: Colors.black54,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              formatoFecha(fecha),
-                              style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Icon(Icons.edit, size: 20),
-                    ],
-                  ),
-                ),
-              );
-            }
-
-            Widget campoHora(
-                String titulo,
-                TimeOfDay hora,
-                VoidCallback accion,
-                ) {
-              return InkWell(
-                onTap: accion,
-                child: Container(
-                  padding: const EdgeInsets.all(13),
-                  decoration: BoxDecoration(
-                    color: fondo,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: azul),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.access_time, color: azul),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          '$titulo: ${hora.format(context)}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      const Icon(Icons.edit, size: 18),
-                    ],
-                  ),
-                ),
-              );
-            }
-
+          builder: (contextDialog, actualizarDialogo) {
             return AlertDialog(
-              backgroundColor: Colors.white,
-              insetPadding: const EdgeInsets.all(16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
-              title: Row(
-                children: [
-                  Icon(Icons.event, color: azul, size: 27),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      evento == null ? 'Añadir evento' : 'Editar evento',
-                      style: const TextStyle(
-                        fontSize: 21,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
+              title: Text(
+                esEdicion ? 'Editar evento' : 'Nuevo evento',
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               content: SizedBox(
-                width: 500,
+                width: 420,
                 child: SingleChildScrollView(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text(
-                        'Título del evento',
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 8),
                       TextField(
                         controller: tituloController,
                         decoration: InputDecoration(
-                          hintText: 'Ej. Cita médica',
-                          filled: true,
-                          fillColor: fondo,
-                          prefixIcon: const Icon(Icons.edit_note),
+                          labelText: 'Nombre del evento',
+                          prefixIcon: const Icon(Icons.event),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 14),
+                      TextField(
+                        controller: descripcionController,
+                        maxLines: 2,
+                        decoration: InputDecoration(
+                          labelText: 'Descripción (opcional)',
+                          prefixIcon: const Icon(Icons.notes),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text(
-                          'Todo el día',
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
+                        title: const Text('Todo el día'),
                         value: todoElDia,
                         activeColor: verde,
                         onChanged: (valor) {
@@ -552,121 +534,78 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
                           });
                         },
                       ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        'Fecha de inicio',
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 8),
-                      campoFecha('Comienza', fechaInicio, () async {
-                        await seleccionarFecha(
-                          context,
-                          fechaInicio,
-                              (fecha) {
+                      const Divider(),
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Icon(Icons.calendar_today, color: azul),
+                        title: const Text('Fecha de inicio'),
+                        subtitle: Text(formatoFecha(fechaInicio)),
+                        onTap: () async {
+                          final fecha = await seleccionarDia(fechaInicio);
+                          if (fecha != null) {
                             actualizarDialogo(() {
-                              fechaInicio = DateTime(
-                                fecha.year,
-                                fecha.month,
-                                fecha.day,
-                                horaInicio.hour,
-                                horaInicio.minute,
-                              );
-
+                              fechaInicio = fecha;
                               if (fechaFin.isBefore(fechaInicio)) {
                                 fechaFin = fechaInicio;
-                                horaFin = horaInicio;
                               }
                             });
-                          },
-                        );
-                      }),
-                      if (!todoElDia) ...[
-                        const SizedBox(height: 10),
-                        campoHora('Hora de inicio', horaInicio, () async {
-                          await seleccionarHora(
-                            context,
-                            horaInicio,
-                                (hora) {
+                          }
+                        },
+                      ),
+                      if (!todoElDia)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Icon(Icons.access_time, color: azul),
+                          title: const Text('Hora de inicio'),
+                          subtitle: Text(horaInicio.format(contextDialog)),
+                          onTap: () async {
+                            final hora = await seleccionarHora(horaInicio);
+                            if (hora != null) {
                               actualizarDialogo(() {
                                 horaInicio = hora;
-                                fechaInicio = DateTime(
-                                  fechaInicio.year,
-                                  fechaInicio.month,
-                                  fechaInicio.day,
-                                  hora.hour,
-                                  hora.minute,
-                                );
-
-                                if (fechaFin.isBefore(fechaInicio)) {
-                                  fechaFin = fechaInicio;
-                                  horaFin = hora;
-                                }
                               });
-                            },
-                          );
-                        }),
-                      ],
-                      const SizedBox(height: 18),
-                      const Text(
-                        'Fecha de finalización',
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 8),
-                      campoFecha('Termina', fechaFin, () async {
-                        await seleccionarFecha(
-                          context,
-                          fechaFin,
-                              (fecha) {
-                            actualizarDialogo(() {
-                              fechaFin = DateTime(
-                                fecha.year,
-                                fecha.month,
-                                fecha.day,
-                                horaFin.hour,
-                                horaFin.minute,
-                              );
-                            });
+                            }
                           },
-                        );
-                      }),
-                      if (!todoElDia) ...[
-                        const SizedBox(height: 10),
-                        campoHora('Hora de finalización', horaFin, () async {
-                          await seleccionarHora(
-                            context,
-                            horaFin,
-                                (hora) {
+                        ),
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Icon(Icons.event_available, color: azul),
+                        title: const Text('Fecha de finalización'),
+                        subtitle: Text(formatoFecha(fechaFin)),
+                        onTap: () async {
+                          final fecha = await seleccionarDia(fechaFin);
+                          if (fecha != null) {
+                            actualizarDialogo(() {
+                              fechaFin = fecha.isBefore(fechaInicio)
+                                  ? fechaInicio
+                                  : fecha;
+                            });
+                          }
+                        },
+                      ),
+                      if (!todoElDia)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Icon(Icons.schedule, color: azul),
+                          title: const Text('Hora de finalización'),
+                          subtitle: Text(horaFin.format(contextDialog)),
+                          onTap: () async {
+                            final hora = await seleccionarHora(horaFin);
+                            if (hora != null) {
                               actualizarDialogo(() {
                                 horaFin = hora;
-                                fechaFin = DateTime(
-                                  fechaFin.year,
-                                  fechaFin.month,
-                                  fechaFin.day,
-                                  hora.hour,
-                                  hora.minute,
-                                );
                               });
-                            },
-                          );
-                        }),
-                      ],
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Repetir',
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
+                            }
+                          },
+                        ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
                         value: repeticion,
-                        isExpanded: true,
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: fondo,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                        decoration: const InputDecoration(
+                          labelText: 'Repetición',
+                          border: OutlineInputBorder(),
                         ),
-                        items: [
+                        items: const [
                           'Nunca',
                           'Todos los días',
                           'Cada semana',
@@ -686,23 +625,14 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
                           }
                         },
                       ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Recordatorio',
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
                         value: recordatorio,
-                        isExpanded: true,
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: fondo,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                        decoration: const InputDecoration(
+                          labelText: 'Recordatorio',
+                          border: OutlineInputBorder(),
                         ),
-                        items: [
+                        items: const [
                           'Sin recordatorio',
                           'A la hora del evento',
                           '5 minutos antes',
@@ -713,8 +643,8 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
                           '1 día antes',
                         ].map((opcion) {
                           return DropdownMenuItem(
-                              value: opcion,
-                              child: Text(opcion),
+                            value: opcion,
+                            child: Text(opcion),
                           );
                         }).toList(),
                         onChanged: (valor) {
@@ -726,23 +656,17 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
                         },
                       ),
                       if (recordatorio != 'Sin recordatorio') ...[
-                        const SizedBox(height: 15),
-                        const Text(
-                          'Tipo de recordatorio',
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 12),
                         DropdownButtonFormField<String>(
                           value: tipoRecordatorio,
-                          isExpanded: true,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: fondo,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                          decoration: const InputDecoration(
+                            labelText: 'Tipo de recordatorio',
+                            border: OutlineInputBorder(),
                           ),
-                          items: ['Alarma', 'Cuenta atrás'].map((opcion) {
+                          items: const [
+                            'Alarma',
+                            'Cuenta atrás',
+                          ].map((opcion) {
                             return DropdownMenuItem(
                               value: opcion,
                               child: Text(opcion),
@@ -757,32 +681,6 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
                           },
                         ),
                       ],
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Descripción',
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: descripcionController,
-                        maxLines: 3,
-                        decoration: InputDecoration(
-                          hintText: 'Añade una pequeña descripción...',
-                          filled: true,
-                          fillColor: fondo,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        'Este recordatorio es una práctica simulada dentro de la aplicación.',
-                        style: TextStyle(
-                          color: Colors.black54,
-                          fontSize: 12,
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -790,87 +688,67 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(dialogContext),
-                  child: const Text(
-                    'Cancelar',
-                    style: TextStyle(color: Colors.black54),
-                  ),
+                  child: const Text('Cancelar'),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: verde,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 22,
-                      vertical: 12,
-                    ),
                   ),
                   onPressed: () {
-                    if (tituloController.text.trim().isEmpty) {
+                    final titulo = tituloController.text.trim();
+
+                    if (titulo.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Escribe el título del evento'),
+                          content: Text('Escribe el nombre del evento.'),
                         ),
                       );
                       return;
                     }
 
-                    if (fechaFin.isBefore(fechaInicio)) {
+                    final inicio = DateTime(
+                      fechaInicio.year,
+                      fechaInicio.month,
+                      fechaInicio.day,
+                      todoElDia ? 0 : horaInicio.hour,
+                      todoElDia ? 0 : horaInicio.minute,
+                    );
+
+                    final fin = DateTime(
+                      fechaFin.year,
+                      fechaFin.month,
+                      fechaFin.day,
+                      todoElDia ? 23 : horaFin.hour,
+                      todoElDia ? 59 : horaFin.minute,
+                    );
+
+                    if (fin.isBefore(inicio)) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
-                            'La fecha de finalización no puede ser anterior al inicio',
+                            'La fecha final no puede ser anterior a la inicial.',
                           ),
                         ),
                       );
                       return;
                     }
 
-                    final nuevoEvento = EventoCalendario(
-                      titulo: tituloController.text.trim(),
-                      fechaInicio: fechaInicio,
-                      fechaFin: fechaFin,
-                      todoElDia: todoElDia,
-                      repeticion: repeticion,
-                      recordatorio: recordatorio,
-                      tipoRecordatorio: tipoRecordatorio,
-                      descripcion: descripcionController.text.trim(),
+                    Navigator.pop(
+                      dialogContext,
+                      EventoCalendario(
+                        titulo: titulo,
+                        fechaInicio: inicio,
+                        fechaFin: fin,
+                        todoElDia: todoElDia,
+                        repeticion: repeticion,
+                        recordatorio: recordatorio,
+                        tipoRecordatorio: tipoRecordatorio,
+                        descripcion: descripcionController.text.trim(),
+                      ),
                     );
-
-                    if (evento == null) {
-                      calendarioController.agregarEvento(nuevoEvento);
-                      eventoCreado = nuevoEvento;
-
-                      if (leccionActual == 1) {
-                        registrarAccion('crear_evento');
-                      }
-                    } else {
-                      calendarioController.editarEvento(
-                        evento,
-                        nuevoEvento,
-                      );
-
-                      eventoEditado = nuevoEvento;
-
-                      if (leccionActual == 3 && pasoActual == 0) {
-                        registrarAccion('editar_evento');
-                      }
-                    }
-
-                    setState(() {
-                      fechaSeleccionada = fechaInicio;
-                      mesActual = DateTime(
-                        fechaInicio.year,
-                        fechaInicio.month,
-                        1,
-                      );
-                    });
-
-                    Navigator.pop(dialogContext);
                   },
-                  child: const Text(
-                    'Listo',
-                    style: TextStyle(fontSize: 16),
-                  ),
+                  child: Text(esEdicion ? 'Guardar cambios' : 'Guardar'),
                 ),
               ],
             );
@@ -881,66 +759,117 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
 
     tituloController.dispose();
     descripcionController.dispose();
+
+    return resultado;
   }
 
-  // ------------------------------------------------------------
-  // ELIMINAR EVENTOS
-  // ------------------------------------------------------------
+  Future<void> agregarEvento() async {
+    final nuevoEvento = await mostrarFormularioEvento();
 
-  void eliminarEvento(EventoCalendario evento) {
-    showDialog(
+    if (nuevoEvento == null || !mounted) return;
+
+    calendarioController.agregarEvento(nuevoEvento);
+
+    setState(() {
+      fechaSeleccionada = nuevoEvento.fechaInicio;
+      mesActual = DateTime(
+        nuevoEvento.fechaInicio.year,
+        nuevoEvento.fechaInicio.month,
+        1,
+      );
+    });
+
+    if (leccionActual == 1 && pasoActual == 0) {
+      registrarAccion('crear_evento');
+    }
+  }
+
+  Future<void> editarEvento(EventoCalendario evento) async {
+    final eventoEditado = await mostrarFormularioEvento(evento);
+
+    if (eventoEditado == null || !mounted) return;
+
+    calendarioController.editarEvento(evento, eventoEditado);
+
+    if (leccionActual == 3 && pasoActual == 0) {
+      registrarAccion('editar_evento');
+    }
+  }
+
+  Future<void> eliminarEvento(EventoCalendario evento) async {
+    final confirmar = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Eliminar evento'),
-        content: const Text(
-          '¿Estás seguro de que deseas eliminar este evento?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancelar'),
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
           ),
-          TextButton(
-            onPressed: () {
-              calendarioController.eliminarEvento(evento);
+          title: const Text('Eliminar evento'),
+          content: Text(
+            '¿Estás seguro de que deseas eliminar "${evento.titulo}"?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Eliminar'),
+            ),
+          ],
+        );
+      },
+    );
 
-              if (leccionActual == 3 && pasoActual == 1) {
-                registrarAccion('eliminar_evento');
-              }
+    if (confirmar != true || !mounted) return;
 
-              Navigator.pop(dialogContext);
-            },
-            child: const Text(
-              'Eliminar',
-              style: TextStyle(color: Colors.red),
+    calendarioController.eliminarEvento(evento);
+
+    if (leccionActual == 3 && pasoActual == 1) {
+      registrarAccion('eliminar_evento');
+    }
+  }
+
+  Widget construirEncabezadoMes() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        IconButton(
+          tooltip: 'Mes anterior',
+          onPressed: () => cambiarMes(-1),
+          icon: const Icon(Icons.chevron_left_rounded, size: 30),
+        ),
+        Expanded(
+          child: Text(
+            '${nombreMes(mesActual.month)} ${mesActual.year}',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.bold,
             ),
           ),
-        ],
-      ),
+        ),
+        IconButton(
+          tooltip: 'Mes siguiente',
+          onPressed: () => cambiarMes(1),
+          icon: const Icon(Icons.chevron_right_rounded, size: 30),
+        ),
+      ],
     );
   }
 
-  // ------------------------------------------------------------
-  // CALENDARIO VISUAL
-  // ------------------------------------------------------------
-
   Widget construirCalendario() {
-    final primerDia = DateTime(
-      mesActual.year,
-      mesActual.month,
-      1,
-    );
+    final primerDia = DateTime(mesActual.year, mesActual.month, 1);
+    final diasMes = DateTime(mesActual.year, mesActual.month + 1, 0).day;
+    final desplazamiento = primerDia.weekday - 1;
+    final totalCeldas = ((desplazamiento + diasMes) / 7).ceil() * 7;
 
-    final diasMes = DateTime(
-      mesActual.year,
-      mesActual.month + 1,
-      0,
-    ).day;
-
-    final espaciosIniciales = primerDia.weekday - 1;
-
-    final totalCasillas =
-        ((espaciosIniciales + diasMes) / 7).ceil() * 7;
+    const diasSemana = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
     return Column(
       children: [
@@ -949,13 +878,12 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
             return Expanded(
               child: Center(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  padding: const EdgeInsets.symmetric(vertical: 9),
                   child: Text(
                     dia,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.black54,
-                      fontSize: 14,
+                      color: Colors.grey.shade600,
                     ),
                   ),
                 ),
@@ -966,16 +894,17 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: totalCasillas,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          itemCount: totalCeldas,
+          gridDelegate:
+          const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 7,
-            childAspectRatio: 0.85,
+            childAspectRatio: 0.95,
           ),
           itemBuilder: (context, indice) {
-            final numeroDia = indice - espaciosIniciales + 1;
+            final numeroDia = indice - desplazamiento + 1;
 
             if (numeroDia < 1 || numeroDia > diasMes) {
-              return const SizedBox();
+              return const SizedBox.shrink();
             }
 
             final fecha = DateTime(
@@ -984,44 +913,61 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
               numeroDia,
             );
 
-            final seleccionado = mismaFecha(fecha, fechaSeleccionada);
-            final hoy = mismaFecha(fecha, DateTime.now());
-            final tieneEventos = eventosDelDia(fecha).isNotEmpty;
+            final seleccionado =
+            calendarioController.mismaFecha(
+              fecha,
+              fechaSeleccionada,
+            );
+
+            final hoy = calendarioController.mismaFecha(
+              fecha,
+              DateTime.now(),
+            );
+
+            final tieneEventos =
+                calendarioController.eventosDelDia(fecha).isNotEmpty;
 
             return InkWell(
-              onTap: () => seleccionarDia(fecha),
               borderRadius: BorderRadius.circular(30),
+              onTap: () => seleccionarFecha(fecha),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    width: 37,
-                    height: 37,
+                    width: 36,
+                    height: 36,
+                    alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: seleccionado ? azul : Colors.transparent,
+                      color: seleccionado
+                          ? azul
+                          : hoy
+                          ? azul.withOpacity(0.18)
+                          : Colors.transparent,
                       shape: BoxShape.circle,
                       border: hoy && !seleccionado
-                          ? Border.all(color: verde, width: 1.8)
+                          ? Border.all(color: azul, width: 1.5)
                           : null,
                     ),
-                    alignment: Alignment.center,
                     child: Text(
                       '$numeroDia',
                       style: TextStyle(
-                        fontSize: 15,
+                        color: seleccionado
+                            ? Colors.white
+                            : Colors.black87,
                         fontWeight: seleccionado || hoy
                             ? FontWeight.bold
                             : FontWeight.normal,
-                        color: seleccionado ? Colors.white : Colors.black87,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 2),
                   Container(
                     width: 5,
                     height: 5,
                     decoration: BoxDecoration(
-                      color: tieneEventos ? verde : Colors.transparent,
+                      color: tieneEventos
+                          ? verde
+                          : Colors.transparent,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -1034,320 +980,226 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
     );
   }
 
-  // ------------------------------------------------------------
-  // TARJETAS DE EVENTOS
-  // ------------------------------------------------------------
-
   Widget construirEvento(EventoCalendario evento) {
-    return Card(
-      elevation: 1,
-      color: Colors.white,
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
+    final hora = evento.todoElDia
+        ? 'Todo el día'
+        : '${TimeOfDay.fromDateTime(evento.fechaInicio).format(context)} - '
+        '${TimeOfDay.fromDateTime(evento.fechaFin).format(context)}';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: azul.withOpacity(0.35)),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          children: [
-            Container(
-              width: 5,
-              height: 65,
-              decoration: BoxDecoration(
-                color: verde,
-                borderRadius: BorderRadius.circular(5),
-              ),
+      child: Row(
+        children: [
+          Container(
+            width: 5,
+            height: 55,
+            decoration: BoxDecoration(
+              color: verde,
+              borderRadius: BorderRadius.circular(5),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  evento.titulo,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  hora,
+                  style: TextStyle(
+                    color: Colors.grey.shade700,
+                    fontSize: 13,
+                  ),
+                ),
+                if (evento.descripcion.isNotEmpty) ...[
+                  const SizedBox(height: 4),
                   Text(
-                    evento.titulo,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
+                    evento.descripcion,
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 12,
                     ),
                   ),
-                  const SizedBox(height: 5),
-                  Text(
-                    evento.todoElDia
-                        ? 'Todo el día'
-                        : '${TimeOfDay.fromDateTime(evento.fechaInicio).format(context)} - ${TimeOfDay.fromDateTime(evento.fechaFin).format(context)}',
-                    style: const TextStyle(
-                      color: Colors.black54,
-                      fontSize: 14,
-                    ),
-                  ),
-                  if (evento.descripcion.isNotEmpty) ...[
-                    const SizedBox(height: 5),
-                    Text(
-                      evento.descripcion,
-                      style: const TextStyle(
-                        color: Colors.black54,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                  if (evento.repeticion != 'Nunca')
-                    Padding(
-                      padding: const EdgeInsets.only(top: 5),
-                      child: Text(
-                        'Se repite: ${evento.repeticion}',
-                        style: TextStyle(
-                          color: azul,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  if (evento.recordatorio != 'Sin recordatorio')
-                    Padding(
-                      padding: const EdgeInsets.only(top: 5),
-                      child: Text(
-                        'Recordatorio: ${evento.recordatorio}',
-                        style: const TextStyle(
-                          color: Colors.black54,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
                 ],
-              ),
-            ),
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert),
-              onSelected: (valor) {
-                if (valor == 'editar') {
-                  mostrarFormulario(evento: evento);
-                } else if (valor == 'eliminar') {
-                  eliminarEvento(evento);
-                }
-              },
-              itemBuilder: (context) => const [
-                PopupMenuItem(
-                  value: 'editar',
-                  child: Row(
-                    children: [
-                      Icon(Icons.edit, size: 20),
-                      SizedBox(width: 8),
-                      Text('Editar'),
-                    ],
+                if (evento.repeticion != 'Nunca')
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      'Se repite: ${evento.repeticion}',
+                      style: TextStyle(
+                        color: azul,
+                        fontSize: 12,
+                      ),
+                    ),
                   ),
-                ),
-                PopupMenuItem(
-                  value: 'eliminar',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete, color: Colors.red, size: 20),
-                      SizedBox(width: 8),
-                      Text('Eliminar'),
-                    ],
+                if (evento.recordatorio != 'Sin recordatorio')
+                  Padding(
+                    padding: const EdgeInsets.only(top: 3),
+                    child: Text(
+                      'Recordatorio: ${evento.recordatorio}',
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 12,
+                      ),
+                    ),
                   ),
-                ),
               ],
             ),
-          ],
-        ),
+          ),
+          PopupMenuButton<String>(
+            tooltip: 'Opciones del evento',
+            onSelected: (opcion) {
+              if (opcion == 'editar') {
+                editarEvento(evento);
+              } else if (opcion == 'eliminar') {
+                eliminarEvento(evento);
+              }
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem(
+                value: 'editar',
+                child: Row(
+                  children: [
+                    Icon(Icons.edit_outlined),
+                    SizedBox(width: 10),
+                    Text('Editar'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'eliminar',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_outline, color: Colors.red),
+                    SizedBox(width: 10),
+                    Text('Eliminar'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
-  // ------------------------------------------------------------
-  // PANEL DE INSTRUCCIONES
-  // ------------------------------------------------------------
+  Widget construirListaEventos() {
+    final eventos =
+    calendarioController.eventosDelDia(fechaSeleccionada);
 
-  Widget construirPanelInstrucciones() {
-    final paso = lecciones[leccionActual][pasoActual];
-    final completado = pasoCompletado();
-
-    return Card(
-      elevation: 2,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-        side: BorderSide(color: azul.withOpacity(0.5)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.school, color: verde, size: 27),
-                const SizedBox(width: 9),
-                Expanded(
-                  child: Text(
-                    'Lección ${leccionActual + 1} de ${lecciones.length}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-                Text(
-                  '${pasoActual + 1}/${lecciones[leccionActual].length}',
-                  style: const TextStyle(
-                    color: Colors.black54,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Eventos del ${formatoFecha(fechaSeleccionada)}',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(height: 12),
+        if (eventos.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(15),
             ),
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: LinearProgressIndicator(
-                value: (pasoActual + 1) /
-                    lecciones[leccionActual].length,
-                minHeight: 7,
-                backgroundColor: fondo,
-                valueColor: AlwaysStoppedAnimation<Color>(verde),
-              ),
-            ),
-            const SizedBox(height: 17),
-            Text(
-              nombresLecciones[leccionActual],
-              style: TextStyle(
-                fontSize: 14,
-                color: verde,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              paso['titulo']!,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              paso['mensaje']!,
-              style: const TextStyle(
-                fontSize: 16,
-                height: 1.4,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 14),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(13),
-              decoration: BoxDecoration(
-                color: fondo,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.touch_app, color: azul, size: 25),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      paso['accion']!,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
-            Row(
+            child: Column(
               children: [
                 Icon(
-                  completado ? Icons.check_circle : Icons.pending_actions,
-                  color: completado ? verde : Colors.orange,
+                  Icons.event_busy_rounded,
+                  size: 35,
+                  color: Colors.grey.shade400,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    completado
-                        ? '¡Muy bien! Has completado este paso.'
-                        : 'Realiza la acción indicada para continuar.',
-                    style: TextStyle(
-                      color: completado ? verde : Colors.black54,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                const SizedBox(height: 8),
+                Text(
+                  'No hay eventos para este día.',
+                  style: TextStyle(color: Colors.grey.shade600),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: leccionActual == 0 && pasoActual == 0
-                        ? null
-                        : pasoAnterior,
-                    icon: const Icon(Icons.arrow_back),
-                    label: const Text('Anterior'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: azul,
-                      minimumSize: const Size(0, 48),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: completado ? siguientePaso : null,
-                    icon: const Icon(Icons.arrow_forward),
-                    label: Text(
-                      leccionActual == 3 &&
-                          pasoActual == 1
-                          ? 'Finalizar'
-                          : 'Siguiente',
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: verde,
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: Colors.grey.shade300,
-                      minimumSize: const Size(0, 48),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+          )
+        else
+          ...eventos.map(construirEvento),
+      ],
     );
   }
 
-  // ------------------------------------------------------------
-  // PANTALLA PRINCIPAL
-  // ------------------------------------------------------------
+  Widget construirResumenLeccion() {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: azul.withOpacity(0.13),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.school_outlined, color: azul, size: 27),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Práctica ${leccionActual + 1} de ${lecciones.length}',
+                  style: TextStyle(
+                    color: Colors.grey.shade700,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  lecciones[leccionActual]['titulo'],
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final listaEventos = eventosDelDia(fechaSeleccionada);
-
     return Scaffold(
       backgroundColor: fondo,
       appBar: AppBar(
         backgroundColor: azul,
         foregroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          tooltip: 'Regresar',
-          icon: const Icon(Icons.arrow_back, size: 28),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: const Text(
-          'Práctica de calendario',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
+          'Aprende a usar el calendario',
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Recordar el paso',
+            icon: const Icon(
+              Icons.help_outline_rounded,
+              size: 27,
+            ),
+            onPressed: mostrarInstruccion,
+          ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -1355,137 +1207,70 @@ class _PantallaCalendarioSimState extends State<PantallaCalendarioSim> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              construirPanelInstrucciones(),
-              const SizedBox(height: 20),
-
-              Card(
-                color: Colors.white,
-                elevation: 1,
-                shape: RoundedRectangleBorder(
+              construirResumenLeccion(),
+              const SizedBox(height: 18),
+              Container(
+                padding: const EdgeInsets.all(13),
+                decoration: BoxDecoration(
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              '${meses[mesActual.month - 1]} ${mesActual.year}',
-                              style: const TextStyle(
-                                fontSize: 21,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            tooltip: 'Mes anterior',
-                            onPressed: () => cambiarMes(-1),
-                            icon: const Icon(
-                              Icons.chevron_left,
-                              size: 30,
-                            ),
-                          ),
-                          IconButton(
-                            tooltip: 'Mes siguiente',
-                            onPressed: () => cambiarMes(1),
-                            icon: const Icon(
-                              Icons.chevron_right,
-                              size: 30,
-                            ),
-                          ),
-                        ],
-                      ),
-                      construirCalendario(),
-                      const SizedBox(height: 8),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton.icon(
-                          onPressed: irHoy,
-                          icon: const Icon(Icons.today, size: 18),
-                          label: const Text('Ir a hoy'),
-                          style: TextButton.styleFrom(
-                            foregroundColor: verde,
-                          ),
+                child: Column(
+                  children: [
+                    construirEncabezadoMes(),
+                    const Divider(height: 15),
+                    construirCalendario(),
+                    const SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: irHoy,
+                        icon: const Icon(Icons.today_rounded),
+                        label: const Text('Hoy'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: verde,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-
               const SizedBox(height: 22),
-
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: Text(
-                      formatoFecha(fechaSeleccionada),
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  const Text(
+                    'Mis actividades',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   if (leccionActual == 1)
-                    IconButton(
-                      tooltip: 'Añadir evento',
-                      onPressed: () => mostrarFormulario(),
-                      icon: Icon(
-                        Icons.add_circle,
-                        color: verde,
-                        size: 34,
+                    ElevatedButton.icon(
+                      onPressed: agregarEvento,
+                      icon: const Icon(Icons.add, size: 19),
+                      label: const Text('Agregar'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: verde,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                 ],
               ),
-
-              const SizedBox(height: 14),
-
-              if (listaEventos.isEmpty)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(25),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.event_available,
-                        color: azul,
-                        size: 45,
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        'No hay eventos para este día',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black54,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      if (leccionActual == 1) ...[
-                        const SizedBox(height: 12),
-                        ElevatedButton.icon(
-                          onPressed: () => mostrarFormulario(),
-                          icon: const Icon(Icons.add),
-                          label: const Text('Añadir evento'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: azul,
-                            foregroundColor: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                )
-              else
-                ...listaEventos.map(construirEvento),
-
-              const SizedBox(height: 20),
+              const SizedBox(height: 13),
+              construirListaEventos(),
+              const SizedBox(height: 30),
             ],
           ),
         ),
