@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'pantalla_camara_sim.dart'; // ← Tu pantalla real de cámara
 
@@ -33,117 +34,153 @@ class DetalleCamaraView extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 10),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 10),
 
-            // Icono principal
-            Container(
-              width: 140,
-              height: 140,
-              decoration: BoxDecoration(
-                color: naranja,
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: const Icon(
-                Icons.camera_alt_rounded,
-                size: 90,
-                color: blanco,
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            const Text(
-              'Tomar fotos y videos',
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                height: 1.2,
-                color: texto,
-              ),
-              textAlign: TextAlign.center,
-            ),
-
-            const SizedBox(height: 12),
-
-            const Text(
-              'Aprende a usar la cámara para tomar fotos y grabar videos. ',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black54,
-                height: 1.5,
-              ),
-              textAlign: TextAlign.center,
-            ),
-
-            const SizedBox(height: 32),
-
-            // Información de la práctica
-            Container(
-              padding: const EdgeInsets.symmetric(
-                vertical: 20,
-                horizontal: 12,
-              ),
-              decoration: BoxDecoration(
-                color: naranjaSuave,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _dato(
-                    Icons.access_time_rounded,
-                    'Duración',
-                    '7 minutos',
-                  ),
-                  _dato(
-                    Icons.trending_up_rounded,
-                    'Nivel',
-                    'Medio',
-                  ),
-                ],
-              ),
-            ),
-
-            const Spacer(),
-
-            // Botón para empezar
-            SizedBox(
-              width: double.infinity,
-              height: 62,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: naranja,
-                  foregroundColor: texto,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+              // Icono principal
+              Container(
+                width: 140,
+                height: 140,
+                decoration: BoxDecoration(
+                  color: naranja,
+                  borderRadius: BorderRadius.circular(30),
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const PantallaCamaraSim(),
+                child: const Icon(
+                  Icons.camera_alt_rounded,
+                  size: 90,
+                  color: blanco,
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              const Text(
+                'Tomar fotos y videos',
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  height: 1.2,
+                  color: texto,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 12),
+
+              const Text(
+                'Aprende a usar la cámara para tomar fotos y grabar videos. ',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black54,
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 32),
+
+              // Información de la práctica
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 20,
+                  horizontal: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: naranjaSuave,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _dato(
+                      Icons.access_time_rounded,
+                      'Duración',
+                      '7 minutos',
                     ),
-                  );
-                },
-                child: const Text(
-                  'Comenzar lección',
-                  style: TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.bold,
+                    _dato(
+                      Icons.trending_up_rounded,
+                      'Nivel',
+                      'Medio',
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              // Botón para empezar
+              SizedBox(
+                width: double.infinity,
+                height: 62,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: naranja,
+                    foregroundColor: texto,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const PantallaCamaraSim(),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'Comenzar lección',
+                    style: TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 8),
-          ],
+              const SizedBox(height: 15),
+
+              // BOTÓN REGRESAR A PRÁCTICAS
+              SizedBox(
+                width: double.infinity,
+                height: 58,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(
+                    Icons.arrow_back_rounded,
+                    size: 25,
+                  ),
+                  label: const Text(
+                    'Regresar a prácticas',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: naranja,
+                    side: const BorderSide(
+                      color: naranja,
+                      width: 2,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 8),
+            ],
+          ),
         ),
       ),
     );

@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../models/whatsapp/leccion_whatsapp_model.dart';
-import '../../models/whatsapp/progreso_whatsapp_model.dart';
+import '../models/whatsapp/leccion_whatsapp_model.dart';
+import '../models/whatsapp/progreso_whatsapp_model.dart';
 
 class WhatsappController extends ChangeNotifier {
   static const String _claveProgreso = 'progreso_whatsapp';

@@ -27,7 +27,6 @@ class SimuladorView extends StatefulWidget {
 }
 
 class _SimuladorViewState extends State<SimuladorView> {
-
   // PALETA DE COLORES PRINCIPAL
   static const Color fondo = Color(0xFFF6F9D8);
   static const Color naranja = Color(0xFFF77F11);
@@ -59,7 +58,6 @@ class _SimuladorViewState extends State<SimuladorView> {
     required IconData icono,
     required Widget pantalla,
   }) {
-
     widget.onSeleccionarPractica?.call(
       nombre,
       descripcion,
@@ -104,7 +102,6 @@ class _SimuladorViewState extends State<SimuladorView> {
         childAspectRatio: 0.95,
 
         children: [
-
           // LLAMADAS
           _tarjeta(
             icono: Icons.phone,
@@ -112,7 +109,8 @@ class _SimuladorViewState extends State<SimuladorView> {
             onTap: () {
               _abrirPractica(
                 nombre: 'Realizar llamada',
-                descripcion: 'Haz una llamada a un contacto conocido',
+                descripcion:
+                'Haz una llamada a un contacto conocido',
                 icono: Icons.phone_in_talk_rounded,
                 pantalla: const DetallePracticaView(),
               );
@@ -126,25 +124,24 @@ class _SimuladorViewState extends State<SimuladorView> {
             onTap: () {
               _abrirPractica(
                 nombre: 'Cámara y galería',
-                descripcion: 'Aprende a tomar fotos y administrar imágenes',
+                descripcion:
+                'Aprende a tomar fotos y administrar imágenes',
                 icono: Icons.camera_alt_rounded,
                 pantalla: const DetalleCamaraView(),
               );
             },
           ),
-
-          // RELOJ
+// RELOJ
           _tarjeta(
             icono: Icons.access_time,
             titulo: 'Reloj y alarmas',
             onTap: () {
               _abrirPractica(
                 nombre: 'Reloj y alarmas',
-                descripcion: 'Aprende a utilizar el reloj y configurar alarmas',
+                descripcion:
+                'Aprende a utilizar el reloj y configurar alarmas',
                 icono: Icons.access_time_rounded,
-                pantalla: DetalleRelojView(
-                  progresoController: progresoController,
-                ),
+                pantalla: const DetalleRelojView(),
               );
             },
           ),
@@ -156,11 +153,10 @@ class _SimuladorViewState extends State<SimuladorView> {
             onTap: () {
               _abrirPractica(
                 nombre: 'Calendario',
-                descripcion: 'Aprende a organizar tus eventos y actividades',
+                descripcion:
+                'Aprende a organizar tus eventos y actividades',
                 icono: Icons.calendar_month_rounded,
-                pantalla: DetalleCalendarioView(
-                  progresoController: progresoController,
-                ),
+                pantalla: const DetalleCalendarioView(),
               );
             },
           ),
@@ -172,7 +168,8 @@ class _SimuladorViewState extends State<SimuladorView> {
             onTap: () {
               _abrirPractica(
                 nombre: 'WhatsApp',
-                descripcion: 'Aprende a enviar mensajes y compartir fotos',
+                descripcion:
+                'Aprende a enviar mensajes y compartir fotos',
                 icono: Icons.message_rounded,
                 pantalla: const DetalleWhatsappView(),
               );
@@ -214,7 +211,6 @@ class _SimuladorViewState extends State<SimuladorView> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-
               Container(
                 width: 76,
                 height: 76,

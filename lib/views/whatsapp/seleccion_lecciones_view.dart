@@ -14,135 +14,344 @@ class SeleccionLeccionesView extends StatelessWidget {
     required this.onSeleccionarLeccion,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (context, child) {
-        return Scaffold(
-          backgroundColor: const Color(0xFFF0F2F5),
-          appBar: AppBar(
-            title: const Text(
-              'Prácticas de WhatsApp',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+  // COLORES
+  static const Color azul = Color(0xFF92AFBC);
+  static const Color fondo = Color(0xFFF7F9FA);
+  static const Color verde = Color(0xFF299764);
+
+  // REINICIAR PROGRESO
+  Future<void> _reiniciarTodo(BuildContext context) async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22),
+          ),
+          title: const Text('¿Reiniciar todo?'),
+          content: const Text(
+            'Se borrará el progreso de las seis prácticas '
+                'de WhatsApp.\n\n'
+                'Esta acción no se puede deshacer.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext, false);
+              },
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
               ),
+              onPressed: () {
+                Navigator.pop(dialogContext, true);
+              },
+              child: const Text('Reiniciar todo'),
             ),
-            backgroundColor: const Color(0xFF075E54),
-            iconTheme: const IconThemeData(
-              color: Colors.white,
-            ),
-          ),
-          body: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Selecciona una práctica',
-                  style: TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF202C33),
-                  ),
-                ),
-
-                const SizedBox(height: 14),
-
-                Expanded(
-                  child: GridView.builder(
-                    itemCount: controller.lecciones.length,
-                    gridDelegate:
-                    const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 0.88,
-                    ),
-                    itemBuilder: (context, index) {
-                      final leccion = controller.lecciones[index];
-
-                      return _TarjetaLeccion(
-                        leccion: leccion,
-                        onTap: () {
-                          onSeleccionarLeccion(leccion);
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
+          ],
         );
       },
     );
+
+    if (confirmar != true || !context.mounted) return;
+
+    await controller.reiniciarProgreso();
+
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Todo el progreso de WhatsApp se ha reiniciado.',
+        ),
+      ),
+    );
   }
-}
 
-class _TarjetaLeccion extends StatelessWidget {
-  final LeccionWhatsappModel leccion;
-  final VoidCallback onTap;
+  // TARJETA DE CADA LECCIÓN
+  Widget _tarjetaPractica({
+    required LeccionWhatsappModel leccion,
+    required VoidCallback onTap,
+  }) {
+    final bool completada =
+    controller.estaCompletada(leccion.id);
 
-  const _TarjetaLeccion({
-    required this.leccion,
-    required this.onTap,
-  });
+    return Card(
+      elevation: 1,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Row(
+            children: [
+              Container(
+                height: 58,
+                width: 58,
+                decoration: BoxDecoration(
+                  color: azul.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(
+                  leccion.icono,
+                  color: const Color(0xFF496A79),
+                  size: 30,
+                ),
+              ),
 
+              const SizedBox(width: 15),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      leccion.titulo,
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(height: 5),
+
+                    Text(
+                      leccion.descripcion,
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontSize: 13,
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    Text(
+                      completada
+                          ? 'Práctica completada'
+                          : 'Práctica pendiente',
+                      style: TextStyle(
+                        color: completada
+                            ? verde
+                            : Colors.orange.shade800,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 8),
+
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: azul,
+                size: 19,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // PANTALLA PRINCIPAL
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
+    return Scaffold(
+      backgroundColor: fondo,
+      appBar: AppBar(
+        backgroundColor: azul,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        title: const Text(
+          'Práctica de WhatsApp',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Spacer(),
+      ),
 
-            CircleAvatar(
-              radius: 29,
-              backgroundColor: leccion.color.withValues(alpha: 0.15),
-              child: Icon(
-                leccion.icono,
-                color: leccion.color,
-                size: 30,
+      body: AnimatedBuilder(
+        animation: controller,
+        builder: (context, child) {
+          if (controller.cargando) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          // CÁLCULO CORREGIDO DEL PROGRESO
+          final int completadas =
+              controller.leccionesCompletadas;
+
+          final int total =
+              controller.totalLecciones;
+
+          final double porcentaje = total == 0
+              ? 0.0
+              : (completadas / total) * 100.0;
+
+          final double valorBarra = total == 0
+              ? 0.0
+              : completadas / total;
+
+          return ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              // ENCABEZADO
+              const Text(
+                'Aprendamos a usar WhatsApp',
+                style: TextStyle(
+                  fontSize: 23,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
 
-            const SizedBox(height: 12),
+              const SizedBox(height: 8),
 
-            Text(
-              leccion.titulo,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-                color: Color(0xFF202C33),
+              const Text(
+                'Practica enviando mensajes, audios, '
+                    'fotos, realizando llamadas y '
+                    'comunicándote con tus familiares '
+                    'y amigos.',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Colors.black54,
+                  height: 1.4,
+                ),
               ),
-            ),
 
-            const SizedBox(height: 8),
+              const SizedBox(height: 24),
 
-            const Text(
-              'Toca para practicar',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                color: Color(0xFF667781),
-                fontWeight: FontWeight.w500,
+              // PROGRESO GENERAL
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  crossAxisAlignment:
+                  CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment:
+                      MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Progreso general',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+
+                        Text(
+                          '${porcentaje.round()}%',
+                          style: const TextStyle(
+                            color: verde,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // BARRA DE PROGRESO
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: LinearProgressIndicator(
+                        value: valorBarra.clamp(0.0, 1.0),
+                        minHeight: 10,
+                        backgroundColor:
+                        Colors.grey.shade200,
+                        valueColor:
+                        const AlwaysStoppedAnimation<Color>(
+                          verde,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    Text(
+                      completadas == total && total > 0
+                          ? '¡Felicitaciones! Has completado '
+                          'todas las prácticas de WhatsApp.'
+                          : 'Has completado $completadas '
+                          'de $total prácticas.',
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
 
-            const Spacer(),
-          ],
-        ),
+              const SizedBox(height: 22),
+
+              // LISTA DE LAS SEIS PRÁCTICAS
+              ...List<LeccionWhatsappModel>.from(
+                controller.lecciones,
+              ).map<Widget>(
+                    (LeccionWhatsappModel leccion) {
+                  return Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: 14,
+                    ),
+                    child: _tarjetaPractica(
+                      leccion: leccion,
+                      onTap: () {
+                        onSeleccionarLeccion(leccion);
+                      },
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 14),
+
+              // BOTÓN REINICIAR TODO
+              OutlinedButton.icon(
+                onPressed: () {
+                  _reiniciarTodo(context);
+                },
+                icon: const Icon(
+                  Icons.restart_alt_rounded,
+                ),
+                label: const Text('Reiniciar todo'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor:
+                  Colors.red.shade700,
+                  side: BorderSide(
+                    color: Colors.red.shade300,
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 15,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                    BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+            ],
+          );
+        },
       ),
     );
   }

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../../controllers/whatsapp_controller.dart';
@@ -303,10 +302,20 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
     super.dispose();
   }
 
+  // Registra una práctica terminada y actualiza el progreso general.
+  void _registrarLeccion(String id) {
+    widget.controller.marcarCompletada(id);
+  }
+
   void _seleccionarContacto(String nombre) {
     setState(() {
       contacto = nombre;
     });
+
+    // Buscar y seleccionar un contacto completa esta lección.
+    if (widget.tipo == 'contactos') {
+      _registrarLeccion('contactos');
+    }
   }
 
   void _enviarMensaje() {
@@ -315,6 +324,7 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
     setState(() {
       mensajeEnviado = true;
     });
+    _registrarLeccion('mensajes');
   }
 
   void _iniciarLlamada() {
@@ -329,6 +339,7 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
       llamadaActiva = false;
       llamadaFinalizada = true;
     });
+    _registrarLeccion('llamadas');
   }
 
   // ---------------------------------------------------------------------------
@@ -438,6 +449,11 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
         fotoEnviada = false;
       }
     });
+
+    // En este simulador, elegir una foto para el estado la publica.
+    if (paraEstado) {
+      _registrarLeccion('estados');
+    }
   }
 
   void _publicarEstadoTexto() {
@@ -447,6 +463,7 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
       estadoPublicado = estadoController.text.trim();
       fotoEstado = null;
     });
+    _registrarLeccion('estados');
   }
 
   @override
@@ -656,6 +673,9 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
                       audioEnviado = true;
                     }
                   });
+                  if (audioEnviado) {
+                    _registrarLeccion('audios');
+                  }
                 },
                 icon: Icon(
                   grabando ? Icons.stop : Icons.mic,
@@ -876,6 +896,7 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
                   setState(() {
                     fotoEnviada = true;
                   });
+                  _registrarLeccion('fotos');
                 },
                 icon: const Icon(
                   Icons.send,

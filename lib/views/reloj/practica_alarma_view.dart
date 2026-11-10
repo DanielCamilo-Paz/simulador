@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 
 import '../../controllers/reloj_controller.dart';
@@ -5,13 +6,11 @@ import '../../models/reloj/alarma_model.dart';
 
 class PracticaAlarmaView extends StatefulWidget {
   final RelojController relojController;
-  final Function(String) onCompletar;
   final VoidCallback onVolver;
 
   const PracticaAlarmaView({
     super.key,
     required this.relojController,
-    required this.onCompletar,
     required this.onVolver,
   });
 
@@ -28,11 +27,19 @@ class _PracticaAlarmaViewState extends State<PracticaAlarmaView> {
   RelojController get controller => widget.relojController;
 
   bool _guiaIniciada = false;
-  bool _creada = false;
-  bool _cambiada = false;
-  bool _editada = false;
-  bool _eliminada = false;
   bool _finalizada = false;
+
+  bool get _creada =>
+      controller.actividadCompletada('crear_alarma');
+
+  bool get _cambiada =>
+      controller.actividadCompletada('cambiar_estado_alarma');
+
+  bool get _editada =>
+      controller.actividadCompletada('editar_alarma');
+
+  bool get _eliminada =>
+      controller.actividadCompletada('eliminar_alarma');
 
   @override
   void initState() {
@@ -41,7 +48,6 @@ class _PracticaAlarmaViewState extends State<PracticaAlarmaView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && !_guiaIniciada) {
         _guiaIniciada = true;
-        widget.onCompletar('abrir_alarmas');
         _mostrarBienvenida();
       }
     });
@@ -105,11 +111,13 @@ class _PracticaAlarmaViewState extends State<PracticaAlarmaView> {
       contenido:
       'En esta práctica aprenderás a crear una alarma, '
           'cambiar su estado, editarla y eliminarla.\n\n'
-          'Primero vamos a crear nuestra primera alarma.',
+          'Sigue las instrucciones para completar las actividades.',
       icono: Icons.alarm_rounded,
     );
 
-    if (mounted) await _mostrarPasoActual();
+    if (mounted) {
+      await _mostrarPasoActual();
+    }
   }
 
   Future<void> _mostrarPasoActual() async {
@@ -120,8 +128,8 @@ class _PracticaAlarmaViewState extends State<PracticaAlarmaView> {
         titulo: 'Paso 1: crear una alarma',
         contenido:
         'Presiona el botón «Agregar alarma». '
-            'Después elige una hora, escribe un nombre y guarda '
-            'la alarma.',
+            'Después elige una hora, escribe un nombre '
+            'y guarda la alarma.',
         icono: Icons.add_alarm_rounded,
       );
     } else if (!_cambiada) {
@@ -130,7 +138,7 @@ class _PracticaAlarmaViewState extends State<PracticaAlarmaView> {
         contenido:
         '¡Muy bien! Ya creaste tu alarma.\n\n'
             'Ahora utiliza el interruptor que aparece junto a ella '
-            'para activarla y desactivarla.',
+            'para activarla o desactivarla.',
         icono: Icons.toggle_on_rounded,
       );
     } else if (!_editada) {
@@ -153,11 +161,13 @@ class _PracticaAlarmaViewState extends State<PracticaAlarmaView> {
       );
     } else if (!_finalizada) {
       _finalizada = true;
+
       await _mensaje(
         titulo: '¡Práctica completada!',
         contenido:
         'Aprendiste a crear, activar, desactivar, editar '
-            'y eliminar una alarma.',
+            'y eliminar una alarma.\n\n'
+            'Tu progreso en Alarmas es del 100%.',
         textoBoton: 'Finalizar',
         icono: Icons.check_circle_rounded,
       );
@@ -213,7 +223,9 @@ class _PracticaAlarmaViewState extends State<PracticaAlarmaView> {
                       style: const TextStyle(fontSize: 20),
                     ),
                   ),
+
                   const SizedBox(height: 16),
+
                   TextField(
                     controller: nombreController,
                     decoration: InputDecoration(
@@ -244,7 +256,10 @@ class _PracticaAlarmaViewState extends State<PracticaAlarmaView> {
 
                     Navigator.pop(
                       dialogContext,
-                      _DatosAlarma(hora: hora, nombre: nombre),
+                      _DatosAlarma(
+                        hora: hora,
+                        nombre: nombre,
+                      ),
                     );
                   },
                   child: const Text('Guardar'),
@@ -271,17 +286,28 @@ class _PracticaAlarmaViewState extends State<PracticaAlarmaView> {
     );
 
     if (!_creada) {
-      setState(() => _creada = true);
-      widget.onCompletar('crear_alarma');
-      await _mostrarPasoActual();
+      await controller.completarActividad('crear_alarma');
+
+      if (mounted) {
+        await _mostrarPasoActual();
+      }
     }
   }
 
   Future<void> _editarAlarma(int indice) async {
+    if (indice < 0 || indice >= controller.alarmas.length) {
+      return;
+    }
+
     final alarma = controller.alarmas[indice];
+
     final datos = await _formularioAlarma(alarma: alarma);
 
     if (datos == null || !mounted) return;
+
+    final huboCambio =
+        datos.nombre != alarma.nombre ||
+            datos.hora != alarma.hora;
 
     controller.editarAlarma(
       indice: indice,
@@ -290,10 +316,12 @@ class _PracticaAlarmaViewState extends State<PracticaAlarmaView> {
       activa: alarma.activa,
     );
 
-    if (!_editada) {
-      setState(() => _editada = true);
-      widget.onCompletar('editar_alarma');
-      await _mostrarPasoActual();
+    if (huboCambio && !_editada) {
+      await controller.completarActividad('editar_alarma');
+
+      if (mounted) {
+        await _mostrarPasoActual();
+      }
     }
   }
 
@@ -334,22 +362,35 @@ class _PracticaAlarmaViewState extends State<PracticaAlarmaView> {
 
     if (confirmar != true || !mounted) return;
 
+    if (indice < 0 || indice >= controller.alarmas.length) {
+      return;
+    }
+
     controller.eliminarAlarma(indice);
 
     if (!_eliminada) {
-      setState(() => _eliminada = true);
-      widget.onCompletar('eliminar_alarma');
-      await _mostrarPasoActual();
+      await controller.completarActividad('eliminar_alarma');
+
+      if (mounted) {
+        await _mostrarPasoActual();
+      }
     }
   }
 
-  Future<void> _cambiarEstado(int indice, bool activa) async {
+  Future<void> _cambiarEstado(
+      int indice,
+      bool activa,
+      ) async {
     controller.cambiarEstadoAlarma(indice, activa);
 
     if (!_cambiada) {
-      setState(() => _cambiada = true);
-      widget.onCompletar('activar_alarma');
-      await _mostrarPasoActual();
+      await controller.completarActividad(
+        'cambiar_estado_alarma',
+      );
+
+      if (mounted) {
+        await _mostrarPasoActual();
+      }
     }
   }
 
@@ -362,6 +403,7 @@ class _PracticaAlarmaViewState extends State<PracticaAlarmaView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: fondo,
+
       appBar: AppBar(
         backgroundColor: azul,
         foregroundColor: Colors.white,
@@ -381,6 +423,7 @@ class _PracticaAlarmaViewState extends State<PracticaAlarmaView> {
           ),
         ],
       ),
+
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _agregarAlarma,
         backgroundColor: verde,
@@ -388,12 +431,70 @@ class _PracticaAlarmaViewState extends State<PracticaAlarmaView> {
         icon: const Icon(Icons.add_alarm_rounded),
         label: const Text('Agregar alarma'),
       ),
+
       body: AnimatedBuilder(
         animation: controller,
         builder: (context, child) {
           return ListView(
             padding: const EdgeInsets.all(18),
             children: [
+              // PROGRESO DE ALARMAS
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Mi progreso en Alarmas',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    Text(
+                      '${controller.porcentajePractica('alarmas').round()}%',
+                      style: const TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: verde,
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    LinearProgressIndicator(
+                      value:
+                      controller.porcentajePractica('alarmas') /
+                          100,
+                      minHeight: 10,
+                      borderRadius: BorderRadius.circular(10),
+                      backgroundColor: Colors.black12,
+                      color: verde,
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    Text(
+                      '${controller.actividadesRealizadas('alarmas')} '
+                          'de ${controller.totalActividades('alarmas')} '
+                          'actividades completadas',
+                      style: const TextStyle(
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
               const Row(
                 children: [
                   Icon(Icons.alarm_rounded, color: verde),
@@ -409,7 +510,9 @@ class _PracticaAlarmaViewState extends State<PracticaAlarmaView> {
                   ),
                 ],
               ),
+
               const SizedBox(height: 16),
+
               if (controller.alarmas.isEmpty)
                 Container(
                   padding: const EdgeInsets.all(24),
@@ -437,76 +540,93 @@ class _PracticaAlarmaViewState extends State<PracticaAlarmaView> {
                       Text(
                         'Presiona «Agregar alarma» para comenzar.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.black54),
+                        style: TextStyle(
+                          color: Colors.black54,
+                        ),
                       ),
                     ],
                   ),
                 )
               else
-                ...List.generate(controller.alarmas.length, (indice) {
-                  final alarma = controller.alarmas[indice];
+                ...List.generate(
+                  controller.alarmas.length,
+                      (indice) {
+                    final alarma = controller.alarmas[indice];
 
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.alarm_rounded,
-                          color: azul,
-                          size: 30,
-                        ),
-                        const SizedBox(width: 13),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _formatearHora(alarma.hora),
-                                style: const TextStyle(
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                alarma.nombre,
-                                style: const TextStyle(
-                                  color: Colors.black54,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Switch(
-                          value: alarma.activa,
-                          activeColor: verde,
-                          onChanged: (valor) =>
-                              _cambiarEstado(indice, valor),
-                        ),
-                        IconButton(
-                          tooltip: 'Editar',
-                          onPressed: () => _editarAlarma(indice),
-                          icon: const Icon(
-                            Icons.edit_rounded,
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(15),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.alarm_rounded,
                             color: azul,
+                            size: 30,
                           ),
-                        ),
-                        IconButton(
-                          tooltip: 'Eliminar',
-                          onPressed: () => _eliminarAlarma(indice),
-                          icon: const Icon(
-                            Icons.delete_outline_rounded,
-                            color: Colors.redAccent,
+
+                          const SizedBox(width: 13),
+
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _formatearHora(alarma.hora),
+                                  style: const TextStyle(
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  alarma.nombre,
+                                  style: const TextStyle(
+                                    color: Colors.black54,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
+
+                          Switch(
+                            value: alarma.activa,
+                            activeColor: verde,
+                            onChanged: (valor) {
+                              _cambiarEstado(indice, valor);
+                            },
+                          ),
+
+                          IconButton(
+                            tooltip: 'Editar',
+                            onPressed: () {
+                              _editarAlarma(indice);
+                            },
+                            icon: const Icon(
+                              Icons.edit_rounded,
+                              color: azul,
+                            ),
+                          ),
+
+                          IconButton(
+                            tooltip: 'Eliminar',
+                            onPressed: () {
+                              _eliminarAlarma(indice);
+                            },
+                            icon: const Icon(
+                              Icons.delete_outline_rounded,
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+
               const SizedBox(height: 85),
             ],
           );

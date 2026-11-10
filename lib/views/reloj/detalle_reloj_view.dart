@@ -1,19 +1,14 @@
 
 import 'package:flutter/material.dart';
 
-import '../../controllers/progreso_controller.dart';
-import '../reloj/pantalla_reloj_sim.dart';
-import '../reloj/progreso_reloj_view.dart';
+import 'pantalla_reloj_sim.dart';
 
 class DetalleRelojView extends StatelessWidget {
-  final ProgresoController progresoController;
-
   const DetalleRelojView({
     super.key,
-    required this.progresoController,
   });
 
-  // PALETA PRINCIPAL
+  // PALETA PRINCIPAL ORIGINAL
   static const Color fondo = Color(0xFFF8F8E8);
   static const Color naranja = Color(0xFFF4A261);
   static const Color naranjaSuave = Color(0xFFF6DCC0);
@@ -26,171 +21,134 @@ class DetalleRelojView extends StatelessWidget {
       backgroundColor: fondo,
 
       appBar: AppBar(
+        backgroundColor: fondo,
+        elevation: 0,
+        foregroundColor: texto,
         title: const Text(
           'Realizar práctica',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: texto,
           ),
-        ),
-        backgroundColor: fondo,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_rounded,
-            color: texto,
-          ),
-          onPressed: () => Navigator.pop(context),
         ),
       ),
 
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(22),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 10),
+              const SizedBox(height: 25),
 
-              // ICONO PRINCIPAL
+              // ICONO DEL RELOJ
               Container(
                 width: 140,
                 height: 140,
                 decoration: BoxDecoration(
-                  color: naranja,
+                  color: naranjaSuave,
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: const Icon(
                   Icons.watch_later_rounded,
-                  size: 90,
-                  color: blanco,
+                  size: 85,
+                  color: naranja,
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
 
               // TÍTULO
               const Text(
                 'Reloj, Alarmas y Cronómetro',
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 26,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  height: 1.2,
                   color: texto,
                 ),
-                textAlign: TextAlign.center,
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
 
               // DESCRIPCIÓN
               const Text(
                 'Aprende a ver la hora actual, crear y editar alarmas. '
                     'Conoce la hora de otras ciudades del mundo y usa el cronómetro.',
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.black54,
                   height: 1.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
-
-              const SizedBox(height: 32),
-
-              // INFORMACIÓN DE LA PRÁCTICA
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 20,
-                  horizontal: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: naranjaSuave,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _dato(
-                      Icons.access_time_rounded,
-                      'Duración',
-                      '10 minutos',
-                    ),
-                    _dato(
-                      Icons.trending_up_rounded,
-                      'Nivel',
-                      'Fácil',
-                    ),
-                  ],
+                  color: Colors.black54,
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 30),
 
-              // CONSULTAR PROGRESO
+              // TARJETA DE DURACIÓN Y NIVEL
+              Card(
+                color: blanco,
+                elevation: 1,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 22,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _dato(
+                          Icons.access_time,
+                          'Duración',
+                          '10 minutos',
+                        ),
+                      ),
+
+                      Container(
+                        width: 1,
+                        height: 60,
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                        ),
+                        color: Colors.black12,
+                      ),
+
+                      Expanded(
+                        child: _dato(
+                          Icons.signal_cellular_alt,
+                          'Nivel',
+                          'Fácil',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 30),
+
+              // BOTÓN COMENZAR LECCIÓN
               SizedBox(
                 width: double.infinity,
-                height: 62,
-                child: OutlinedButton.icon(
+                height: 58,
+                child: ElevatedButton(
                   onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ProgresoRelojView(
-                          progresoController: progresoController,
-                        ),
+                        builder: (_) =>
+                        const PantallaRelojSim(),
                       ),
                     );
                   },
-                  icon: const Icon(
-                    Icons.trending_up_rounded,
-                    size: 27,
-                  ),
-                  label: const Text(
-                    'Consultar mi progreso',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: texto,
-                    side: const BorderSide(
-                      color: naranja,
-                      width: 1.5,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // COMENZAR LECCIÓN
-              SizedBox(
-                width: double.infinity,
-                height: 62,
-                child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: naranja,
                     foregroundColor: texto,
-                    elevation: 0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PantallaRelojSim(
-                          progresoController: progresoController,
-                        ),
-                      ),
-                    );
-                  },
                   child: const Text(
                     'Comenzar lección',
                     style: TextStyle(
@@ -201,7 +159,41 @@ class DetalleRelojView extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 15),
+
+              // BOTÓN REGRESAR A PRÁCTICAS
+              SizedBox(
+                width: double.infinity,
+                height: 58,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(
+                    Icons.arrow_back_rounded,
+                    size: 25,
+                  ),
+                  label: const Text(
+                    'Regresar a prácticas',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: naranja,
+                    side: const BorderSide(
+                      color: naranja,
+                      width: 2,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 15),
             ],
           ),
         ),
@@ -209,42 +201,38 @@ class DetalleRelojView extends StatelessWidget {
     );
   }
 
-  Widget _dato(IconData icono, String etiqueta, String valor) {
+  // INFORMACIÓN DE DURACIÓN Y NIVEL
+  Widget _dato(
+      IconData icono,
+      String titulo,
+      String valor,
+      ) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            color: blanco.withValues(alpha: 0.75),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Icon(
-            icono,
-            size: 32,
-            color: naranja,
-          ),
+        Icon(
+          icono,
+          color: naranja,
+          size: 30,
         ),
 
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
 
         Text(
-          etiqueta,
+          titulo,
           style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-            color: texto,
+            color: Colors.black54,
+            fontSize: 14,
           ),
         ),
 
-        const SizedBox(height: 4),
+        const SizedBox(height: 5),
 
         Text(
           valor,
           style: const TextStyle(
-            color: Colors.black54,
-            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: texto,
           ),
         ),
       ],

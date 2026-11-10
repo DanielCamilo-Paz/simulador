@@ -1,16 +1,15 @@
+
 import 'package:flutter/material.dart';
 
 import '../../controllers/reloj_controller.dart';
 
 class PracticaCronometroView extends StatefulWidget {
   final RelojController relojController;
-  final Function(String) onCompletar;
   final VoidCallback onVolver;
 
   const PracticaCronometroView({
     super.key,
     required this.relojController,
-    required this.onCompletar,
     required this.onVolver,
   });
 
@@ -28,11 +27,19 @@ class _PracticaCronometroViewState
   RelojController get controller => widget.relojController;
 
   bool _guiaIniciada = false;
-  bool _iniciado = false;
-  bool _pausado = false;
-  bool _vueltaGuardada = false;
-  bool _reiniciado = false;
   bool _finalizado = false;
+
+  bool get _iniciado =>
+      controller.actividadCompletada('iniciar_cronometro');
+
+  bool get _pausado =>
+      controller.actividadCompletada('pausar_cronometro');
+
+  bool get _vueltaGuardada =>
+      controller.actividadCompletada('guardar_vuelta');
+
+  bool get _reiniciado =>
+      controller.actividadCompletada('reiniciar_cronometro');
 
   @override
   void initState() {
@@ -108,7 +115,9 @@ class _PracticaCronometroViewState
       icono: Icons.timer_rounded,
     );
 
-    if (mounted) await _mostrarPasoActual();
+    if (mounted) {
+      await _mostrarPasoActual();
+    }
   }
 
   Future<void> _mostrarPasoActual() async {
@@ -150,13 +159,13 @@ class _PracticaCronometroViewState
       );
     } else if (!_finalizado) {
       _finalizado = true;
-      widget.onCompletar('iniciar_cronometro');
 
       await _mensaje(
         titulo: '¡Práctica completada!',
         contenido:
         'Aprendiste a iniciar, pausar, guardar vueltas '
-            'y reiniciar el cronómetro.',
+            'y reiniciar el cronómetro.\n\n'
+            'Tu progreso en Cronómetro es del 100%.',
         textoBoton: 'Finalizar',
         icono: Icons.check_circle_rounded,
       );
@@ -171,9 +180,13 @@ class _PracticaCronometroViewState
     controller.iniciarCronometro();
 
     if (!_iniciado) {
-      setState(() => _iniciado = true);
-      widget.onCompletar('iniciar_cronometro');
-      await _mostrarPasoActual();
+      await controller.completarActividad(
+        'iniciar_cronometro',
+      );
+
+      if (mounted) {
+        await _mostrarPasoActual();
+      }
     }
   }
 
@@ -181,20 +194,31 @@ class _PracticaCronometroViewState
     controller.pausarCronometro();
 
     if (!_pausado) {
-      setState(() => _pausado = true);
-      await _mostrarPasoActual();
+      await controller.completarActividad(
+        'pausar_cronometro',
+      );
+
+      if (mounted) {
+        await _mostrarPasoActual();
+      }
     }
   }
 
   Future<void> _guardarVuelta() async {
-    if (controller.tiempoTranscurrido.inMilliseconds <= 0) return;
+    if (controller.tiempoTranscurrido.inMilliseconds <= 0) {
+      return;
+    }
 
     controller.guardarVuelta();
 
     if (!_vueltaGuardada) {
-      setState(() => _vueltaGuardada = true);
-      widget.onCompletar('guardar_vuelta');
-      await _mostrarPasoActual();
+      await controller.completarActividad(
+        'guardar_vuelta',
+      );
+
+      if (mounted) {
+        await _mostrarPasoActual();
+      }
     }
   }
 
@@ -202,9 +226,13 @@ class _PracticaCronometroViewState
     controller.reiniciarCronometro();
 
     if (!_reiniciado) {
-      setState(() => _reiniciado = true);
-      widget.onCompletar('reiniciar_cronometro');
-      await _mostrarPasoActual();
+      await controller.completarActividad(
+        'reiniciar_cronometro',
+      );
+
+      if (mounted) {
+        await _mostrarPasoActual();
+      }
     }
   }
 
@@ -212,6 +240,7 @@ class _PracticaCronometroViewState
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: fondo,
+
       appBar: AppBar(
         backgroundColor: azul,
         foregroundColor: Colors.white,
@@ -231,12 +260,70 @@ class _PracticaCronometroViewState
           ),
         ],
       ),
+
       body: AnimatedBuilder(
         animation: controller,
         builder: (context, child) {
           return ListView(
             padding: const EdgeInsets.all(18),
             children: [
+              // PROGRESO DE CRONÓMETRO
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Mi progreso en Cronómetro',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    Text(
+                      '${controller.porcentajePractica('cronometro').round()}%',
+                      style: const TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: verde,
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    LinearProgressIndicator(
+                      value:
+                      controller.porcentajePractica('cronometro') /
+                          100,
+                      minHeight: 10,
+                      borderRadius: BorderRadius.circular(10),
+                      backgroundColor: Colors.black12,
+                      color: verde,
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    Text(
+                      '${controller.actividadesRealizadas('cronometro')} '
+                          'de ${controller.totalActividades('cronometro')} '
+                          'actividades completadas',
+                      style: const TextStyle(
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
               const Row(
                 children: [
                   Icon(Icons.timer_rounded, color: verde),
@@ -252,7 +339,9 @@ class _PracticaCronometroViewState
                   ),
                 ],
               ),
+
               const SizedBox(height: 25),
+
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(
@@ -270,7 +359,9 @@ class _PracticaCronometroViewState
                       color: azul,
                       size: 48,
                     ),
+
                     const SizedBox(height: 18),
+
                     Text(
                       controller.cronometro.tiempo,
                       style: const TextStyle(
@@ -281,7 +372,9 @@ class _PracticaCronometroViewState
                         ],
                       ),
                     ),
+
                     const SizedBox(height: 8),
+
                     Text(
                       controller.estaEnMarcha
                           ? 'Cronómetro en marcha'
@@ -294,9 +387,12 @@ class _PracticaCronometroViewState
                   ],
                 ),
               ),
+
               const SizedBox(height: 25),
+
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment:
+                MainAxisAlignment.spaceEvenly,
                 children: [
                   _botonAccion(
                     icono: controller.estaEnMarcha
@@ -310,26 +406,31 @@ class _PracticaCronometroViewState
                         ? _pausar
                         : _iniciar,
                   ),
+
                   _botonAccion(
                     icono: Icons.flag_rounded,
                     texto: 'Guardar vuelta',
                     color: azul,
-                    onTap: controller.estaEnMarcha ||
-                        controller.tiempoTranscurrido.inMilliseconds > 0
+                    onTap:
+                    controller.tiempoTranscurrido.inMilliseconds > 0
                         ? _guardarVuelta
                         : null,
                   ),
+
                   _botonAccion(
                     icono: Icons.restart_alt_rounded,
                     texto: 'Reiniciar',
                     color: Colors.deepPurple,
-                    onTap: controller.tiempoTranscurrido.inMilliseconds > 0
+                    onTap:
+                    controller.tiempoTranscurrido.inMilliseconds > 0
                         ? _reiniciar
                         : null,
                   ),
                 ],
               ),
+
               const SizedBox(height: 25),
+
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -352,11 +453,15 @@ class _PracticaCronometroViewState
                         ),
                       ],
                     ),
+
                     const SizedBox(height: 12),
+
                     if (controller.cronometro.vueltas.isEmpty)
                       const Text(
                         'Todavía no has guardado ninguna vuelta.',
-                        style: TextStyle(color: Colors.black54),
+                        style: TextStyle(
+                          color: Colors.black54,
+                        ),
                       )
                     else
                       ...List.generate(
@@ -369,7 +474,8 @@ class _PracticaCronometroViewState
                             dense: true,
                             contentPadding: EdgeInsets.zero,
                             leading: CircleAvatar(
-                              backgroundColor: azul.withOpacity(0.18),
+                              backgroundColor:
+                              azul.withValues(alpha: 0.18),
                               child: Text('${indice + 1}'),
                             ),
                             title: Text('Vuelta ${indice + 1}'),
@@ -405,13 +511,15 @@ class _PracticaCronometroViewState
           icon: Icon(icono),
           iconSize: 28,
           style: IconButton.styleFrom(
-            backgroundColor: color.withOpacity(0.16),
+            backgroundColor: color.withValues(alpha: 0.16),
             foregroundColor: color,
             disabledBackgroundColor: Colors.black12,
             disabledForegroundColor: Colors.black26,
           ),
         ),
+
         const SizedBox(height: 5),
+
         SizedBox(
           width: 95,
           child: Text(

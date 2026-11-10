@@ -34,124 +34,160 @@ class DetallePracticaView extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 10),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 10),
 
-            // ICONO PRINCIPAL
-            Container(
-              width: 140,
-              height: 140,
-              decoration: BoxDecoration(
-                color: naranja,
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: const Icon(
-                Icons.phone_rounded,
-                size: 90,
-                color: blanco,
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            const Text(
-              'Realizar llamada\ntelefónica',
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                height: 1.2,
-                color: texto,
-              ),
-              textAlign: TextAlign.center,
-            ),
-
-            const SizedBox(height: 12),
-
-            const Text(
-              'Aprende a hacer una llamada telefónica '
-                  'al contacto que tú desees.',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black54,
-                height: 1.5,
-              ),
-              textAlign: TextAlign.center,
-            ),
-
-            const SizedBox(height: 32),
-
-            // INFORMACIÓN DE LA LECCIÓN
-            Container(
-              padding: const EdgeInsets.symmetric(
-                vertical: 20,
-                horizontal: 12,
-              ),
-              decoration: BoxDecoration(
-                color: naranjaSuave,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _dato(
-                    Icons.access_time_rounded,
-                    'Duración',
-                    '5 minutos',
-                  ),
-                  _dato(
-                    Icons.trending_up_rounded,
-                    'Nivel',
-                    'Fácil',
-                  ),
-                ],
-              ),
-            ),
-
-            const Spacer(),
-
-            // BOTÓN PRINCIPAL
-            SizedBox(
-              width: double.infinity,
-              height: 62,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: naranja,
-                  foregroundColor: texto,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+              // ICONO PRINCIPAL
+              Container(
+                width: 140,
+                height: 140,
+                decoration: BoxDecoration(
+                  color: naranja,
+                  borderRadius: BorderRadius.circular(30),
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const PantallaLlamadaSim(),
-                    ),
-                  );
-                },
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: const Icon(
+                  Icons.phone_rounded,
+                  size: 90,
+                  color: blanco,
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              const Text(
+                'Realizar llamada\ntelefónica',
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  height: 1.2,
+                  color: texto,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 12),
+
+              const Text(
+                'Aprende a hacer una llamada telefónica '
+                    'al contacto que tú desees.',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black54,
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 32),
+
+              // INFORMACIÓN DE LA LECCIÓN
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 20,
+                  horizontal: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: naranjaSuave,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    SizedBox(width: 10),
-                    Text(
-                      'Comenzar lección',
-                      style: TextStyle(
-                        fontSize: 19,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    _dato(
+                      Icons.access_time_rounded,
+                      'Duración',
+                      '5 minutos',
+                    ),
+                    _dato(
+                      Icons.trending_up_rounded,
+                      'Nivel',
+                      'Fácil',
                     ),
                   ],
                 ),
               ),
-            ),
 
-            const SizedBox(height: 8),
-          ],
+              const SizedBox(height: 32),
+
+              // BOTÓN PRINCIPAL
+              SizedBox(
+                width: double.infinity,
+                height: 62,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: naranja,
+                    foregroundColor: texto,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const PantallaLlamadaSim(),
+                      ),
+                    );
+                  },
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(width: 10),
+                      Text(
+                        'Comenzar lección',
+                        style: TextStyle(
+                          fontSize: 19,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 15),
+
+              // BOTÓN REGRESAR A PRÁCTICAS
+              SizedBox(
+                width: double.infinity,
+                height: 58,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(
+                    Icons.arrow_back_rounded,
+                    size: 25,
+                  ),
+                  label: const Text(
+                    'Regresar a prácticas',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: naranja,
+                    side: const BorderSide(
+                      color: naranja,
+                      width: 2,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 8),
+            ],
+          ),
         ),
       ),
     );

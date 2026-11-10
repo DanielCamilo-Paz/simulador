@@ -1,14 +1,17 @@
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../controllers/reloj_controller.dart';
+
 class PracticaRelojMundialView extends StatefulWidget {
-  final Function(String) onCompletar;
+  final RelojController relojController;
   final VoidCallback onVolver;
 
   const PracticaRelojMundialView({
     super.key,
-    required this.onCompletar,
+    required this.relojController,
     required this.onVolver,
   });
 
@@ -28,6 +31,8 @@ class _PracticaRelojMundialViewState
 
   bool _guiaIniciada = false;
   bool _finalizada = false;
+
+  RelojController get controller => widget.relojController;
 
   final List<_Ciudad> _ciudades = const [
     _Ciudad(
@@ -63,7 +68,9 @@ class _PracticaRelojMundialViewState
     _temporizador = Timer.periodic(
       const Duration(seconds: 1),
           (_) {
-        if (mounted) setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       },
     );
 
@@ -143,27 +150,37 @@ class _PracticaRelojMundialViewState
       icono: Icons.public_rounded,
     );
 
-    if (mounted) await _mostrarPasoActual();
+    if (mounted) {
+      await _mostrarPasoActual();
+    }
   }
 
   Future<void> _mostrarPasoActual() async {
     if (!mounted) return;
 
     final pendientes = _ciudades
-        .where((ciudad) =>
-    !_ciudadesVisitadas.contains(ciudad.nombre))
+        .where(
+          (ciudad) =>
+      !_ciudadesVisitadas.contains(ciudad.nombre),
+    )
         .toList();
 
     if (pendientes.isEmpty) {
       if (!_finalizada) {
         _finalizada = true;
-        widget.onCompletar('reloj_mundial');
+
+        await controller.completarActividad(
+          'consultar_ciudad',
+        );
+
+        if (!mounted) return;
 
         await _mensaje(
           titulo: '¡Práctica completada!',
           contenido:
           'Consultaste la hora de Bogotá, Madrid, Nueva York '
-              'y Tokio. ¡Ya sabes utilizar el reloj mundial!',
+              'y Tokio. ¡Ya sabes utilizar el reloj mundial!\n\n'
+              'Tu progreso en Reloj mundial es del 100%.',
           textoBoton: 'Finalizar',
           icono: Icons.check_circle_rounded,
         );
@@ -234,6 +251,9 @@ class _PracticaRelojMundialViewState
 
   @override
   Widget build(BuildContext context) {
+    final progresoCompletado =
+    controller.actividadCompletada('consultar_ciudad');
+
     return Scaffold(
       backgroundColor: fondo,
       appBar: AppBar(
@@ -258,6 +278,56 @@ class _PracticaRelojMundialViewState
       body: ListView(
         padding: const EdgeInsets.all(18),
         children: [
+          // PROGRESO GUARDADO
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Mi progreso en Reloj mundial',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  '${controller.porcentajePractica('mundial').round()}%',
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: verde,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                LinearProgressIndicator(
+                  value:
+                  controller.porcentajePractica('mundial') / 100,
+                  minHeight: 10,
+                  borderRadius: BorderRadius.circular(10),
+                  backgroundColor: Colors.black12,
+                  color: verde,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  progresoCompletado
+                      ? '¡Práctica completada!'
+                      : 'Consulta las cuatro ciudades para completar la práctica.',
+                  style: const TextStyle(
+                    color: Colors.black54,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
           Row(
             children: [
               const Icon(Icons.public_rounded, color: verde),
@@ -280,7 +350,9 @@ class _PracticaRelojMundialViewState
               ),
             ],
           ),
+
           const SizedBox(height: 16),
+
           ..._ciudades.map((ciudad) {
             final visitada =
             _ciudadesVisitadas.contains(ciudad.nombre);
@@ -307,7 +379,7 @@ class _PracticaRelojMundialViewState
                         width: 52,
                         height: 52,
                         decoration: BoxDecoration(
-                          color: azul.withOpacity(0.15),
+                          color: azul.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(15),
                         ),
                         child: Icon(
@@ -371,7 +443,9 @@ class _PracticaRelojMundialViewState
               ),
             );
           }),
+
           const SizedBox(height: 10),
+
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
@@ -387,7 +461,7 @@ class _PracticaRelojMundialViewState
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Ciudades consultadas: '
+                    'Ciudades consultadas en esta sesión: '
                         '${_ciudadesVisitadas.length} de 4',
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
