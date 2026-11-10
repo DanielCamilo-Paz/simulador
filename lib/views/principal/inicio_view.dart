@@ -13,9 +13,9 @@ class InicioView extends StatefulWidget {
 class _InicioViewState extends State<InicioView> {
 
   // PALETA DE COLORES
-  static const Color naranja = Color(0xFFF77F11);
-  static const Color amarillo = Color(0xFFF8E8A0);
-  static const Color fondo = Color(0xFFF6F9D8);
+  static const Color naranja = Color(0xFF4d67bc);
+  static const Color amarillo = Color(0xFF4d67bc);
+  static const Color fondo = Color(0xFFeff6ff);
   static const Color texto = Color(0xFF333333);
   static const Color blanco = Colors.white;
 
@@ -103,9 +103,9 @@ class _InicioViewState extends State<InicioView> {
 
                   const Expanded(
                     child: Text(
-                      'App de Aprendizaje',
+                      'SafeTap',
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: 30,
                         fontWeight: FontWeight.bold,
                         color: texto,
                       ),
@@ -121,7 +121,7 @@ class _InicioViewState extends State<InicioView> {
                       onPressed: null,
                       icon: const Icon(
                         Icons.settings,
-                        color: texto,
+                        color: Colors.white,
                         size: 27,
                       ),
                     ),
@@ -218,7 +218,7 @@ class _InicioViewState extends State<InicioView> {
       onTap: _continuarLeccion,
 
       child: Container(
-        height: 185,
+        height: 270,
         padding: const EdgeInsets.all(11),
 
         decoration: BoxDecoration(
@@ -238,7 +238,7 @@ class _InicioViewState extends State<InicioView> {
               'Sigue con tu lección',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: texto,
               ),
@@ -246,7 +246,7 @@ class _InicioViewState extends State<InicioView> {
 
             Icon(
               iconoLeccion,
-              size: 49,
+              size: 100,
               color: naranja,
             ),
 
@@ -254,14 +254,14 @@ class _InicioViewState extends State<InicioView> {
               descripcionLeccion,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 10,
+                fontSize: 13,
                 color: texto,
               ),
             ),
 
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 9),
+              padding: const EdgeInsets.symmetric(vertical: 11),
 
               decoration: BoxDecoration(
                 color: naranja,
@@ -274,7 +274,7 @@ class _InicioViewState extends State<InicioView> {
                 style: const TextStyle(
                   color: blanco,
                   fontWeight: FontWeight.bold,
-                  fontSize: 11,
+                  fontSize: 13,
                 ),
               ),
             ),
@@ -284,66 +284,111 @@ class _InicioViewState extends State<InicioView> {
     );
   }
 
-  // TARJETA DE PROGRESO
+  // TARJETA DE PROGRESO GENERAL
   Widget _tarjetaProgreso() {
+
+    // DATOS DE EJEMPLO
+    // Después los conectamos al ProgresoController.
+    const int leccionesCompletadas = 3;
+    const int totalLecciones = 10;
+
+    final double porcentaje =
+        leccionesCompletadas / totalLecciones;
+
+    final int porcentajeTexto = (porcentaje * 100).round();
 
     return InkWell(
       borderRadius: BorderRadius.circular(20),
-      onTap: () {},
+      onTap: () {
+        // Aquí podremos abrir la pantalla de progreso general.
+      },
 
       child: Container(
-        height: 185,
-        padding: const EdgeInsets.all(12),
-
-        decoration: BoxDecoration(
-          color: naranja.withOpacity(0.18),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: naranja.withOpacity(0.35),
-          ),
+        height: 250,
+        padding: const EdgeInsets.symmetric(
+          horizontal: 5,
+          vertical: 0,
         ),
 
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
 
-          children: [
+            final double tamanoCirculo =
+            (constraints.maxWidth * 0.88).clamp(65.0, 135.0);
 
-            const Text(
-              'Tu progreso general',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: texto,
-              ),
-            ),
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
 
-            const Icon(
-              Icons.pie_chart_rounded,
-              size: 55,
-              color: naranja,
-            ),
-
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 10),
-
-              decoration: BoxDecoration(
-                color: naranja,
-                borderRadius: BorderRadius.circular(12),
-              ),
-
-              child: const Text(
-                'Consultar progreso',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: blanco,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 11,
+                // TITULO
+                const Text(
+                  'Tu progreso General',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    height: 2.5,
+                    fontWeight: FontWeight.bold,
+                    color: texto,
+                  ),
                 ),
-              ),
-            ),
-          ],
+
+                // INDICADOR CIRCULAR
+                SizedBox(
+                  width: tamanoCirculo,
+                  height: tamanoCirculo,
+
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+
+                      // CIRCULO DE PROGRESO
+                      Transform.rotate(
+                        angle: 1.57,
+                        child: SizedBox.expand(
+                          child: CircularProgressIndicator(
+                            value: porcentaje,
+                            strokeWidth: 15,
+                            strokeCap: StrokeCap.round,
+                            backgroundColor: const Color(0xFFBFCFD4),
+                            valueColor:
+                            const AlwaysStoppedAnimation<Color>(
+                              naranja,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // PORCENTAJE CENTRAL
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          '$porcentajeTexto%',
+                          style: const TextStyle(
+                            fontSize: 35,
+                            fontWeight: FontWeight.bold,
+                            color: texto,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // LECCIONES REALIZADAS
+                Text(
+                  'Has realizado $leccionesCompletadas de '
+                      '$totalLecciones lecciones',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    height: 1.9,
+                    fontWeight: FontWeight.bold,
+                    color: texto,
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -376,7 +421,7 @@ class _InicioViewState extends State<InicioView> {
 
             Icon(
               icono,
-              size: 39,
+              size: 50,
               color: naranja,
             ),
 
@@ -389,7 +434,7 @@ class _InicioViewState extends State<InicioView> {
                 titulo,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 13,
+                  fontSize: 13.9,
                   fontWeight: FontWeight.bold,
                   color: texto,
                 ),
