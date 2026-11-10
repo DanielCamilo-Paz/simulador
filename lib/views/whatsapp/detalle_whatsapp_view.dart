@@ -14,9 +14,9 @@ class DetalleWhatsappView extends StatefulWidget {
 
 class _DetalleWhatsappViewState extends State<DetalleWhatsappView> {
   // PALETA PRINCIPAL
-  static const Color fondo = Color(0xFFF8F8E8);
-  static const Color naranja = Color(0xFFF4A261);
-  static const Color naranjaSuave = Color(0xFFF6DCC0);
+  static const Color fondo = Color(0xFFEFF6FF);
+  static const Color naranja = Color(0xFF4D67BC);
+  static const Color naranjaSuave = Color(0x2B4D67BC);
   static const Color texto = Color(0xFF333333);
   static const Color blanco = Colors.white;
 

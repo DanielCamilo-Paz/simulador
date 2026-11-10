@@ -23,18 +23,22 @@ class SimuladorView extends StatefulWidget {
   });
 
   @override
-  State<SimuladorView> createState() => _SimuladorViewState();
+  State<SimuladorView> createState() =>
+      _SimuladorViewState();
 }
 
 class _SimuladorViewState extends State<SimuladorView> {
-  // PALETA DE COLORES PRINCIPAL
-  static const Color fondo = Color(0xFFF6F9D8);
-  static const Color naranja = Color(0xFFF77F11);
+  // PALETA DE COLORES OFICIAL DE SAFETAP
+  static const Color fondo = Color(0xFFEFF6FF);
+  static const Color azul = Color(0xFF4D67BC);
   static const Color texto = Color(0xFF333333);
   static const Color blanco = Colors.white;
 
-  static const Color colorTarjeta = Color(0xFFFFE5C7);
-  static const Color colorIcono = Color(0xFFF77F11);
+  static const Color colorTarjeta =
+  Color(0x2B4D67BC);
+
+  static const Color colorIcono =
+  Color(0xFF4D67BC);
 
   // CONTROLADOR COMPARTIDO
   late final ProgresoController progresoController;
@@ -131,7 +135,8 @@ class _SimuladorViewState extends State<SimuladorView> {
               );
             },
           ),
-// RELOJ
+
+          // RELOJ
           _tarjeta(
             icono: Icons.access_time,
             titulo: 'Reloj y alarmas',
@@ -194,7 +199,7 @@ class _SimuladorViewState extends State<SimuladorView> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(22),
         side: BorderSide(
-          color: naranja.withOpacity(0.25),
+          color: azul.withOpacity(0.25),
           width: 1,
         ),
       ),
@@ -203,7 +208,7 @@ class _SimuladorViewState extends State<SimuladorView> {
 
       child: InkWell(
         onTap: onTap,
-        splashColor: naranja.withOpacity(0.15),
+        splashColor: azul.withOpacity(0.15),
 
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -216,7 +221,8 @@ class _SimuladorViewState extends State<SimuladorView> {
                 height: 76,
                 decoration: BoxDecoration(
                   color: colorIcono,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius:
+                  BorderRadius.circular(20),
                 ),
                 child: Icon(
                   icono,
@@ -243,7 +249,7 @@ class _SimuladorViewState extends State<SimuladorView> {
               const Icon(
                 Icons.arrow_forward_ios,
                 size: 19,
-                color: naranja,
+                color: azul,
               ),
             ],
           ),

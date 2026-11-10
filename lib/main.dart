@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'views/principal/inicio_view.dart';
+import 'views/principal/splash_view.dart';
 
 import 'controllers/camara_controller.dart';
 import 'controllers/reloj_controller.dart';
@@ -70,16 +70,16 @@ class MiApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Simulador Celular',
+      title: 'SafeTap',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFFF6F9D8),
+        scaffoldBackgroundColor: const Color(0xFFEFF6FF),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFFF77F11),
+          seedColor: const Color(0xFF4D67BC),
         ),
         useMaterial3: true,
       ),
-      home: const InicioView(),
+      home: const SplashView(),
     );
   }
 }
