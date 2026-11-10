@@ -1,3 +1,4 @@
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -9,6 +10,7 @@ import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/camara/camara_model.dart';
+import 'progreso_general_controller.dart';
 
 class CamaraController extends ChangeNotifier {
   CameraController? camara;
@@ -29,19 +31,74 @@ class CamaraController extends ChangeNotifier {
   double zoomMaximo = 1.0;
 
   bool get usaCamaraFrontal =>
-      camara?.description.lensDirection == CameraLensDirection.front;
+      camara?.description.lensDirection ==
+          CameraLensDirection.front;
 
   int get progresoGeneral => estado.progresoGeneral;
+
+  // CONTROLADOR GENERAL COMPARTIDO
+  final ProgresoGeneralController _progresoGeneral =
+      progresoGeneralController;
+
+  // REGISTRAR LAS SEIS ACTIVIDADES
+  CamaraController() {
+    _progresoGeneral.registrarLecciones(
+      'camara',
+      {
+        'foto_trasera': 'Tomar una fotografía',
+        'selfie': 'Tomar una selfie',
+        'abrir_galeria': 'Abrir la galería',
+        'visualizar_foto': 'Visualizar una fotografía',
+        'importar_foto': 'Importar una fotografía',
+        'eliminar_foto': 'Eliminar una fotografía',
+      },
+    );
+
+    _progresoGeneral.configurarTotalActividades(
+      'camara',
+      6,
+    );
+  }
+
+  // SINCRONIZAR PROGRESO INDIVIDUAL Y GENERAL
+  void _sincronizarProgresoGeneral() {
+    final actividades = <String, bool>{
+      'foto_trasera': estado.fotoTrasera,
+      'selfie': estado.selfie,
+      'abrir_galeria': estado.galeriaAbierta,
+      'visualizar_foto': estado.fotoVisualizada,
+      'importar_foto': estado.fotoImportada,
+      'eliminar_foto': estado.fotoEliminada,
+    };
+
+    for (final actividad in actividades.entries) {
+      if (actividad.value) {
+        _progresoGeneral.completarActividad(
+          'camara',
+          actividad.key,
+        );
+      } else {
+        _progresoGeneral.reiniciarActividad(
+          'camara',
+          actividad.key,
+        );
+      }
+    }
+  }
 
   // --------------------------------------------------
   // ALMACENAMIENTO
   // --------------------------------------------------
 
   Future<Directory> _directorioFotos() async {
-    final directorio = await getApplicationDocumentsDirectory();
+    final directorio =
+    await getApplicationDocumentsDirectory();
 
     final carpeta = Directory(
-      p.join(directorio.path, 'fotografias_camara'),
+      p.join(
+        directorio.path,
+        'fotografias_camara',
+      ),
     );
 
     if (!await carpeta.exists()) {
@@ -57,9 +114,11 @@ class CamaraController extends ChangeNotifier {
   }
 
   Future<void> cargarProgreso() async {
-    final preferencias = await SharedPreferences.getInstance();
+    final preferencias =
+    await SharedPreferences.getInstance();
 
-    final datos = preferencias.getString('progreso_camara');
+    final datos =
+    preferencias.getString('progreso_camara');
 
     if (datos != null) {
       try {
@@ -71,11 +130,18 @@ class CamaraController extends ChangeNotifier {
       }
     }
 
+    // RECUPERAR AVANCES EN EL PROGRESO GENERAL
+    _sincronizarProgresoGeneral();
+
     notifyListeners();
   }
 
   Future<void> _guardarProgreso() async {
-    final preferencias = await SharedPreferences.getInstance();
+    // ACTUALIZAR PROGRESO GENERAL INMEDIATAMENTE
+    _sincronizarProgresoGeneral();
+
+    final preferencias =
+    await SharedPreferences.getInstance();
 
     await preferencias.setString(
       'progreso_camara',
@@ -96,27 +162,37 @@ class CamaraController extends ChangeNotifier {
       for (final archivo in archivos) {
         if (archivo is! File) continue;
 
-        final extension = p.extension(archivo.path).toLowerCase();
+        final extension =
+        p.extension(archivo.path).toLowerCase();
 
-        if (!['.jpg', '.jpeg', '.png', '.webp'].contains(extension)) {
+        if (![
+          '.jpg',
+          '.jpeg',
+          '.png',
+          '.webp',
+        ].contains(extension)) {
           continue;
         }
 
         try {
-          final nombre = p.basenameWithoutExtension(archivo.path);
+          final nombre =
+          p.basenameWithoutExtension(archivo.path);
 
           fotos.add(
             Foto(
               ruta: archivo.path,
               fecha: archivo.lastModifiedSync(),
-              importada: nombre.startsWith('importada_'),
+              importada:
+              nombre.startsWith('importada_'),
             ),
           );
         } catch (_) {}
       }
     }
 
-    fotos.sort((a, b) => b.fecha.compareTo(a.fecha));
+    fotos.sort(
+          (a, b) => b.fecha.compareTo(a.fecha),
+    );
 
     notifyListeners();
   }
@@ -136,17 +212,22 @@ class CamaraController extends ChangeNotifier {
       final disponibles = await availableCameras();
 
       if (disponibles.isEmpty) {
-        throw Exception('No se encontraron cámaras disponibles.');
+        throw Exception(
+          'No se encontraron cámaras disponibles.',
+        );
       }
 
       final trasera = disponibles.firstWhere(
-            (camera) => camera.lensDirection == CameraLensDirection.back,
+            (camera) =>
+        camera.lensDirection ==
+            CameraLensDirection.back,
         orElse: () => disponibles.first,
       );
 
       await _configurarCamara(trasera);
     } catch (e) {
-      errorCamara = 'No se pudo iniciar la cámara: $e';
+      errorCamara =
+      'No se pudo iniciar la cámara: $e';
       camaraLista = false;
     } finally {
       cargando = false;
@@ -169,14 +250,21 @@ class CamaraController extends ChangeNotifier {
 
     await nuevaCamara.initialize();
 
-    await nuevaCamara.setFlashMode(FlashMode.off);
+    await nuevaCamara.setFlashMode(
+      FlashMode.off,
+    );
 
-    zoomMinimo = await nuevaCamara.getMinZoomLevel();
-    zoomMaximo = await nuevaCamara.getMaxZoomLevel();
+    zoomMinimo =
+    await nuevaCamara.getMinZoomLevel();
+
+    zoomMaximo =
+    await nuevaCamara.getMaxZoomLevel();
 
     zoomActual = zoomMinimo;
 
-    await nuevaCamara.setZoomLevel(zoomActual);
+    await nuevaCamara.setZoomLevel(
+      zoomActual,
+    );
 
     camaraLista = true;
     errorCamara = null;
@@ -206,8 +294,11 @@ class CamaraController extends ChangeNotifier {
           : CameraLensDirection.front;
 
       final camaraDestino = disponibles.firstWhere(
-            (camera) => camera.lensDirection == destino,
-        orElse: () => throw Exception('No se encontró esa cámara.'),
+            (camera) =>
+        camera.lensDirection == destino,
+        orElse: () => throw Exception(
+          'No se encontró esa cámara.',
+        ),
       );
 
       cargando = true;
@@ -215,7 +306,8 @@ class CamaraController extends ChangeNotifier {
 
       await _configurarCamara(camaraDestino);
     } catch (e) {
-      errorCamara = 'No se pudo cambiar de cámara: $e';
+      errorCamara =
+      'No se pudo cambiar de cámara: $e';
     } finally {
       cargando = false;
       notifyListeners();
@@ -223,7 +315,11 @@ class CamaraController extends ChangeNotifier {
   }
 
   Future<void> cambiarZoom(double valor) async {
-    if (camara == null || !camaraLista || usaCamaraFrontal) return;
+    if (camara == null ||
+        !camaraLista ||
+        usaCamaraFrontal) {
+      return;
+    }
 
     final nuevoZoom = valor.clamp(
       zoomMinimo,
@@ -233,9 +329,12 @@ class CamaraController extends ChangeNotifier {
     zoomActual = nuevoZoom;
 
     try {
-      await camara!.setZoomLevel(nuevoZoom);
+      await camara!.setZoomLevel(
+        nuevoZoom,
+      );
     } catch (_) {
-      errorCamara = 'No se pudo ajustar el zoom.';
+      errorCamara =
+      'No se pudo ajustar el zoom.';
     }
 
     notifyListeners();
@@ -249,16 +348,21 @@ class CamaraController extends ChangeNotifier {
     }
 
     try {
-      final imagen = await camara!.takePicture();
+      final imagen =
+      await camara!.takePicture();
 
-      final carpeta = await _directorioFotos();
+      final carpeta =
+      await _directorioFotos();
 
       final nombre =
           'foto_${DateTime.now().microsecondsSinceEpoch}.jpg';
 
-      final destino = p.join(carpeta.path, nombre);
+      final destino =
+      p.join(carpeta.path, nombre);
 
-      await File(imagen.path).copy(destino);
+      await File(imagen.path).copy(
+        destino,
+      );
 
       fotos.insert(
         0,
@@ -280,7 +384,8 @@ class CamaraController extends ChangeNotifier {
 
       return true;
     } catch (e) {
-      errorCamara = 'No se pudo tomar la fotografía: $e';
+      errorCamara =
+      'No se pudo tomar la fotografía: $e';
       notifyListeners();
       return false;
     }
@@ -297,7 +402,9 @@ class CamaraController extends ChangeNotifier {
     await _guardarProgreso();
   }
 
-  Future<void> visualizarFoto(Foto foto) async {
+  Future<void> visualizarFoto(
+      Foto foto,
+      ) async {
     estado.fotoVisualizada = true;
     await _guardarProgreso();
   }
@@ -306,25 +413,33 @@ class CamaraController extends ChangeNotifier {
     errorCamara = null;
 
     try {
-      final imagen = await _picker.pickImage(
+      final imagen =
+      await _picker.pickImage(
         source: ImageSource.gallery,
         imageQuality: 95,
       );
 
-      if (imagen == null) return false;
+      if (imagen == null) {
+        return false;
+      }
 
-      final carpeta = await _directorioFotos();
+      final carpeta =
+      await _directorioFotos();
 
-      final extension = p.extension(imagen.path).isEmpty
+      final extension =
+      p.extension(imagen.path).isEmpty
           ? '.jpg'
           : p.extension(imagen.path);
 
       final nombre =
           'importada_${DateTime.now().microsecondsSinceEpoch}$extension';
 
-      final destino = p.join(carpeta.path, nombre);
+      final destino =
+      p.join(carpeta.path, nombre);
 
-      await File(imagen.path).copy(destino);
+      await File(imagen.path).copy(
+        destino,
+      );
 
       fotos.insert(
         0,
@@ -343,22 +458,27 @@ class CamaraController extends ChangeNotifier {
 
       return true;
     } catch (e) {
-      errorCamara = 'No se pudo importar la fotografía: $e';
+      errorCamara =
+      'No se pudo importar la fotografía: $e';
       notifyListeners();
       return false;
     }
   }
 
-  Future<bool> eliminarFoto(Foto foto) async {
+  Future<bool> eliminarFoto(
+      Foto foto,
+      ) async {
     try {
-      final archivo = File(foto.ruta);
+      final archivo =
+      File(foto.ruta);
 
       if (await archivo.exists()) {
         await archivo.delete();
       }
 
       fotos.removeWhere(
-            (elemento) => elemento.ruta == foto.ruta,
+            (elemento) =>
+        elemento.ruta == foto.ruta,
       );
 
       estado.fotoEliminada = true;
@@ -369,24 +489,29 @@ class CamaraController extends ChangeNotifier {
 
       return true;
     } catch (e) {
-      errorCamara = 'No se pudo eliminar la fotografía: $e';
+      errorCamara =
+      'No se pudo eliminar la fotografía: $e';
       notifyListeners();
       return false;
     }
   }
 
   // --------------------------------------------------
-  // ÚNICO REINICIO: TODO EL MÓDULO
+  // REINICIAR TODO EL MÓDULO
   // --------------------------------------------------
 
   Future<void> reiniciarTodo() async {
     await detenerCamara();
 
-    final carpeta = await _directorioFotos();
+    final carpeta =
+    await _directorioFotos();
 
     if (await carpeta.exists()) {
-      await for (final archivo in carpeta.list()) {
-        await archivo.delete(recursive: true);
+      await for (final archivo
+      in carpeta.list()) {
+        await archivo.delete(
+          recursive: true,
+        );
       }
     }
 
@@ -394,9 +519,17 @@ class CamaraController extends ChangeNotifier {
 
     estado = EstadoPracticaCamara();
 
-    final preferencias = await SharedPreferences.getInstance();
+    final preferencias =
+    await SharedPreferences.getInstance();
 
-    await preferencias.remove('progreso_camara');
+    await preferencias.remove(
+      'progreso_camara',
+    );
+
+    // REINICIAR TAMBIÉN EL PROGRESO GENERAL
+    _progresoGeneral.reiniciarAplicacion(
+      'camara',
+    );
 
     errorCamara = null;
     zoomActual = 1.0;

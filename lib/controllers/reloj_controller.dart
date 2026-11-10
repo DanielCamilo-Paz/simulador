@@ -1,12 +1,76 @@
 
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/reloj/alarma_model.dart';
 import '../models/reloj/cronometro_model.dart';
 
+import 'progreso_general_controller.dart';
+
 class RelojController extends ChangeNotifier {
+
+  // ==============================
+  // PROGRESO GENERAL DE SAFETAP
+  // ==============================
+
+  final ProgresoGeneralController _progresoGeneral =
+      progresoGeneralController;
+
+  RelojController() {
+    _registrarLeccionesGenerales();
+  }
+
+  void _registrarLeccionesGenerales() {
+    _progresoGeneral.registrarLecciones(
+      'reloj',
+      {
+        'crear_alarma': 'Crear una alarma',
+        'editar_alarma': 'Editar una alarma',
+        'cambiar_estado_alarma':
+        'Activar o desactivar una alarma',
+        'eliminar_alarma': 'Eliminar una alarma',
+        'consultar_ciudad':
+        'Consultar una ciudad en el reloj mundial',
+        'iniciar_cronometro': 'Iniciar el cronómetro',
+        'pausar_cronometro': 'Pausar el cronómetro',
+        'guardar_vuelta':
+        'Guardar una vuelta del cronómetro',
+        'reiniciar_cronometro':
+        'Reiniciar el cronómetro',
+      },
+    );
+
+    _progresoGeneral.configurarTotalActividades(
+      'reloj',
+      9,
+    );
+  }
+
+  // SINCRONIZAR AVANCES INDIVIDUALES
+  // CON EL PROGRESO GENERAL
+
+  void _sincronizarProgresoGeneral() {
+    final actividadesValidas = actividades.values
+        .expand((lista) => lista)
+        .toSet();
+
+    for (final actividad in actividadesValidas) {
+      if (_actividadesCompletadas.contains(actividad)) {
+        _progresoGeneral.completarActividad(
+          'reloj',
+          actividad,
+        );
+      } else {
+        _progresoGeneral.reiniciarActividad(
+          'reloj',
+          actividad,
+        );
+      }
+    }
+  }
+
   // ==============================
   // ALARMAS
   // ==============================
@@ -25,6 +89,7 @@ class RelojController extends ChangeNotifier {
         activa: activa,
       ),
     );
+
     notifyListeners();
   }
 
@@ -34,44 +99,68 @@ class RelojController extends ChangeNotifier {
     required String nombre,
     required bool activa,
   }) {
-    if (indice < 0 || indice >= alarmas.length) return;
+    if (indice < 0 || indice >= alarmas.length) {
+      return;
+    }
 
     alarmas[indice].hora = hora;
     alarmas[indice].nombre = nombre;
     alarmas[indice].activa = activa;
+
     notifyListeners();
   }
 
   void eliminarAlarma(int indice) {
-    if (indice < 0 || indice >= alarmas.length) return;
+    if (indice < 0 || indice >= alarmas.length) {
+      return;
+    }
 
     alarmas.removeAt(indice);
+
     notifyListeners();
   }
 
-  void cambiarEstadoAlarma(int indice, bool activa) {
-    if (indice < 0 || indice >= alarmas.length) return;
+  void cambiarEstadoAlarma(
+      int indice,
+      bool activa,
+      ) {
+    if (indice < 0 || indice >= alarmas.length) {
+      return;
+    }
 
     alarmas[indice].activa = activa;
+
     notifyListeners();
   }
 
   AlarmaModel? obtenerProximaAlarma() {
-    final activas = alarmas.where((alarma) => alarma.activa).toList();
+    final activas = alarmas
+        .where((alarma) => alarma.activa)
+        .toList();
 
-    if (activas.isEmpty) return null;
+    if (activas.isEmpty) {
+      return null;
+    }
 
     activas.sort((a, b) {
-      final minutosA = a.hora.hour * 60 + a.hora.minute;
-      final minutosB = b.hora.hour * 60 + b.hora.minute;
+      final minutosA =
+          a.hora.hour * 60 + a.hora.minute;
+
+      final minutosB =
+          b.hora.hour * 60 + b.hora.minute;
+
       return minutosA.compareTo(minutosB);
     });
 
     final ahora = TimeOfDay.now();
-    final minutosActuales = ahora.hour * 60 + ahora.minute;
+
+    final minutosActuales =
+        ahora.hour * 60 + ahora.minute;
 
     for (final alarma in activas) {
-      final minutos = alarma.hora.hour * 60 + alarma.hora.minute;
+      final minutos =
+          alarma.hora.hour * 60 +
+              alarma.hora.minute;
 
       if (minutos > minutosActuales) {
         return alarma;
@@ -85,35 +174,57 @@ class RelojController extends ChangeNotifier {
   // CRONÓMETRO
   // ==============================
 
-  final CronometroModel cronometro = CronometroModel();
+  final CronometroModel cronometro =
+  CronometroModel();
+
   final Stopwatch _stopwatch = Stopwatch();
+
   Timer? _timer;
 
-  bool get estaEnMarcha => _stopwatch.isRunning;
-  Duration get tiempoTranscurrido => _stopwatch.elapsed;
+  bool get estaEnMarcha =>
+      _stopwatch.isRunning;
 
-  String _formatearTiempo(Duration duracion) {
-    final horas = duracion.inHours.toString().padLeft(2, '0');
+  Duration get tiempoTranscurrido =>
+      _stopwatch.elapsed;
+
+  String _formatearTiempo(
+      Duration duracion,
+      ) {
+    final horas = duracion.inHours
+        .toString()
+        .padLeft(2, '0');
+
     final minutos =
-    (duracion.inMinutes % 60).toString().padLeft(2, '0');
+    (duracion.inMinutes % 60)
+        .toString()
+        .padLeft(2, '0');
+
     final segundos =
-    (duracion.inSeconds % 60).toString().padLeft(2, '0');
+    (duracion.inSeconds % 60)
+        .toString()
+        .padLeft(2, '0');
 
     return '$horas:$minutos:$segundos';
   }
 
   void iniciarCronometro() {
-    if (_stopwatch.isRunning) return;
+    if (_stopwatch.isRunning) {
+      return;
+    }
 
     _stopwatch.start();
+
     _timer?.cancel();
 
     _timer = Timer.periodic(
       const Duration(milliseconds: 100),
           (_) {
         cronometro.actualizarTiempo(
-          _formatearTiempo(_stopwatch.elapsed),
+          _formatearTiempo(
+            _stopwatch.elapsed,
+          ),
         );
+
         notifyListeners();
       },
     );
@@ -123,11 +234,15 @@ class RelojController extends ChangeNotifier {
 
   void pausarCronometro() {
     _stopwatch.stop();
+
     _timer?.cancel();
 
     cronometro.actualizarTiempo(
-      _formatearTiempo(_stopwatch.elapsed),
+      _formatearTiempo(
+        _stopwatch.elapsed,
+      ),
     );
+
     notifyListeners();
   }
 
@@ -137,18 +252,25 @@ class RelojController extends ChangeNotifier {
       ..reset();
 
     _timer?.cancel();
+
     cronometro.reiniciar();
+
     notifyListeners();
   }
 
   void guardarVuelta() {
-    if (_stopwatch.elapsedMilliseconds <= 0) return;
+    if (_stopwatch.elapsedMilliseconds <= 0) {
+      return;
+    }
 
     cronometro.actualizarTiempo(
-      _formatearTiempo(_stopwatch.elapsed),
+      _formatearTiempo(
+        _stopwatch.elapsed,
+      ),
     );
 
     cronometro.guardarVuelta();
+
     notifyListeners();
   }
 
@@ -156,7 +278,8 @@ class RelojController extends ChangeNotifier {
   // PROGRESO DE LAS PRÁCTICAS
   // ==============================
 
-  static const Map<String, List<String>> actividades = {
+  static const Map<String, List<String>>
+  actividades = {
     'alarmas': [
       'crear_alarma',
       'editar_alarma',
@@ -174,17 +297,25 @@ class RelojController extends ChangeNotifier {
     ],
   };
 
-  final Set<String> _actividadesCompletadas = {};
+  final Set<String> _actividadesCompletadas =
+  {};
 
   bool cargandoProgreso = true;
 
+  // ==============================
+  // CARGAR PROGRESO GUARDADO
+  // ==============================
+
   Future<void> iniciarProgreso() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs =
+      await SharedPreferences.getInstance();
 
-      final guardadas = prefs.getStringList(
-        'reloj_actividades_completadas',
-      ) ?? [];
+      final guardadas =
+          prefs.getStringList(
+            'reloj_actividades_completadas',
+          ) ??
+              [];
 
       final validas = actividades.values
           .expand((lista) => lista)
@@ -195,43 +326,71 @@ class RelojController extends ChangeNotifier {
         ..addAll(
           guardadas.where(validas.contains),
         );
+
+      // RECUPERAR PROGRESO EN SAFETAP
+      _sincronizarProgresoGeneral();
+
     } catch (e) {
-      debugPrint('Error al cargar progreso de Reloj: $e');
+      debugPrint(
+        'Error al cargar progreso de Reloj: $e',
+      );
     } finally {
       cargandoProgreso = false;
       notifyListeners();
     }
   }
 
-  bool actividadCompletada(String actividad) {
-    return _actividadesCompletadas.contains(actividad);
+  bool actividadCompletada(
+      String actividad,
+      ) {
+    return _actividadesCompletadas.contains(
+      actividad,
+    );
   }
 
-  int actividadesRealizadas(String practica) {
-    final lista = actividades[practica] ?? [];
+  int actividadesRealizadas(
+      String practica,
+      ) {
+    final lista =
+        actividades[practica] ?? [];
 
     return lista
-        .where(_actividadesCompletadas.contains)
+        .where(
+      _actividadesCompletadas.contains,
+    )
         .length;
   }
 
-  int totalActividades(String practica) {
+  int totalActividades(
+      String practica,
+      ) {
     return actividades[practica]?.length ?? 0;
   }
 
-  double porcentajePractica(String practica) {
-    final total = totalActividades(practica);
+  double porcentajePractica(
+      String practica,
+      ) {
+    final total =
+    totalActividades(practica);
 
-    if (total == 0) return 0;
+    if (total == 0) {
+      return 0;
+    }
 
-    return actividadesRealizadas(practica) / total * 100;
+    return actividadesRealizadas(practica) /
+        total *
+        100;
   }
 
-  bool practicaCompletada(String practica) {
-    final total = totalActividades(practica);
+  bool practicaCompletada(
+      String practica,
+      ) {
+    final total =
+    totalActividades(practica);
 
     return total > 0 &&
-        actividadesRealizadas(practica) == total;
+        actividadesRealizadas(practica) ==
+            total;
   }
 
   int get practicasCompletadas {
@@ -245,43 +404,87 @@ class RelojController extends ChangeNotifier {
         .map(porcentajePractica)
         .toList();
 
-    if (porcentajes.isEmpty) return 0;
+    if (porcentajes.isEmpty) {
+      return 0;
+    }
 
-    return porcentajes.reduce((a, b) => a + b) /
+    return porcentajes.reduce(
+          (a, b) => a + b,
+    ) /
         porcentajes.length;
   }
 
-  Future<void> completarActividad(String actividad) async {
+  // ==============================
+  // COMPLETAR UNA ACTIVIDAD
+  // ==============================
+
+  Future<void> completarActividad(
+      String actividad,
+      ) async {
     final validas = actividades.values
         .expand((lista) => lista)
         .toSet();
 
-    if (!validas.contains(actividad)) return;
+    if (!validas.contains(actividad)) {
+      return;
+    }
 
-    final agregada = _actividadesCompletadas.add(actividad);
+    final agregada =
+    _actividadesCompletadas.add(
+      actividad,
+    );
 
-    if (!agregada) return;
+    if (!agregada) {
+      return;
+    }
 
+    // ACTUALIZAR PROGRESO INDIVIDUAL
     notifyListeners();
+
+    // ACTUALIZAR PROGRESO GENERAL
+    _progresoGeneral.completarActividad(
+      'reloj',
+      actividad,
+    );
+
+    // GUARDAR PROGRESO
     await _guardarProgreso();
   }
 
+  // ==============================
+  // GUARDAR PROGRESO
+  // ==============================
+
   Future<void> _guardarProgreso() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs =
+      await SharedPreferences.getInstance();
 
       await prefs.setStringList(
         'reloj_actividades_completadas',
         _actividadesCompletadas.toList(),
       );
     } catch (e) {
-      debugPrint('Error al guardar progreso de Reloj: $e');
+      debugPrint(
+        'Error al guardar progreso de Reloj: $e',
+      );
     }
   }
 
+  // ==============================
+  // REINICIAR PROGRESO
+  // ==============================
+
   Future<void> reiniciarProgreso() async {
     _actividadesCompletadas.clear();
+
+    // REINICIAR PROGRESO GENERAL DE RELOJ
+    _progresoGeneral.reiniciarAplicacion(
+      'reloj',
+    );
+
     notifyListeners();
+
     await _guardarProgreso();
   }
 
