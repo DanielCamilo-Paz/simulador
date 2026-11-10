@@ -22,6 +22,7 @@ class _SplashViewState extends State<SplashView> {
   }
 
   Future<void> _iniciarAplicacion() async {
+    // Esperar 5 segundos antes de entrar a la aplicación
     await Future.delayed(const Duration(seconds: 5));
 
     if (!mounted) return;
@@ -43,19 +44,13 @@ class _SplashViewState extends State<SplashView> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // LOGO PROVISIONAL
-              Container(
-                width: 160,
-                height: 160,
-                decoration: BoxDecoration(
-                  color: azul,
-                  borderRadius: BorderRadius.circular(35),
-                ),
-                child: const Icon(
-                  Icons.phone_android_rounded,
-                  size: 95,
-                  color: Colors.white,
-                ),
+
+              // LOGO OFICIAL DE SAFETAP
+              Image.asset(
+                'assets/images/safeTapLogo.png',
+                width: 180,
+                height: 180,
+                fit: BoxFit.contain,
               ),
 
               const SizedBox(height: 25),
@@ -72,6 +67,7 @@ class _SplashViewState extends State<SplashView> {
 
               const SizedBox(height: 12),
 
+              // FRASE DE BIENVENIDA
               const Text(
                 'Aprende a usar tu celular',
                 textAlign: TextAlign.center,
@@ -83,6 +79,7 @@ class _SplashViewState extends State<SplashView> {
 
               const SizedBox(height: 45),
 
+              // INDICADOR DE CARGA
               const CircularProgressIndicator(
                 color: azul,
               ),
