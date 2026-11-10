@@ -13,23 +13,33 @@ class DetalleRelojView extends StatelessWidget {
     required this.progresoController,
   });
 
-  static const Color azulFondo = Color(0xFFBECCD2);
-  static const Color azulIcono = Color(0xFF92AFBC);
+  // PALETA PRINCIPAL
+  static const Color fondo = Color(0xFFF8F8E8);
+  static const Color naranja = Color(0xFFF4A261);
+  static const Color naranjaSuave = Color(0xFFF6DCC0);
+  static const Color texto = Color(0xFF333333);
+  static const Color blanco = Colors.white;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FA),
+      backgroundColor: fondo,
 
       appBar: AppBar(
         title: const Text(
           'Realizar práctica',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: texto,
+          ),
         ),
-        backgroundColor: const Color(0xFFF7F9FA),
+        backgroundColor: fondo,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
+          icon: const Icon(
+            Icons.arrow_back_rounded,
+            color: texto,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -47,13 +57,13 @@ class DetalleRelojView extends StatelessWidget {
                 width: 140,
                 height: 140,
                 decoration: BoxDecoration(
-                  color: azulIcono,
+                  color: naranja,
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: const Icon(
                   Icons.watch_later_rounded,
                   size: 90,
-                  color: Colors.white,
+                  color: blanco,
                 ),
               ),
 
@@ -66,6 +76,7 @@ class DetalleRelojView extends StatelessWidget {
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
                   height: 1.2,
+                  color: texto,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -94,7 +105,7 @@ class DetalleRelojView extends StatelessWidget {
                   horizontal: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: azulFondo,
+                  color: naranjaSuave,
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: Row(
@@ -143,9 +154,9 @@ class DetalleRelojView extends StatelessWidget {
                     ),
                   ),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF405F6D),
+                    foregroundColor: texto,
                     side: const BorderSide(
-                      color: azulIcono,
+                      color: naranja,
                       width: 1.5,
                     ),
                     shape: RoundedRectangleBorder(
@@ -163,8 +174,8 @@ class DetalleRelojView extends StatelessWidget {
                 height: 62,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: azulIcono,
-                    foregroundColor: Colors.black,
+                    backgroundColor: naranja,
+                    foregroundColor: texto,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
@@ -206,13 +217,13 @@ class DetalleRelojView extends StatelessWidget {
           width: 64,
           height: 64,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.75),
+            color: blanco.withValues(alpha: 0.75),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Icon(
             icono,
             size: 32,
-            color: const Color(0xFF79929E),
+            color: naranja,
           ),
         ),
 
@@ -223,6 +234,7 @@ class DetalleRelojView extends StatelessWidget {
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
+            color: texto,
           ),
         ),
 

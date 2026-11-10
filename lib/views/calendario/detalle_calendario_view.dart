@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../../controllers/progreso_controller.dart';
@@ -13,17 +12,21 @@ class DetalleCalendarioView extends StatelessWidget {
     required this.progresoController,
   });
 
-  static const Color azulFondo = Color(0xFFBECCD2);
-  static const Color azulIcono = Color(0xFF92AFBC);
+  // PALETA PRINCIPAL
+  static const Color fondo = Color(0xFFF8F8E8);
+  static const Color naranja = Color(0xFFF4A261);
+  static const Color naranjaSuave = Color(0xFFF6DCC0);
+  static const Color texto = Color(0xFF333333);
+  static const Color blanco = Colors.white;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FA),
+      backgroundColor: fondo,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF7F9FA),
+        backgroundColor: fondo,
         elevation: 0,
-        foregroundColor: Colors.black,
+        foregroundColor: texto,
         title: const Text(
           'Realizar práctica',
           style: TextStyle(
@@ -42,13 +45,13 @@ class DetalleCalendarioView extends StatelessWidget {
                 width: 140,
                 height: 140,
                 decoration: BoxDecoration(
-                  color: azulFondo,
+                  color: naranjaSuave,
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: const Icon(
                   Icons.calendar_month,
                   size: 85,
-                  color: azulIcono,
+                  color: naranja,
                 ),
               ),
 
@@ -60,6 +63,7 @@ class DetalleCalendarioView extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
+                  color: texto,
                 ),
               ),
 
@@ -80,7 +84,7 @@ class DetalleCalendarioView extends StatelessWidget {
               const SizedBox(height: 30),
 
               Card(
-                color: Colors.white,
+                color: blanco,
                 elevation: 1,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(18),
@@ -120,9 +124,9 @@ class DetalleCalendarioView extends StatelessWidget {
                 height: 58,
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: azulIcono,
+                    foregroundColor: naranja,
                     side: const BorderSide(
-                      color: azulIcono,
+                      color: naranja,
                       width: 2,
                     ),
                     shape: RoundedRectangleBorder(
@@ -160,8 +164,8 @@ class DetalleCalendarioView extends StatelessWidget {
                 height: 58,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: azulIcono,
-                    foregroundColor: Colors.white,
+                    backgroundColor: naranja,
+                    foregroundColor: texto,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -197,7 +201,7 @@ class DetalleCalendarioView extends StatelessWidget {
       children: [
         Icon(
           icono,
-          color: azulIcono,
+          color: naranja,
           size: 30,
         ),
         const SizedBox(height: 8),
@@ -214,6 +218,7 @@ class DetalleCalendarioView extends StatelessWidget {
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
+            color: texto,
           ),
         ),
       ],

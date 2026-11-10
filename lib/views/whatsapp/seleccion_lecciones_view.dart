@@ -19,16 +19,6 @@ class SeleccionLeccionesView extends StatelessWidget {
     return AnimatedBuilder(
       animation: controller,
       builder: (context, child) {
-        if (controller.cargando) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(
-                color: Color(0xFF075E54),
-              ),
-            ),
-          );
-        }
-
         return Scaffold(
           backgroundColor: const Color(0xFFF0F2F5),
           appBar: AppBar(
@@ -40,17 +30,15 @@ class SeleccionLeccionesView extends StatelessWidget {
               ),
             ),
             backgroundColor: const Color(0xFF075E54),
-            iconTheme: const IconThemeData(color: Colors.white),
+            iconTheme: const IconThemeData(
+              color: Colors.white,
+            ),
           ),
           body: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _PanelProgreso(controller: controller),
-
-                const SizedBox(height: 22),
-
                 const Text(
                   'Selecciona una práctica',
                   style: TextStyle(
@@ -74,13 +62,12 @@ class SeleccionLeccionesView extends StatelessWidget {
                     ),
                     itemBuilder: (context, index) {
                       final leccion = controller.lecciones[index];
-                      final completada =
-                      controller.estaCompletada(leccion.id);
 
-                      return _TarjetaLeccionProgreso(
+                      return _TarjetaLeccion(
                         leccion: leccion,
-                        completada: completada,
-                        onTap: () => onSeleccionarLeccion(leccion),
+                        onTap: () {
+                          onSeleccionarLeccion(leccion);
+                        },
                       );
                     },
                   ),
@@ -94,86 +81,12 @@ class SeleccionLeccionesView extends StatelessWidget {
   }
 }
 
-class _PanelProgreso extends StatelessWidget {
-  final WhatsappController controller;
-
-  const _PanelProgreso({
-    required this.controller,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final porcentaje =
-    (controller.porcentajeProgreso * 100).round();
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Tu progreso',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF202C33),
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${controller.leccionesCompletadas} de '
-                    '${controller.totalLecciones} prácticas completadas',
-                style: const TextStyle(
-                  color: Color(0xFF667781),
-                  fontSize: 13,
-                ),
-              ),
-              Text(
-                '$porcentaje%',
-                style: const TextStyle(
-                  color: Color(0xFF075E54),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 10),
-
-          ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: LinearProgressIndicator(
-              value: controller.porcentajeProgreso,
-              minHeight: 10,
-              backgroundColor: const Color(0xFFE5E9EB),
-              color: const Color(0xFF25D366),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TarjetaLeccionProgreso extends StatelessWidget {
+class _TarjetaLeccion extends StatelessWidget {
   final LeccionWhatsappModel leccion;
-  final bool completada;
   final VoidCallback onTap;
 
-  const _TarjetaLeccionProgreso({
+  const _TarjetaLeccion({
     required this.leccion,
-    required this.completada,
     required this.onTap,
   });
 
@@ -187,31 +100,10 @@ class _TarjetaLeccionProgreso extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: completada
-                ? const Color(0xFF25D366)
-                : Colors.transparent,
-            width: 2,
-          ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Align(
-              alignment: Alignment.topRight,
-              child: completada
-                  ? const Icon(
-                Icons.check_circle,
-                color: Color(0xFF25D366),
-                size: 23,
-              )
-                  : const Icon(
-                Icons.circle_outlined,
-                color: Color(0xFFCCD3D6),
-                size: 23,
-              ),
-            ),
-
             const Spacer(),
 
             CircleAvatar(
@@ -236,16 +128,15 @@ class _TarjetaLeccionProgreso extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 5),
+            const SizedBox(height: 8),
 
-            Text(
-              completada ? 'Completada' : 'Pendiente',
+            const Text(
+              'Toca para practicar',
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 12,
-                color: completada
-                    ? const Color(0xFF168B55)
-                    : const Color(0xFF667781),
-                fontWeight: FontWeight.w600,
+                color: Color(0xFF667781),
+                fontWeight: FontWeight.w500,
               ),
             ),
 

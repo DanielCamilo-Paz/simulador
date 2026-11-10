@@ -284,7 +284,6 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
   TextEditingController();
 
   String contacto = '';
-  String instruccion = '';
   String? fotoSeleccionada;
   String? estadoPublicado;
   String? fotoEstado;
@@ -297,12 +296,6 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
   bool fotoEnviada = false;
 
   @override
-  void initState() {
-    super.initState();
-    _actualizarInstruccion();
-  }
-
-  @override
   void dispose() {
     mensajeController.dispose();
     busquedaController.dispose();
@@ -310,103 +303,10 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
     super.dispose();
   }
 
-  void _actualizarInstruccion() {
-    switch (widget.tipo) {
-      case 'mensajes':
-        if (contacto.isEmpty) {
-          instruccion =
-          'Primero elige a la persona a quien quieres escribir.';
-        } else if (mensajeController.text.trim().isEmpty) {
-          instruccion =
-          'Escribe un mensaje en el espacio de la parte inferior.';
-        } else if (!mensajeEnviado) {
-          instruccion =
-          '¡Muy bien! Ahora pulsa el botón verde para enviar tu mensaje.';
-        } else {
-          instruccion =
-          '¡Mensaje enviado! Puedes ver cómo aparece en la conversación.';
-        }
-        break;
-
-      case 'audios':
-        if (contacto.isEmpty) {
-          instruccion =
-          'Elige un contacto para enviarle un mensaje de voz.';
-        } else if (!grabando && !audioEnviado) {
-          instruccion =
-          'Pulsa el micrófono para comenzar a grabar tu audio.';
-        } else if (grabando) {
-          instruccion =
-          'Estás grabando. Pulsa el botón de detener para enviar el audio.';
-        } else {
-          instruccion =
-          '¡Audio enviado! Así se verá tu mensaje de voz en el chat.';
-        }
-        break;
-
-      case 'llamadas':
-        if (contacto.isEmpty) {
-          instruccion =
-          'Selecciona el contacto al que deseas llamar.';
-        } else if (!llamadaActiva && !llamadaFinalizada) {
-          instruccion =
-          'Pulsa el teléfono para iniciar la llamada.';
-        } else if (llamadaActiva) {
-          instruccion =
-          'Estás en una llamada simulada. Pulsa el botón rojo para colgar.';
-        } else {
-          instruccion =
-          'La llamada ha finalizado. ¡Ya sabes cómo llamar a un contacto!';
-        }
-        break;
-
-      case 'fotos':
-        if (contacto.isEmpty) {
-          instruccion =
-          'Elige primero a quién quieres enviar una foto.';
-        } else if (fotoSeleccionada == null) {
-          instruccion =
-          'Pulsa el botón + y selecciona Galería para elegir una foto.';
-        } else if (!fotoEnviada) {
-          instruccion =
-          'Revisa la foto y pulsa Enviar para compartirla.';
-        } else {
-          instruccion =
-          '¡Foto enviada! Ya aparece en tu conversación.';
-        }
-        break;
-
-      case 'estados':
-        if (estadoPublicado == null && fotoEstado == null) {
-          instruccion =
-          'Pulsa “Mi estado” para crear una publicación.';
-        } else {
-          instruccion =
-          '¡Tu estado está publicado! Ya puedes verlo en Novedades.';
-        }
-        break;
-
-      case 'contactos':
-        if (contacto.isEmpty) {
-          instruccion =
-          'Escribe el nombre de una persona en el buscador y selecciónala.';
-        } else {
-          instruccion =
-          '¡Encontraste a $contacto! Ya puedes abrir su conversación.';
-        }
-        break;
-    }
-  }
-
   void _seleccionarContacto(String nombre) {
     setState(() {
       contacto = nombre;
-      _actualizarInstruccion();
     });
-
-    if (widget.tipo == 'contactos') {
-      widget.controller.marcarCompletada('contactos');
-    }
   }
 
   void _enviarMensaje() {
@@ -414,17 +314,13 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
 
     setState(() {
       mensajeEnviado = true;
-      _actualizarInstruccion();
     });
-
-    widget.controller.marcarCompletada('mensajes');
   }
 
   void _iniciarLlamada() {
     setState(() {
       llamadaActiva = true;
       llamadaFinalizada = false;
-      _actualizarInstruccion();
     });
   }
 
@@ -432,10 +328,7 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
     setState(() {
       llamadaActiva = false;
       llamadaFinalizada = true;
-      _actualizarInstruccion();
     });
-
-    widget.controller.marcarCompletada('llamadas');
   }
 
   // ---------------------------------------------------------------------------
@@ -544,12 +437,7 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
         fotoSeleccionada = nombre;
         fotoEnviada = false;
       }
-      _actualizarInstruccion();
     });
-
-    if (paraEstado) {
-      widget.controller.marcarCompletada('estados');
-    }
   }
 
   void _publicarEstadoTexto() {
@@ -558,10 +446,7 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
     setState(() {
       estadoPublicado = estadoController.text.trim();
       fotoEstado = null;
-      _actualizarInstruccion();
     });
-
-    widget.controller.marcarCompletada('estados');
   }
 
   @override
@@ -584,12 +469,7 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          _PanelInstruccion(texto: instruccion),
-          Expanded(child: _contenidoLeccion()),
-        ],
-      ),
+      body: _contenidoLeccion(),
     );
   }
 
@@ -636,7 +516,8 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
             children: contactosDemo.map((c) {
               return _FilaContacto(
                 contacto: c,
-                onTap: () => onSeleccionar(c['nombre'] as String),
+                onTap: () =>
+                    onSeleccionar(c['nombre'] as String),
               );
             }).toList(),
           ),
@@ -678,7 +559,7 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
               controller: mensajeController,
               enabled: !mensajeEnviado,
               onChanged: (_) {
-                setState(_actualizarInstruccion);
+                setState(() {});
               },
               decoration: InputDecoration(
                 hintText: 'Escribe un mensaje',
@@ -774,12 +655,7 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
                       grabando = false;
                       audioEnviado = true;
                     }
-                    _actualizarInstruccion();
                   });
-
-                  if (audioEnviado) {
-                    widget.controller.marcarCompletada('audios');
-                  }
                 },
                 icon: Icon(
                   grabando ? Icons.stop : Icons.mic,
@@ -999,10 +875,7 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
                 onPressed: () {
                   setState(() {
                     fotoEnviada = true;
-                    _actualizarInstruccion();
                   });
-
-                  widget.controller.marcarCompletada('fotos');
                 },
                 icon: const Icon(
                   Icons.send,
@@ -1288,7 +1161,6 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
               setState(() {
                 contacto = '';
                 busquedaController.clear();
-                _actualizarInstruccion();
               });
             },
             icon: const Icon(Icons.search),
@@ -1305,7 +1177,7 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
           child: TextField(
             controller: busquedaController,
             onChanged: (_) {
-              setState(_actualizarInstruccion);
+              setState(() {});
             },
             decoration: InputDecoration(
               hintText: 'Buscar contacto',
@@ -1427,56 +1299,6 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
           child: campo,
         ),
       ],
-    );
-  }
-}
-
-// -----------------------------------------------------------------------------
-// PANEL DE INSTRUCCIONES
-// -----------------------------------------------------------------------------
-
-class _PanelInstruccion extends StatelessWidget {
-  final String texto;
-
-  const _PanelInstruccion({
-    required this.texto,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFFE0F2E9),
-        borderRadius: BorderRadius.circular(13),
-        border: Border.all(
-          color: const Color(0xFFB9DDC8),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(
-            Icons.lightbulb,
-            color: verdeWhatsapp,
-            size: 25,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              texto,
-              style: const TextStyle(
-                color: Color(0xFF164D3C),
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                height: 1.35,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

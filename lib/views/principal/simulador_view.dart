@@ -10,18 +10,34 @@ import '../calendario/detalle_calendario_view.dart';
 import '../whatsapp/detalle_whatsapp_view.dart';
 
 class SimuladorView extends StatefulWidget {
-  const SimuladorView({super.key});
+  final Function(
+      String nombre,
+      String descripcion,
+      IconData icono,
+      Widget pantalla,
+      )? onSeleccionarPractica;
+
+  const SimuladorView({
+    super.key,
+    this.onSeleccionarPractica,
+  });
 
   @override
   State<SimuladorView> createState() => _SimuladorViewState();
 }
 
 class _SimuladorViewState extends State<SimuladorView> {
-  static const Color fondo = Color(0xFFF7F9FA);
-  static const Color colorTarjeta = Color(0xFFBECCD2);
-  static const Color colorIcono = Color(0xFF92AFBC);
 
-  // Controlador compartido de las prácticas.
+  // PALETA DE COLORES PRINCIPAL
+  static const Color fondo = Color(0xFFF6F9D8);
+  static const Color naranja = Color(0xFFF77F11);
+  static const Color texto = Color(0xFF333333);
+  static const Color blanco = Colors.white;
+
+  static const Color colorTarjeta = Color(0xFFFFE5C7);
+  static const Color colorIcono = Color(0xFFF77F11);
+
+  // CONTROLADOR COMPARTIDO
   late final ProgresoController progresoController;
 
   @override
@@ -36,93 +52,129 @@ class _SimuladorViewState extends State<SimuladorView> {
     super.dispose();
   }
 
+  // ABRIR PRÁCTICA Y NOTIFICAR A INICIO
+  void _abrirPractica({
+    required String nombre,
+    required String descripcion,
+    required IconData icono,
+    required Widget pantalla,
+  }) {
+
+    widget.onSeleccionarPractica?.call(
+      nombre,
+      descripcion,
+      icono,
+      pantalla,
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => pantalla,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: fondo,
+
       appBar: AppBar(
         backgroundColor: fondo,
         elevation: 0,
+        iconTheme: const IconThemeData(
+          color: texto,
+        ),
         title: const Text(
           'Seleccionar práctica',
           style: TextStyle(
             fontSize: 23,
             fontWeight: FontWeight.bold,
+            color: texto,
           ),
         ),
       ),
+
       body: GridView.count(
         padding: const EdgeInsets.all(16),
         crossAxisCount: 2,
         crossAxisSpacing: 14,
         mainAxisSpacing: 14,
         childAspectRatio: 0.95,
+
         children: [
+
+          // LLAMADAS
           _tarjeta(
             icono: Icons.phone,
             titulo: 'Realizar llamada',
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const DetallePracticaView(),
-                ),
+              _abrirPractica(
+                nombre: 'Realizar llamada',
+                descripcion: 'Haz una llamada a un contacto conocido',
+                icono: Icons.phone_in_talk_rounded,
+                pantalla: const DetallePracticaView(),
               );
             },
           ),
 
+          // CÁMARA
           _tarjeta(
             icono: Icons.camera_alt,
-            titulo: 'Cámara y galeria',
+            titulo: 'Cámara y galería',
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const DetalleCamaraView(),
-                ),
+              _abrirPractica(
+                nombre: 'Cámara y galería',
+                descripcion: 'Aprende a tomar fotos y administrar imágenes',
+                icono: Icons.camera_alt_rounded,
+                pantalla: const DetalleCamaraView(),
               );
             },
           ),
 
+          // RELOJ
           _tarjeta(
             icono: Icons.access_time,
             titulo: 'Reloj y alarmas',
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => DetalleRelojView(
-                    progresoController: progresoController,
-                  ),
+              _abrirPractica(
+                nombre: 'Reloj y alarmas',
+                descripcion: 'Aprende a utilizar el reloj y configurar alarmas',
+                icono: Icons.access_time_rounded,
+                pantalla: DetalleRelojView(
+                  progresoController: progresoController,
                 ),
               );
             },
           ),
 
+          // CALENDARIO
           _tarjeta(
             icono: Icons.calendar_month,
             titulo: 'Calendario',
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => DetalleCalendarioView(
-                    progresoController: progresoController,
-                  ),
+              _abrirPractica(
+                nombre: 'Calendario',
+                descripcion: 'Aprende a organizar tus eventos y actividades',
+                icono: Icons.calendar_month_rounded,
+                pantalla: DetalleCalendarioView(
+                  progresoController: progresoController,
                 ),
               );
             },
           ),
 
+          // WHATSAPP
           _tarjeta(
             icono: Icons.message,
             titulo: 'WhatsApp',
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const DetalleWhatsappView(),
-                ),
+              _abrirPractica(
+                nombre: 'WhatsApp',
+                descripcion: 'Aprende a enviar mensajes y compartir fotos',
+                icono: Icons.message_rounded,
+                pantalla: const DetalleWhatsappView(),
               );
             },
           ),
@@ -131,6 +183,7 @@ class _SimuladorViewState extends State<SimuladorView> {
     );
   }
 
+  // TARJETAS DE LAS PRÁCTICAS
   Widget _tarjeta({
     required IconData icono,
     required String titulo,
@@ -140,17 +193,28 @@ class _SimuladorViewState extends State<SimuladorView> {
       color: colorTarjeta,
       elevation: 0,
       margin: EdgeInsets.zero,
+
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(22),
+        side: BorderSide(
+          color: naranja.withOpacity(0.25),
+          width: 1,
+        ),
       ),
+
       clipBehavior: Clip.antiAlias,
+
       child: InkWell(
         onTap: onTap,
+        splashColor: naranja.withOpacity(0.15),
+
         child: Padding(
           padding: const EdgeInsets.all(12),
+
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+
               Container(
                 width: 76,
                 height: 76,
@@ -161,7 +225,7 @@ class _SimuladorViewState extends State<SimuladorView> {
                 child: Icon(
                   icono,
                   size: 43,
-                  color: Colors.white,
+                  color: blanco,
                 ),
               ),
 
@@ -174,6 +238,7 @@ class _SimuladorViewState extends State<SimuladorView> {
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   height: 1.2,
+                  color: texto,
                 ),
               ),
 
@@ -182,7 +247,7 @@ class _SimuladorViewState extends State<SimuladorView> {
               const Icon(
                 Icons.arrow_forward_ios,
                 size: 19,
-                color: Colors.black87,
+                color: naranja,
               ),
             ],
           ),
