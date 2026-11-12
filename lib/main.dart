@@ -9,12 +9,15 @@ import 'controllers/reloj_controller.dart';
 import 'controllers/calendario_controller.dart';
 import 'controllers/whatsapp_controller.dart';
 import 'controllers/configuracion_controller.dart';
+import 'controllers/progreso_general_controller.dart';
 
 // ========================================
-// CONTROLADOR GLOBAL DE CONFIGURACIÓN
+// CONTROLADORES GLOBALES DE SAFETAP
 // ========================================
 
 final configuracionController = ConfiguracionController();
+
+final progresoGeneralController = ProgresoGeneralController();
 
 // ========================================
 // FUNCIÓN PRINCIPAL
@@ -58,6 +61,7 @@ Future<void> main() async {
 
   try {
     await configuracionController.cargarConfiguracion();
+
     debugPrint('Configuración de SafeTap cargada.');
   } catch (e) {
     debugPrint('Error al cargar configuración: $e');
@@ -81,11 +85,15 @@ Future<void> main() async {
 // ========================================
 
 Future<void> cargarProgresoGeneral() async {
+  // ========================================
   // CÁMARA Y GALERÍA
+  // ========================================
+
   final camaraController = CamaraController();
 
   try {
     await camaraController.cargarProgreso();
+
     debugPrint('Progreso de Cámara cargado.');
   } catch (e) {
     debugPrint('Error al cargar progreso de Cámara: $e');
@@ -93,11 +101,15 @@ Future<void> cargarProgresoGeneral() async {
     camaraController.dispose();
   }
 
+  // ========================================
   // RELOJ Y ALARMAS
+  // ========================================
+
   final relojController = RelojController();
 
   try {
     await relojController.iniciarProgreso();
+
     debugPrint('Progreso de Reloj cargado.');
   } catch (e) {
     debugPrint('Error al cargar progreso de Reloj: $e');
@@ -105,11 +117,15 @@ Future<void> cargarProgresoGeneral() async {
     relojController.dispose();
   }
 
+  // ========================================
   // CALENDARIO
+  // ========================================
+
   final calendarioController = CalendarioController();
 
   try {
     await calendarioController.cargarDatos();
+
     debugPrint('Progreso de Calendario cargado.');
   } catch (e) {
     debugPrint('Error al cargar progreso de Calendario: $e');
@@ -117,11 +133,15 @@ Future<void> cargarProgresoGeneral() async {
     calendarioController.dispose();
   }
 
+  // ========================================
   // WHATSAPP
+  // ========================================
+
   final whatsappController = WhatsappController();
 
   try {
     await whatsappController.cargarProgreso();
+
     debugPrint('Progreso de WhatsApp cargado.');
   } catch (e) {
     debugPrint('Error al cargar progreso de WhatsApp: $e');
@@ -158,7 +178,8 @@ class MiApp extends StatelessWidget {
           theme: ThemeData(
             useMaterial3: true,
             brightness: Brightness.light,
-            scaffoldBackgroundColor: const Color(0xFFEFF6FF),
+            scaffoldBackgroundColor:
+            const Color(0xFFEFF6FF),
             colorScheme: ColorScheme.fromSeed(
               seedColor: color,
               brightness: Brightness.light,
@@ -176,7 +197,8 @@ class MiApp extends StatelessWidget {
           darkTheme: ThemeData(
             useMaterial3: true,
             brightness: Brightness.dark,
-            scaffoldBackgroundColor: const Color(0xFF121826),
+            scaffoldBackgroundColor:
+            const Color(0xFF121826),
             colorScheme: ColorScheme.fromSeed(
               seedColor: color,
               brightness: Brightness.dark,

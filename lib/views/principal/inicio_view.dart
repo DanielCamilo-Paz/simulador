@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../main.dart';
+
 import '../usuario/perfil_view.dart';
 import '../principal/simulador_view.dart';
 import '../progreso/progreso_general_view.dart';
 import '../configuracion/configuracion_view.dart';
 
-import '../../controllers/progreso_general_controller.dart';
+// ========================================
+// PANTALLA PRINCIPAL DE SAFETAP
+// ========================================
 
 class InicioView extends StatefulWidget {
   const InicioView({super.key});
@@ -19,12 +22,14 @@ class InicioView extends StatefulWidget {
 
 class _InicioViewState extends State<InicioView> {
   // ========================================
-  // COLORES DINÁMICOS DE SAFETAP
+  // COLORES DINÁMICOS
   // ========================================
 
-  Color get naranja => configuracionController.colorPrincipal;
+  Color get naranja =>
+      configuracionController.colorPrincipal;
 
-  Color get amarillo => configuracionController.colorPrincipal;
+  Color get amarillo =>
+      configuracionController.colorPrincipal;
 
   Color get fondo =>
       Theme.of(context).scaffoldBackgroundColor;
@@ -65,18 +70,23 @@ class _InicioViewState extends State<InicioView> {
   // ========================================
   // ABRIR PERFIL
   // ========================================
+  // CORRECCIÓN DEL ERROR DE COMPILACIÓN
+  // ========================================
 
   Future<void> _abrirPerfil() async {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => const PerfilView(),
+        builder: (_) => PerfilView(
+          progresoController: progresoGeneralController,
+          configuracionController: configuracionController,
+        ),
       ),
     );
 
-    if (mounted) {
-      await _cargarNombreUsuario();
-    }
+    if (!mounted) return;
+
+    await _cargarNombreUsuario();
   }
 
   // ========================================
@@ -406,7 +416,6 @@ class _InicioViewState extends State<InicioView> {
 
   // ========================================
   // TARJETA DE PROGRESO GENERAL
-  // SOLO INFORMATIVA
   // ========================================
 
   Widget _tarjetaProgreso() {
