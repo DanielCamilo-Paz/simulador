@@ -22,6 +22,8 @@ class _PracticaCrearEventoViewState
   static const Color azul = Color(0xFF92AFBC);
   static const Color fondo = Color(0xFFF7F9FA);
   static const Color verde = Color(0xFF299764);
+  static const Color textoOscuro = Color(0xFF202C33);
+  static const Color azulBoton = Color(0xFF4D67BC);
 
   final TextEditingController tituloController =
   TextEditingController();
@@ -57,6 +59,31 @@ class _PracticaCrearEventoViewState
     super.dispose();
   }
 
+  // ==========================================
+  // TEMA CLARO PARA VENTANAS DEL SIMULADOR
+  // ==========================================
+
+  ThemeData get temaClaro {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.light,
+      scaffoldBackgroundColor: fondo,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: azulBoton,
+        brightness: Brightness.light,
+      ),
+      textTheme: const TextTheme(
+        bodyMedium: TextStyle(color: textoOscuro),
+        bodyLarge: TextStyle(color: textoOscuro),
+        titleMedium: TextStyle(color: textoOscuro),
+      ),
+    );
+  }
+
+  // ==========================================
+  // FORMATO DE FECHAS
+  // ==========================================
+
   String formatoFecha(DateTime fecha) {
     final dia = fecha.day.toString().padLeft(2, '0');
     final mes = fecha.month.toString().padLeft(2, '0');
@@ -64,12 +91,20 @@ class _PracticaCrearEventoViewState
     return '$dia/$mes/${fecha.year}';
   }
 
+  // ==========================================
+  // FORMATO DE HORAS
+  // ==========================================
+
   String formatoHora(DateTime fecha) {
     final hora = fecha.hour.toString().padLeft(2, '0');
     final minuto = fecha.minute.toString().padLeft(2, '0');
 
     return '$hora:$minuto';
   }
+
+  // ==========================================
+  // SELECCIONAR FECHA
+  // ==========================================
 
   Future<void> seleccionarFecha(bool inicio) async {
     final fechaActual = inicio ? fechaInicio : fechaFin;
@@ -82,6 +117,12 @@ class _PracticaCrearEventoViewState
       helpText: 'Selecciona una fecha',
       cancelText: 'Cancelar',
       confirmText: 'Aceptar',
+      builder: (context, child) {
+        return Theme(
+          data: temaClaro,
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
     );
 
     if (seleccionada == null || !mounted) return;
@@ -109,6 +150,10 @@ class _PracticaCrearEventoViewState
     });
   }
 
+  // ==========================================
+  // SELECCIONAR HORA
+  // ==========================================
+
   Future<void> seleccionarHora(bool inicio) async {
     final fechaActual = inicio ? fechaInicio : fechaFin;
 
@@ -118,6 +163,12 @@ class _PracticaCrearEventoViewState
       helpText: 'Selecciona una hora',
       cancelText: 'Cancelar',
       confirmText: 'Aceptar',
+      builder: (context, child) {
+        return Theme(
+          data: temaClaro,
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
     );
 
     if (seleccionada == null || !mounted) return;
@@ -144,6 +195,10 @@ class _PracticaCrearEventoViewState
       }
     });
   }
+
+  // ==========================================
+  // GUARDAR EVENTO
+  // ==========================================
 
   Future<void> guardarEvento() async {
     if (guardando) return;
@@ -213,7 +268,8 @@ class _PracticaCrearEventoViewState
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'No se pudo guardar el evento. Inténtalo de nuevo.',
+            'No se pudo guardar el evento. '
+                'Inténtalo de nuevo.',
           ),
         ),
       );
@@ -225,6 +281,10 @@ class _PracticaCrearEventoViewState
       }
     }
   }
+
+  // ==========================================
+  // SELECTOR REUTILIZABLE
+  // ==========================================
 
   Widget construirSelector({
     required String titulo,
@@ -244,18 +304,27 @@ class _PracticaCrearEventoViewState
         style: const TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w600,
+          color: textoOscuro,
         ),
       ),
       subtitle: Text(
         valor,
-        style: const TextStyle(fontSize: 15),
+        style: const TextStyle(
+          fontSize: 15,
+          color: Colors.black54,
+        ),
       ),
       trailing: const Icon(
         Icons.chevron_right_rounded,
+        color: textoOscuro,
       ),
       onTap: onTap,
     );
   }
+
+  // ==========================================
+  // VENTANA DE SELECCIÓN DE OPCIONES
+  // ==========================================
 
   Future<void> seleccionarOpcion({
     required String titulo,
@@ -265,35 +334,53 @@ class _PracticaCrearEventoViewState
     final seleccion = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(22),
         ),
       ),
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(18),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  titulo,
-                  style: const TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.bold,
-                  ),
+      builder: (sheetContext) {
+        return Theme(
+          data: temaClaro,
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      titulo,
+                      style: const TextStyle(
+                        fontSize: 19,
+                        fontWeight: FontWeight.bold,
+                        color: textoOscuro,
+                      ),
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    ...opciones.map(
+                          (opcion) => ListTile(
+                        title: Text(
+                          opcion,
+                          style: const TextStyle(
+                            color: textoOscuro,
+                            fontSize: 16,
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.pop(
+                            sheetContext,
+                            opcion,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 14),
-                ...opciones.map(
-                      (opcion) => ListTile(
-                    title: Text(opcion),
-                    onTap: () {
-                      Navigator.pop(context, opcion);
-                    },
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         );
@@ -307,27 +394,78 @@ class _PracticaCrearEventoViewState
     }
   }
 
+  // ==========================================
+  // DECORACIÓN DE LOS CAMPOS
+  // ==========================================
+
+  InputDecoration decoracionCampo({
+    required String etiqueta,
+    required String ayuda,
+    required IconData icono,
+  }) {
+    return InputDecoration(
+      labelText: etiqueta,
+      hintText: ayuda,
+      labelStyle: const TextStyle(
+        color: textoOscuro,
+      ),
+      hintStyle: const TextStyle(
+        color: Colors.black45,
+      ),
+      prefixIcon: Icon(
+        icono,
+        color: azulBoton,
+      ),
+      border: const OutlineInputBorder(),
+      enabledBorder: const OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Color(0xFF9AA9B3),
+        ),
+      ),
+      focusedBorder: const OutlineInputBorder(
+        borderSide: BorderSide(
+          color: azulBoton,
+          width: 2,
+        ),
+      ),
+    );
+  }
+
+  // ==========================================
+  // PANTALLA PRINCIPAL
+  // ==========================================
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: fondo,
+
       appBar: AppBar(
         backgroundColor: azul,
         foregroundColor: Colors.white,
         centerTitle: true,
         title: const Text(
           'Crear un evento',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
       ),
+
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
+          // ======================================
+          // ENCABEZADO
+          // ======================================
+
           const Text(
             'Aprende a crear un evento',
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
+              color: textoOscuro,
             ),
           ),
 
@@ -345,7 +483,9 @@ class _PracticaCrearEventoViewState
 
           const SizedBox(height: 20),
 
-          // INSTRUCCIÓN
+          // ======================================
+          // GUÍA PASO A PASO
+          // ======================================
 
           Container(
             padding: const EdgeInsets.all(18),
@@ -363,9 +503,12 @@ class _PracticaCrearEventoViewState
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
+                    color: textoOscuro,
                   ),
                 ),
+
                 const SizedBox(height: 10),
+
                 Text(
                   eventoGuardado
                       ? '¡Felicitaciones! Has aprendido '
@@ -375,9 +518,12 @@ class _PracticaCrearEventoViewState
                   style: const TextStyle(
                     fontSize: 16,
                     height: 1.5,
+                    color: textoOscuro,
                   ),
                 ),
+
                 const SizedBox(height: 14),
+
                 LinearProgressIndicator(
                   value: eventoGuardado ? 1 : 0,
                   minHeight: 9,
@@ -394,7 +540,9 @@ class _PracticaCrearEventoViewState
 
           const SizedBox(height: 22),
 
+          // ======================================
           // FORMULARIO DEL EVENTO
+          // ======================================
 
           Container(
             padding: const EdgeInsets.all(18),
@@ -404,26 +552,39 @@ class _PracticaCrearEventoViewState
             ),
             child: Column(
               children: [
+                // ==================================
+                // TÍTULO DEL EVENTO
+                // ==================================
+
                 TextField(
                   controller: tituloController,
                   textCapitalization:
                   TextCapitalization.sentences,
-                  decoration: const InputDecoration(
-                    labelText: 'Título del evento',
-                    hintText: 'Ejemplo: Cita médica',
-                    prefixIcon:
-                    Icon(Icons.edit_note_rounded),
-                    border: OutlineInputBorder(),
+                  style: const TextStyle(
+                    color: textoOscuro,
+                  ),
+                  cursorColor: azulBoton,
+                  decoration: decoracionCampo(
+                    etiqueta: 'Título del evento',
+                    ayuda: 'Ejemplo: Cita médica',
+                    icono: Icons.edit_note_rounded,
                   ),
                 ),
 
                 const SizedBox(height: 15),
 
+                // ==================================
+                // TODO EL DÍA
+                // ==================================
+
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   title: const Text(
                     'Todo el día',
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: textoOscuro,
+                    ),
                   ),
                   value: todoElDia,
                   activeColor: verde,
@@ -434,7 +595,13 @@ class _PracticaCrearEventoViewState
                   },
                 ),
 
-                const Divider(),
+                const Divider(
+                  color: Color(0xFFE0E0E0),
+                ),
+
+                // ==================================
+                // FECHA DE INICIO
+                // ==================================
 
                 construirSelector(
                   titulo: 'Fecha de inicio',
@@ -442,6 +609,10 @@ class _PracticaCrearEventoViewState
                   icono: Icons.event_rounded,
                   onTap: () => seleccionarFecha(true),
                 ),
+
+                // ==================================
+                // HORA DE INICIO
+                // ==================================
 
                 if (!todoElDia)
                   construirSelector(
@@ -451,7 +622,13 @@ class _PracticaCrearEventoViewState
                     onTap: () => seleccionarHora(true),
                   ),
 
-                const Divider(),
+                const Divider(
+                  color: Color(0xFFE0E0E0),
+                ),
+
+                // ==================================
+                // FECHA DE FINALIZACIÓN
+                // ==================================
 
                 construirSelector(
                   titulo: 'Fecha de finalización',
@@ -459,6 +636,10 @@ class _PracticaCrearEventoViewState
                   icono: Icons.event_available_rounded,
                   onTap: () => seleccionarFecha(false),
                 ),
+
+                // ==================================
+                // HORA DE FINALIZACIÓN
+                // ==================================
 
                 if (!todoElDia)
                   construirSelector(
@@ -468,7 +649,13 @@ class _PracticaCrearEventoViewState
                     onTap: () => seleccionarHora(false),
                   ),
 
-                const Divider(),
+                const Divider(
+                  color: Color(0xFFE0E0E0),
+                ),
+
+                // ==================================
+                // REPETICIÓN
+                // ==================================
 
                 construirSelector(
                   titulo: 'Repetir',
@@ -489,7 +676,13 @@ class _PracticaCrearEventoViewState
                   ),
                 ),
 
-                const Divider(),
+                const Divider(
+                  color: Color(0xFFE0E0E0),
+                ),
+
+                // ==================================
+                // RECORDATORIO
+                // ==================================
 
                 construirSelector(
                   titulo: 'Recordatorio',
@@ -511,7 +704,13 @@ class _PracticaCrearEventoViewState
                   ),
                 ),
 
-                const Divider(),
+                const Divider(
+                  color: Color(0xFFE0E0E0),
+                ),
+
+                // ==================================
+                // TIPO DE RECORDATORIO
+                // ==================================
 
                 construirSelector(
                   titulo: 'Tipo de recordatorio',
@@ -529,20 +728,27 @@ class _PracticaCrearEventoViewState
                   ),
                 ),
 
-                const Divider(),
+                const Divider(
+                  color: Color(0xFFE0E0E0),
+                ),
 
                 const SizedBox(height: 12),
+
+                // ==================================
+                // DESCRIPCIÓN
+                // ==================================
 
                 TextField(
                   controller: descripcionController,
                   maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'Descripción',
-                    hintText:
-                    'Escribe información adicional',
-                    prefixIcon:
-                    Icon(Icons.description_rounded),
-                    border: OutlineInputBorder(),
+                  style: const TextStyle(
+                    color: textoOscuro,
+                  ),
+                  cursorColor: azulBoton,
+                  decoration: decoracionCampo(
+                    etiqueta: 'Descripción',
+                    ayuda: 'Escribe información adicional',
+                    icono: Icons.description_rounded,
                   ),
                 ),
               ],
@@ -551,13 +757,19 @@ class _PracticaCrearEventoViewState
 
           const SizedBox(height: 25),
 
+          // ======================================
+          // GUARDAR EVENTO
+          // ======================================
+
           if (!eventoGuardado)
             SizedBox(
               width: double.infinity,
               height: 55,
               child: ElevatedButton.icon(
                 onPressed: guardando ? null : guardarEvento,
-                icon: const Icon(Icons.save_rounded),
+                icon: const Icon(
+                  Icons.save_rounded,
+                ),
                 label: Text(
                   guardando
                       ? 'Guardando...'
@@ -565,21 +777,31 @@ class _PracticaCrearEventoViewState
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: azul,
+                  backgroundColor: azulBoton,
                   foregroundColor: Colors.white,
+                  disabledBackgroundColor:
+                  azulBoton.withOpacity(0.6),
+                  disabledForegroundColor: Colors.white,
                 ),
               ),
             ),
+
+          // ======================================
+          // FINALIZAR PRÁCTICA
+          // ======================================
 
           if (eventoGuardado)
             SizedBox(
               width: double.infinity,
               height: 55,
               child: ElevatedButton.icon(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
                 icon: const Icon(
                   Icons.check_circle_rounded,
                 ),
@@ -588,6 +810,7 @@ class _PracticaCrearEventoViewState
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(

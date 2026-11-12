@@ -28,19 +28,10 @@ class SimuladorView extends StatefulWidget {
 }
 
 class _SimuladorViewState extends State<SimuladorView> {
-  // PALETA DE COLORES OFICIAL DE SAFETAP
-  static const Color fondo = Color(0xFFEFF6FF);
-  static const Color azul = Color(0xFF4D67BC);
-  static const Color texto = Color(0xFF333333);
-  static const Color blanco = Colors.white;
-
-  static const Color colorTarjeta =
-  Color(0x2B4D67BC);
-
-  static const Color colorIcono =
-  Color(0xFF4D67BC);
-
+  // ========================================
   // CONTROLADOR COMPARTIDO
+  // ========================================
+
   late final ProgresoController progresoController;
 
   @override
@@ -55,7 +46,10 @@ class _SimuladorViewState extends State<SimuladorView> {
     super.dispose();
   }
 
+  // ========================================
   // ABRIR PRÁCTICA Y NOTIFICAR A INICIO
+  // ========================================
+
   void _abrirPractica({
     required String nombre,
     required String descripcion,
@@ -77,18 +71,29 @@ class _SimuladorViewState extends State<SimuladorView> {
     );
   }
 
+  // ========================================
+  // INTERFAZ PRINCIPAL
+  // ========================================
+
   @override
   Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+    final colores = tema.colorScheme;
+
+    final Color fondo = tema.scaffoldBackgroundColor;
+    final Color texto = colores.onSurface;
+
     return Scaffold(
       backgroundColor: fondo,
 
       appBar: AppBar(
         backgroundColor: fondo,
         elevation: 0,
-        iconTheme: const IconThemeData(
+        foregroundColor: texto,
+        iconTheme: IconThemeData(
           color: texto,
         ),
-        title: const Text(
+        title: Text(
           'Seleccionar práctica',
           style: TextStyle(
             fontSize: 23,
@@ -98,99 +103,171 @@ class _SimuladorViewState extends State<SimuladorView> {
         ),
       ),
 
-      body: GridView.count(
-        padding: const EdgeInsets.all(16),
-        crossAxisCount: 2,
-        crossAxisSpacing: 14,
-        mainAxisSpacing: 14,
-        childAspectRatio: 0.95,
+      // ========================================
+      // CUADRÍCULA ADAPTABLE
+      // ========================================
 
-        children: [
-          // LLAMADAS
-          _tarjeta(
-            icono: Icons.phone,
-            titulo: 'Realizar llamada',
-            onTap: () {
-              _abrirPractica(
-                nombre: 'Realizar llamada',
-                descripcion:
-                'Haz una llamada a un contacto conocido',
-                icono: Icons.phone_in_talk_rounded,
-                pantalla: const DetallePracticaView(),
-              );
-            },
-          ),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // El tamaño de letra seleccionado
+            // determina el espacio de las tarjetas.
+            final escala = MediaQuery.textScalerOf(
+              context,
+            ).scale(1.0);
 
-          // CÁMARA
-          _tarjeta(
-            icono: Icons.camera_alt,
-            titulo: 'Cámara y galería',
-            onTap: () {
-              _abrirPractica(
-                nombre: 'Cámara y galería',
-                descripcion:
-                'Aprende a tomar fotos y administrar imágenes',
-                icono: Icons.camera_alt_rounded,
-                pantalla: const DetalleCamaraView(),
-              );
-            },
-          ),
+            // Si la letra es muy grande,
+            // usamos una columna para evitar
+            // que los textos se amontonen.
+            final bool unaColumna =
+                constraints.maxWidth < 340 ||
+                    escala >= 1.3;
 
-          // RELOJ
-          _tarjeta(
-            icono: Icons.access_time,
-            titulo: 'Reloj y alarmas',
-            onTap: () {
-              _abrirPractica(
-                nombre: 'Reloj y alarmas',
-                descripcion:
-                'Aprende a utilizar el reloj y configurar alarmas',
-                icono: Icons.access_time_rounded,
-                pantalla: const DetalleRelojView(),
-              );
-            },
-          ),
+            final int columnas =
+            unaColumna ? 1 : 2;
 
-          // CALENDARIO
-          _tarjeta(
-            icono: Icons.calendar_month,
-            titulo: 'Calendario',
-            onTap: () {
-              _abrirPractica(
-                nombre: 'Calendario',
-                descripcion:
-                'Aprende a organizar tus eventos y actividades',
-                icono: Icons.calendar_month_rounded,
-                pantalla: const DetalleCalendarioView(),
-              );
-            },
-          ),
+            final double alturaTarjeta =
+            unaColumna
+                ? 185 + (escala - 1.0) * 45
+                : 205 + (escala - 1.0) * 65;
 
-          // WHATSAPP
-          _tarjeta(
-            icono: Icons.message,
-            titulo: 'WhatsApp',
-            onTap: () {
-              _abrirPractica(
-                nombre: 'WhatsApp',
-                descripcion:
-                'Aprende a enviar mensajes y compartir fotos',
-                icono: Icons.message_rounded,
-                pantalla: const DetalleWhatsappView(),
-              );
-            },
-          ),
-        ],
+            return GridView(
+              padding: const EdgeInsets.all(16),
+              gridDelegate:
+              SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: columnas,
+                crossAxisSpacing: 14,
+                mainAxisSpacing: 14,
+                mainAxisExtent: alturaTarjeta,
+              ),
+              children: [
+                // ===================================
+                // LLAMADAS
+                // ===================================
+
+                _tarjeta(
+                  icono: Icons.phone,
+                  titulo: 'Realizar llamada',
+                  onTap: () {
+                    _abrirPractica(
+                      nombre: 'Realizar llamada',
+                      descripcion:
+                      'Haz una llamada a un contacto conocido',
+                      icono:
+                      Icons.phone_in_talk_rounded,
+                      pantalla:
+                      const DetallePracticaView(),
+                    );
+                  },
+                ),
+
+                // ===================================
+                // CÁMARA Y GALERÍA
+                // ===================================
+
+                _tarjeta(
+                  icono: Icons.camera_alt,
+                  titulo: 'Cámara y galería',
+                  onTap: () {
+                    _abrirPractica(
+                      nombre: 'Cámara y galería',
+                      descripcion:
+                      'Aprende a tomar fotos y administrar imágenes',
+                      icono:
+                      Icons.camera_alt_rounded,
+                      pantalla:
+                      const DetalleCamaraView(),
+                    );
+                  },
+                ),
+
+                // ===================================
+                // RELOJ Y ALARMAS
+                // ===================================
+
+                _tarjeta(
+                  icono: Icons.access_time,
+                  titulo: 'Reloj y alarmas',
+                  onTap: () {
+                    _abrirPractica(
+                      nombre: 'Reloj y alarmas',
+                      descripcion:
+                      'Aprende a utilizar el reloj y configurar alarmas',
+                      icono:
+                      Icons.access_time_rounded,
+                      pantalla:
+                      const DetalleRelojView(),
+                    );
+                  },
+                ),
+
+                // ===================================
+                // CALENDARIO
+                // ===================================
+
+                _tarjeta(
+                  icono: Icons.calendar_month,
+                  titulo: 'Calendario',
+                  onTap: () {
+                    _abrirPractica(
+                      nombre: 'Calendario',
+                      descripcion:
+                      'Aprende a organizar tus eventos y actividades',
+                      icono:
+                      Icons.calendar_month_rounded,
+                      pantalla:
+                      const DetalleCalendarioView(),
+                    );
+                  },
+                ),
+
+                // ===================================
+                // WHATSAPP
+                // ===================================
+
+                _tarjeta(
+                  icono: Icons.message,
+                  titulo: 'WhatsApp',
+                  onTap: () {
+                    _abrirPractica(
+                      nombre: 'WhatsApp',
+                      descripcion:
+                      'Aprende a enviar mensajes y compartir fotos',
+                      icono: Icons.message_rounded,
+                      pantalla:
+                      const DetalleWhatsappView(),
+                    );
+                  },
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
 
+  // ========================================
   // TARJETAS DE LAS PRÁCTICAS
+  // ========================================
+
   Widget _tarjeta({
     required IconData icono,
     required String titulo,
     required VoidCallback onTap,
   }) {
+    final colores = Theme.of(context).colorScheme;
+
+    final Color colorPrincipal = colores.primary;
+    final Color colorTexto = colores.onSurface;
+    final Color colorIcono = colores.onPrimary;
+
+    final Color colorTarjeta =
+    Color.alphaBlend(
+      colorPrincipal.withValues(alpha: 0.13),
+      colores.surface,
+    );
+
     return Card(
       color: colorTarjeta,
       elevation: 0,
@@ -199,7 +276,9 @@ class _SimuladorViewState extends State<SimuladorView> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(22),
         side: BorderSide(
-          color: azul.withOpacity(0.25),
+          color: colorPrincipal.withValues(
+            alpha: 0.30,
+          ),
           width: 1,
         ),
       ),
@@ -208,48 +287,64 @@ class _SimuladorViewState extends State<SimuladorView> {
 
       child: InkWell(
         onTap: onTap,
-        splashColor: azul.withOpacity(0.15),
+        splashColor: colorPrincipal.withValues(
+          alpha: 0.15,
+        ),
 
         child: Padding(
           padding: const EdgeInsets.all(12),
 
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment:
+            MainAxisAlignment.center,
             children: [
+              // ===================================
+              // ICONO
+              // ===================================
+
               Container(
                 width: 76,
                 height: 76,
                 decoration: BoxDecoration(
-                  color: colorIcono,
+                  color: colorPrincipal,
                   borderRadius:
                   BorderRadius.circular(20),
                 ),
                 child: Icon(
                   icono,
                   size: 43,
-                  color: blanco,
+                  color: colorIcono,
                 ),
               ),
 
               const SizedBox(height: 14),
 
+              // ===================================
+              // NOMBRE DE LA PRÁCTICA
+              // ===================================
+
               Text(
                 titulo,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                softWrap: true,
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   height: 1.2,
-                  color: texto,
+                  color: colorTexto,
                 ),
               ),
 
               const SizedBox(height: 8),
 
-              const Icon(
+              // ===================================
+              // FLECHA
+              // ===================================
+
+              Icon(
                 Icons.arrow_forward_ios,
                 size: 19,
-                color: azul,
+                color: colorPrincipal,
               ),
             ],
           ),

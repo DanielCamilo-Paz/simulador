@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../controllers/whatsapp_controller.dart';
 import '../../models/whatsapp/leccion_whatsapp_model.dart';
 import 'seleccion_lecciones_view.dart';
+import '../compartido/tema_simulador.dart';
 
 const Color verdeWhatsapp = Color(0xFF075E54);
 const Color verdeClaro = Color(0xFF25D366);
@@ -63,20 +64,24 @@ class _PantallaWhatsappSimState extends State<PantallaWhatsappSim> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => SeleccionLeccionesView(
-          controller: widget.controller,
-          onSeleccionarLeccion: (LeccionWhatsappModel leccion) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => PantallaLeccionSim(
-                  tipo: leccion.tipo,
-                  titulo: leccion.titulo,
-                  controller: widget.controller,
+        builder: (_) => TemaSimulador(
+          child: SeleccionLeccionesView(
+            controller: widget.controller,
+            onSeleccionarLeccion: (LeccionWhatsappModel leccion) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TemaSimulador(
+                    child: PantallaLeccionSim(
+                      tipo: leccion.tipo,
+                      titulo: leccion.titulo,
+                      controller: widget.controller,
+                    ),
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
@@ -352,86 +357,88 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
       isScrollControlled: true,
       backgroundColor: Colors.white,
       builder: (contextGaleria) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(18),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Selecciona una foto',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+        return TemaSimulador(
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Selecciona una foto',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 15),
-                GridView.count(
-                  crossAxisCount: 3,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  mainAxisSpacing: 9,
-                  crossAxisSpacing: 9,
-                  children: [
-                    _FotoDemo(
-                      nombre: 'Paisaje',
-                      emoji: '🏞️',
-                      color: const Color(0xFF80B8A0),
-                      onTap: () {
-                        Navigator.pop(contextGaleria);
-                        _elegirFoto('Paisaje', paraEstado);
-                      },
-                    ),
-                    _FotoDemo(
-                      nombre: 'Flores',
-                      emoji: '🌷',
-                      color: const Color(0xFFD9A0B7),
-                      onTap: () {
-                        Navigator.pop(contextGaleria);
-                        _elegirFoto('Flores', paraEstado);
-                      },
-                    ),
-                    _FotoDemo(
-                      nombre: 'Familia',
-                      emoji: '👨‍👩‍👧',
-                      color: const Color(0xFFE6C18B),
-                      onTap: () {
-                        Navigator.pop(contextGaleria);
-                        _elegirFoto('Familia', paraEstado);
-                      },
-                    ),
-                    _FotoDemo(
-                      nombre: 'Playa',
-                      emoji: '🏖️',
-                      color: const Color(0xFF77B8D2),
-                      onTap: () {
-                        Navigator.pop(contextGaleria);
-                        _elegirFoto('Playa', paraEstado);
-                      },
-                    ),
-                    _FotoDemo(
-                      nombre: 'Comida',
-                      emoji: '🍓',
-                      color: const Color(0xFFE7A08E),
-                      onTap: () {
-                        Navigator.pop(contextGaleria);
-                        _elegirFoto('Comida', paraEstado);
-                      },
-                    ),
-                    _FotoDemo(
-                      nombre: 'Mascota',
-                      emoji: '🐶',
-                      color: const Color(0xFFB6A1D4),
-                      onTap: () {
-                        Navigator.pop(contextGaleria);
-                        _elegirFoto('Mascota', paraEstado);
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-              ],
+                  const SizedBox(height: 15),
+                  GridView.count(
+                    crossAxisCount: 3,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    mainAxisSpacing: 9,
+                    crossAxisSpacing: 9,
+                    children: [
+                      _FotoDemo(
+                        nombre: 'Paisaje',
+                        emoji: '🏞️',
+                        color: const Color(0xFF80B8A0),
+                        onTap: () {
+                          Navigator.pop(contextGaleria);
+                          _elegirFoto('Paisaje', paraEstado);
+                        },
+                      ),
+                      _FotoDemo(
+                        nombre: 'Flores',
+                        emoji: '🌷',
+                        color: const Color(0xFFD9A0B7),
+                        onTap: () {
+                          Navigator.pop(contextGaleria);
+                          _elegirFoto('Flores', paraEstado);
+                        },
+                      ),
+                      _FotoDemo(
+                        nombre: 'Familia',
+                        emoji: '👨‍👩‍👧',
+                        color: const Color(0xFFE6C18B),
+                        onTap: () {
+                          Navigator.pop(contextGaleria);
+                          _elegirFoto('Familia', paraEstado);
+                        },
+                      ),
+                      _FotoDemo(
+                        nombre: 'Playa',
+                        emoji: '🏖️',
+                        color: const Color(0xFF77B8D2),
+                        onTap: () {
+                          Navigator.pop(contextGaleria);
+                          _elegirFoto('Playa', paraEstado);
+                        },
+                      ),
+                      _FotoDemo(
+                        nombre: 'Comida',
+                        emoji: '🍓',
+                        color: const Color(0xFFE7A08E),
+                        onTap: () {
+                          Navigator.pop(contextGaleria);
+                          _elegirFoto('Comida', paraEstado);
+                        },
+                      ),
+                      _FotoDemo(
+                        nombre: 'Mascota',
+                        emoji: '🐶',
+                        color: const Color(0xFFB6A1D4),
+                        onTap: () {
+                          Navigator.pop(contextGaleria);
+                          _elegirFoto('Mascota', paraEstado);
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
             ),
           ),
         );
@@ -1026,48 +1033,50 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
     showModalBottomSheet(
       context: context,
       builder: (contextModal) {
-        return SafeArea(
-          child: Wrap(
-            children: [
-              const Padding(
-                padding: EdgeInsets.all(18),
-                child: Text(
-                  'Crear una actualización',
-                  style: TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.bold,
+        return TemaSimulador(
+          child: SafeArea(
+            child: Wrap(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.all(18),
+                  child: Text(
+                    'Crear una actualización',
+                    style: TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
-              ListTile(
-                leading: const CircleAvatar(
-                  backgroundColor: Color(0xFF6D5BA6),
-                  child: Icon(
-                    Icons.text_fields,
-                    color: Colors.white,
+                ListTile(
+                  leading: const CircleAvatar(
+                    backgroundColor: Color(0xFF6D5BA6),
+                    child: Icon(
+                      Icons.text_fields,
+                      color: Colors.white,
+                    ),
                   ),
+                  title: const Text('Crear estado de texto'),
+                  onTap: () {
+                    Navigator.pop(contextModal);
+                    _abrirEditorEstado();
+                  },
                 ),
-                title: const Text('Crear estado de texto'),
-                onTap: () {
-                  Navigator.pop(contextModal);
-                  _abrirEditorEstado();
-                },
-              ),
-              ListTile(
-                leading: const CircleAvatar(
-                  backgroundColor: Color(0xFF3D967D),
-                  child: Icon(
-                    Icons.photo,
-                    color: Colors.white,
+                ListTile(
+                  leading: const CircleAvatar(
+                    backgroundColor: Color(0xFF3D967D),
+                    child: Icon(
+                      Icons.photo,
+                      color: Colors.white,
+                    ),
                   ),
+                  title: const Text('Compartir una foto'),
+                  onTap: () {
+                    Navigator.pop(contextModal);
+                    _abrirGaleria(paraEstado: true);
+                  },
                 ),
-                title: const Text('Compartir una foto'),
-                onTap: () {
-                  Navigator.pop(contextModal);
-                  _abrirGaleria(paraEstado: true);
-                },
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -1080,61 +1089,63 @@ class _PantallaLeccionSimState extends State<PantallaLeccionSim> {
       isScrollControlled: true,
       backgroundColor: const Color(0xFF5C548D),
       builder: (contextModal) {
-        return StatefulBuilder(
-          builder: (contextModal, setModalState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                left: 20,
-                right: 20,
-                top: 25,
-                bottom:
-                MediaQuery.of(contextModal).viewInsets.bottom + 25,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Crear estado',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
+        return TemaSimulador(
+          child: StatefulBuilder(
+            builder: (contextModal, setModalState) {
+              return Padding(
+                padding: EdgeInsets.only(
+                  left: 20,
+                  right: 20,
+                  top: 25,
+                  bottom:
+                  MediaQuery.of(contextModal).viewInsets.bottom + 25,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Crear estado',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: estadoController,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 23,
-                    ),
-                    onChanged: (_) {
-                      setModalState(() {});
-                    },
-                    decoration: const InputDecoration(
-                      hintText: 'Escribe lo que quieras compartir',
-                      hintStyle: TextStyle(color: Colors.white70),
-                      border: InputBorder.none,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: estadoController.text.trim().isEmpty
-                          ? null
-                          : () {
-                        Navigator.pop(contextModal);
-                        _publicarEstadoTexto();
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: estadoController,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 23,
+                      ),
+                      onChanged: (_) {
+                        setModalState(() {});
                       },
-                      icon: const Icon(Icons.send),
-                      label: const Text('Compartir estado'),
+                      decoration: const InputDecoration(
+                        hintText: 'Escribe lo que quieras compartir',
+                        hintStyle: TextStyle(color: Colors.white70),
+                        border: InputBorder.none,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: estadoController.text.trim().isEmpty
+                            ? null
+                            : () {
+                          Navigator.pop(contextModal);
+                          _publicarEstadoTexto();
+                        },
+                        icon: const Icon(Icons.send),
+                        label: const Text('Compartir estado'),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         );
       },
     );

@@ -22,6 +22,7 @@ class _PracticaConsultarEventosViewState
   static const Color azul = Color(0xFF92AFBC);
   static const Color fondo = Color(0xFFF7F9FA);
   static const Color verde = Color(0xFF299764);
+  static const Color textoOscuro = Color(0xFF202C33);
 
   late DateTime mesActual;
   late DateTime fechaSeleccionada;
@@ -40,6 +41,10 @@ class _PracticaConsultarEventosViewState
     practicaCompletada =
         widget.controller.estado.consultarEvento;
   }
+
+  // ==========================================
+  // FORMATOS DE FECHA Y HORA
+  // ==========================================
 
   String nombreMes(int mes) {
     const meses = [
@@ -74,6 +79,10 @@ class _PracticaConsultarEventosViewState
     return '$hora:$minuto';
   }
 
+  // ==========================================
+  // NAVEGACIÓN DEL CALENDARIO
+  // ==========================================
+
   void cambiarMes(int cantidad) {
     setState(() {
       mesActual = DateTime(
@@ -98,6 +107,10 @@ class _PracticaConsultarEventosViewState
     });
   }
 
+  // ==========================================
+  // CONSULTAR EVENTO
+  // ==========================================
+
   Future<void> consultarEvento(
       EventoCalendario evento,
       ) async {
@@ -113,99 +126,121 @@ class _PracticaConsultarEventosViewState
 
     await showDialog<void>(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: Text(
-            evento.titulo,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
+      builder: (dialogContext) {
+        return Theme(
+          data: ThemeData(
+            useMaterial3: true,
+            brightness: Brightness.light,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: azul,
+              brightness: Brightness.light,
             ),
           ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _detalle(
-                  Icons.event_rounded,
-                  'Fecha de inicio',
-                  formatoFecha(evento.fechaInicio),
-                ),
-
-                if (!evento.todoElDia)
-                  _detalle(
-                    Icons.access_time_rounded,
-                    'Hora de inicio',
-                    formatoHora(evento.fechaInicio),
-                  ),
-
-                const SizedBox(height: 12),
-
-                _detalle(
-                  Icons.event_available_rounded,
-                  'Fecha de finalización',
-                  formatoFecha(evento.fechaFin),
-                ),
-
-                if (!evento.todoElDia)
-                  _detalle(
-                    Icons.access_time_rounded,
-                    'Hora de finalización',
-                    formatoHora(evento.fechaFin),
-                  ),
-
-                const SizedBox(height: 12),
-
-                _detalle(
-                  Icons.repeat_rounded,
-                  'Repetición',
-                  evento.repeticion,
-                ),
-
-                const SizedBox(height: 12),
-
-                _detalle(
-                  Icons.notifications_rounded,
-                  'Recordatorio',
-                  evento.recordatorio,
-                ),
-
-                const SizedBox(height: 12),
-
-                _detalle(
-                  Icons.alarm_rounded,
-                  'Tipo de recordatorio',
-                  evento.tipoRecordatorio,
-                ),
-
-                if (evento.descripcion.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  _detalle(
-                    Icons.description_rounded,
-                    'Descripción',
-                    evento.descripcion,
-                  ),
-                ],
-              ],
+          child: AlertDialog(
+            backgroundColor: Colors.white,
+            surfaceTintColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-          ),
-          actions: [
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: verde,
-                foregroundColor: Colors.white,
+            title: Text(
+              evento.titulo,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: textoOscuro,
               ),
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Entendido'),
             ),
-          ],
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _detalle(
+                    Icons.event_rounded,
+                    'Fecha de inicio',
+                    formatoFecha(evento.fechaInicio),
+                  ),
+
+                  if (!evento.todoElDia)
+                    _detalle(
+                      Icons.access_time_rounded,
+                      'Hora de inicio',
+                      formatoHora(evento.fechaInicio),
+                    ),
+
+                  const SizedBox(height: 12),
+
+                  _detalle(
+                    Icons.event_available_rounded,
+                    'Fecha de finalización',
+                    formatoFecha(evento.fechaFin),
+                  ),
+
+                  if (!evento.todoElDia)
+                    _detalle(
+                      Icons.access_time_rounded,
+                      'Hora de finalización',
+                      formatoHora(evento.fechaFin),
+                    ),
+
+                  const SizedBox(height: 12),
+
+                  _detalle(
+                    Icons.repeat_rounded,
+                    'Repetición',
+                    evento.repeticion,
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  _detalle(
+                    Icons.notifications_rounded,
+                    'Recordatorio',
+                    evento.recordatorio,
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  _detalle(
+                    Icons.alarm_rounded,
+                    'Tipo de recordatorio',
+                    evento.tipoRecordatorio,
+                  ),
+
+                  if (evento.descripcion.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    _detalle(
+                      Icons.description_rounded,
+                      'Descripción',
+                      evento.descripcion,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            actions: [
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: verde,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () {
+                  Navigator.pop(dialogContext);
+                },
+                child: const Text(
+                  'Entendido',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
   }
+
+  // ==========================================
+  // DETALLE DE INFORMACIÓN DEL EVENTO
+  // ==========================================
 
   Widget _detalle(
       IconData icono,
@@ -220,7 +255,9 @@ class _PracticaConsultarEventosViewState
           color: azul,
           size: 23,
         ),
+
         const SizedBox(width: 10),
+
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,13 +267,17 @@ class _PracticaConsultarEventosViewState
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
+                  color: textoOscuro,
                 ),
               ),
+
               const SizedBox(height: 3),
+
               Text(
                 valor,
                 style: const TextStyle(
                   fontSize: 15,
+                  color: textoOscuro,
                 ),
               ),
             ],
@@ -245,6 +286,10 @@ class _PracticaConsultarEventosViewState
       ],
     );
   }
+
+  // ==========================================
+  // CONSTRUIR CALENDARIO
+  // ==========================================
 
   Widget construirCalendario() {
     final primerDia = DateTime(
@@ -260,7 +305,6 @@ class _PracticaConsultarEventosViewState
     ).day;
 
     final espaciosIniciales = primerDia.weekday - 1;
-
     final totalCeldas = espaciosIniciales + diasEnMes;
 
     return Container(
@@ -271,29 +315,37 @@ class _PracticaConsultarEventosViewState
       ),
       child: Column(
         children: [
+          // ======================================
+          // NAVEGACIÓN ENTRE MESES
+          // ======================================
+
           Row(
-            mainAxisAlignment:
-            MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
                 onPressed: () => cambiarMes(-1),
                 icon: const Icon(
                   Icons.chevron_left_rounded,
                   size: 34,
+                  color: textoOscuro,
                 ),
               ),
+
               Text(
                 '${nombreMes(mesActual.month)} ${mesActual.year}',
                 style: const TextStyle(
                   fontSize: 19,
                   fontWeight: FontWeight.bold,
+                  color: textoOscuro,
                 ),
               ),
+
               IconButton(
                 onPressed: () => cambiarMes(1),
                 icon: const Icon(
                   Icons.chevron_right_rounded,
                   size: 34,
+                  color: textoOscuro,
                 ),
               ),
             ],
@@ -301,19 +353,76 @@ class _PracticaConsultarEventosViewState
 
           const SizedBox(height: 14),
 
+          // ======================================
+          // DÍAS DE LA SEMANA
+          // ======================================
+
           const Row(
             children: [
-              Expanded(child: Center(child: Text('L'))),
-              Expanded(child: Center(child: Text('M'))),
-              Expanded(child: Center(child: Text('M'))),
-              Expanded(child: Center(child: Text('J'))),
-              Expanded(child: Center(child: Text('V'))),
-              Expanded(child: Center(child: Text('S'))),
-              Expanded(child: Center(child: Text('D'))),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    'L',
+                    style: TextStyle(color: textoOscuro),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    'M',
+                    style: TextStyle(color: textoOscuro),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    'M',
+                    style: TextStyle(color: textoOscuro),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    'J',
+                    style: TextStyle(color: textoOscuro),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    'V',
+                    style: TextStyle(color: textoOscuro),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    'S',
+                    style: TextStyle(color: textoOscuro),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    'D',
+                    style: TextStyle(color: textoOscuro),
+                  ),
+                ),
+              ),
             ],
           ),
 
           const SizedBox(height: 10),
+
+          // ======================================
+          // CUADRÍCULA DEL CALENDARIO
+          // ======================================
 
           GridView.builder(
             shrinkWrap: true,
@@ -385,9 +494,10 @@ class _PracticaConsultarEventosViewState
                               : FontWeight.normal,
                           color: seleccionado
                               ? Colors.white
-                              : Colors.black87,
+                              : textoOscuro,
                         ),
                       ),
+
                       if (tieneEventos)
                         Container(
                           margin: const EdgeInsets.only(
@@ -411,6 +521,10 @@ class _PracticaConsultarEventosViewState
 
           const SizedBox(height: 15),
 
+          // ======================================
+          // BOTÓN HOY
+          // ======================================
+
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
@@ -423,7 +537,8 @@ class _PracticaConsultarEventosViewState
                 style: TextStyle(fontSize: 16),
               ),
               style: OutlinedButton.styleFrom(
-                foregroundColor: azul,
+                foregroundColor: const Color(0xFF496A79),
+                side: const BorderSide(color: azul),
                 padding: const EdgeInsets.symmetric(
                   vertical: 14,
                 ),
@@ -434,6 +549,10 @@ class _PracticaConsultarEventosViewState
       ),
     );
   }
+
+  // ==========================================
+  // CONSTRUIR LISTA DE EVENTOS
+  // ==========================================
 
   Widget construirListaEventos() {
     final eventos = widget.controller
@@ -447,6 +566,7 @@ class _PracticaConsultarEventosViewState
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
+            color: textoOscuro,
           ),
         ),
 
@@ -460,23 +580,28 @@ class _PracticaConsultarEventosViewState
               color: Colors.white,
               borderRadius: BorderRadius.circular(18),
             ),
-            child: Column(
+            child: const Column(
               children: [
-                const Icon(
+                Icon(
                   Icons.event_busy_rounded,
                   size: 42,
                   color: azul,
                 ),
-                const SizedBox(height: 10),
-                const Text(
+
+                SizedBox(height: 10),
+
+                Text(
                   'No hay eventos para esta fecha.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 15,
+                    color: textoOscuro,
                   ),
                 ),
-                const SizedBox(height: 6),
-                const Text(
+
+                SizedBox(height: 6),
+
+                Text(
                   'Selecciona otro día que tenga '
                       'un punto verde debajo del número.',
                   textAlign: TextAlign.center,
@@ -509,15 +634,20 @@ class _PracticaConsultarEventosViewState
                   evento.titulo,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
+                    color: textoOscuro,
                   ),
                 ),
                 subtitle: Text(
                   evento.todoElDia
                       ? 'Todo el día'
                       : formatoHora(evento.fechaInicio),
+                  style: const TextStyle(
+                    color: Colors.black54,
+                  ),
                 ),
                 trailing: const Icon(
                   Icons.chevron_right_rounded,
+                  color: textoOscuro,
                 ),
                 onTap: () => consultarEvento(evento),
               ),
@@ -527,10 +657,15 @@ class _PracticaConsultarEventosViewState
     );
   }
 
+  // ==========================================
+  // PANTALLA PRINCIPAL
+  // ==========================================
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: fondo,
+
       appBar: AppBar(
         backgroundColor: azul,
         foregroundColor: Colors.white,
@@ -539,17 +674,24 @@ class _PracticaConsultarEventosViewState
           'Consultar eventos',
           style: TextStyle(
             fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
       ),
+
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
+          // ======================================
+          // ENCABEZADO
+          // ======================================
+
           const Text(
             'Aprende a consultar eventos',
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
+              color: textoOscuro,
             ),
           ),
 
@@ -567,7 +709,9 @@ class _PracticaConsultarEventosViewState
 
           const SizedBox(height: 20),
 
-          // INSTRUCCIÓN
+          // ======================================
+          // GUÍA PASO A PASO
+          // ======================================
 
           Container(
             padding: const EdgeInsets.all(18),
@@ -586,6 +730,7 @@ class _PracticaConsultarEventosViewState
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
+                    color: textoOscuro,
                   ),
                 ),
 
@@ -601,6 +746,7 @@ class _PracticaConsultarEventosViewState
                   style: const TextStyle(
                     fontSize: 16,
                     height: 1.5,
+                    color: textoOscuro,
                   ),
                 ),
 
@@ -622,20 +768,34 @@ class _PracticaConsultarEventosViewState
 
           const SizedBox(height: 22),
 
+          // ======================================
+          // CALENDARIO
+          // ======================================
+
           construirCalendario(),
 
           const SizedBox(height: 24),
 
+          // ======================================
+          // LISTA DE EVENTOS
+          // ======================================
+
           construirListaEventos(),
 
           const SizedBox(height: 24),
+
+          // ======================================
+          // FINALIZAR PRÁCTICA
+          // ======================================
 
           if (practicaCompletada)
             SizedBox(
               width: double.infinity,
               height: 55,
               child: ElevatedButton.icon(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
                 icon: const Icon(
                   Icons.check_circle_rounded,
                 ),
@@ -644,6 +804,7 @@ class _PracticaConsultarEventosViewState
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(

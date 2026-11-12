@@ -2,28 +2,44 @@
 import 'package:flutter/material.dart';
 
 import 'pantalla_calendario_sim.dart';
+import '../compartido/tema_simulador.dart';
 
 class DetalleCalendarioView extends StatelessWidget {
   const DetalleCalendarioView({
     super.key,
   });
 
-  // PALETA PRINCIPAL ORIGINAL
-  static const Color fondo = Color(0xFFEFF6FF);
-  static const Color naranja = Color(0xFF4D67BC);
-  static const Color naranjaSuave = Color(0x2B4D67BC);
-  static const Color texto = Color(0xFF333333);
-  static const Color blanco = Colors.white;
-
   @override
   Widget build(BuildContext context) {
+    // ========================================
+    // COLORES DINÁMICOS DEL TEMA SELECCIONADO
+    // ========================================
+
+    final tema = Theme.of(context);
+    final colores = tema.colorScheme;
+
+    final Color fondo = tema.scaffoldBackgroundColor;
+    final Color colorPrincipal = colores.primary;
+    final Color colorTexto = colores.onSurface;
+    final Color colorSecundario = colores.onSurfaceVariant;
+    final Color colorTarjeta = colores.surface;
+    final Color colorSobrePrincipal = colores.onPrimary;
+
+    // Color suave que se adapta al tema.
+    final Color colorSuave =
+    colorPrincipal.withOpacity(0.15);
+
     return Scaffold(
       backgroundColor: fondo,
+
+      // ========================================
+      // BARRA SUPERIOR
+      // ========================================
 
       appBar: AppBar(
         backgroundColor: fondo,
         elevation: 0,
-        foregroundColor: texto,
+        foregroundColor: colorTexto,
         title: const Text(
           'Realizar práctica',
           style: TextStyle(
@@ -39,38 +55,47 @@ class DetalleCalendarioView extends StatelessWidget {
             children: [
               const SizedBox(height: 25),
 
+              // ===================================
               // ICONO DEL CALENDARIO
+              // ===================================
+
               Container(
                 width: 140,
                 height: 140,
                 decoration: BoxDecoration(
-                  color: naranjaSuave,
+                  color: colorSuave,
                   borderRadius: BorderRadius.circular(30),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.calendar_month,
                   size: 85,
-                  color: naranja,
+                  color: colorPrincipal,
                 ),
               ),
 
               const SizedBox(height: 28),
 
-              // TÍTULO ORIGINAL
-              const Text(
+              // ===================================
+              // TÍTULO
+              // ===================================
+
+              Text(
                 'Colocar recordatorio en calendario',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: texto,
+                  color: colorTexto,
                 ),
               ),
 
               const SizedBox(height: 14),
 
-              // DESCRIPCIÓN ORIGINAL
-              const Text(
+              // ===================================
+              // DESCRIPCIÓN
+              // ===================================
+
+              Text(
                 'Aprende a visualizar el calendario del mes. '
                     'Selecciona el día y la hora para poner un '
                     'recordatorio con el evento que tú quieras recordar.',
@@ -78,15 +103,18 @@ class DetalleCalendarioView extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16,
                   height: 1.5,
-                  color: Colors.black54,
+                  color: colorSecundario,
                 ),
               ),
 
               const SizedBox(height: 30),
 
+              // ===================================
               // TARJETA DE DURACIÓN Y NIVEL
+              // ===================================
+
               Card(
-                color: blanco,
+                color: colorTarjeta,
                 elevation: 1,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(18),
@@ -103,6 +131,9 @@ class DetalleCalendarioView extends StatelessWidget {
                           Icons.access_time,
                           'Duración',
                           '6 minutos',
+                          colorPrincipal,
+                          colorTexto,
+                          colorSecundario,
                         ),
                       ),
 
@@ -112,7 +143,7 @@ class DetalleCalendarioView extends StatelessWidget {
                         margin: const EdgeInsets.symmetric(
                           horizontal: 10,
                         ),
-                        color: Colors.black12,
+                        color: colores.outlineVariant,
                       ),
 
                       Expanded(
@@ -120,6 +151,9 @@ class DetalleCalendarioView extends StatelessWidget {
                           Icons.signal_cellular_alt,
                           'Nivel',
                           'Fácil',
+                          colorPrincipal,
+                          colorTexto,
+                          colorSecundario,
                         ),
                       ),
                     ],
@@ -129,7 +163,10 @@ class DetalleCalendarioView extends StatelessWidget {
 
               const SizedBox(height: 30),
 
+              // ===================================
               // BOTÓN COMENZAR LECCIÓN
+              // ===================================
+
               SizedBox(
                 width: double.infinity,
                 height: 58,
@@ -138,23 +175,27 @@ class DetalleCalendarioView extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) =>
-                        const PantallaCalendarioSim(),
+                        builder: (_) => const TemaSimulador(
+                          child: PantallaCalendarioSim(),
+                        ),
                       ),
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: naranja,
-                    foregroundColor: texto,
+                    backgroundColor: colorPrincipal,
+                    foregroundColor: colorSobrePrincipal,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Comenzar lección',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 19,
                       fontWeight: FontWeight.bold,
+                      color: colorSobrePrincipal,
                     ),
                   ),
                 ),
@@ -162,7 +203,10 @@ class DetalleCalendarioView extends StatelessWidget {
 
               const SizedBox(height: 15),
 
+              // ===================================
               // BOTÓN REGRESAR A PRÁCTICAS
+              // ===================================
+
               SizedBox(
                 width: double.infinity,
                 height: 58,
@@ -182,9 +226,9 @@ class DetalleCalendarioView extends StatelessWidget {
                     ),
                   ),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: naranja,
-                    side: const BorderSide(
-                      color: naranja,
+                    foregroundColor: colorPrincipal,
+                    side: BorderSide(
+                      color: colorPrincipal,
                       width: 2,
                     ),
                     shape: RoundedRectangleBorder(
@@ -202,17 +246,23 @@ class DetalleCalendarioView extends StatelessWidget {
     );
   }
 
+  // ========================================
   // INFORMACIÓN DE DURACIÓN Y NIVEL
+  // ========================================
+
   Widget _dato(
       IconData icono,
       String titulo,
       String valor,
+      Color colorPrincipal,
+      Color colorTexto,
+      Color colorSecundario,
       ) {
     return Column(
       children: [
         Icon(
           icono,
-          color: naranja,
+          color: colorPrincipal,
           size: 30,
         ),
 
@@ -220,8 +270,8 @@ class DetalleCalendarioView extends StatelessWidget {
 
         Text(
           titulo,
-          style: const TextStyle(
-            color: Colors.black54,
+          style: TextStyle(
+            color: colorSecundario,
             fontSize: 14,
           ),
         ),
@@ -230,10 +280,10 @@ class DetalleCalendarioView extends StatelessWidget {
 
         Text(
           valor,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
-            color: texto,
+            color: colorTexto,
           ),
         ),
       ],

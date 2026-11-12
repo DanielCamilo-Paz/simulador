@@ -1,9 +1,14 @@
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:simulador/views/principal/simulador_view.dart';
-import 'package:simulador/views/progreso/progreso_general_view.dart';
-import 'package:simulador/controllers/progreso_general_controller.dart';
+import '../../main.dart';
+import '../usuario/perfil_view.dart';
+import '../principal/simulador_view.dart';
+import '../progreso/progreso_general_view.dart';
+import '../configuracion/configuracion_view.dart';
+
+import '../../controllers/progreso_general_controller.dart';
 
 class InicioView extends StatefulWidget {
   const InicioView({super.key});
@@ -13,25 +18,104 @@ class InicioView extends StatefulWidget {
 }
 
 class _InicioViewState extends State<InicioView> {
-  // PALETA DE COLORES DE SAFETAP
-  static const Color naranja = Color(0xFF4D67BC);
-  static const Color amarillo = Color(0xFF4D67BC);
-  static const Color fondo = Color(0xFFEFF6FF);
-  static const Color texto = Color(0xFF333333);
-  static const Color blanco = Colors.white;
+  // ========================================
+  // COLORES DINÁMICOS DE SAFETAP
+  // ========================================
 
+  Color get naranja => configuracionController.colorPrincipal;
+
+  Color get amarillo => configuracionController.colorPrincipal;
+
+  Color get fondo =>
+      Theme.of(context).scaffoldBackgroundColor;
+
+  Color get texto =>
+      Theme.of(context).colorScheme.onSurface;
+
+  Color get blanco => Colors.white;
+
+  // ========================================
+  // DATOS DEL USUARIO
+  // ========================================
+
+  String nombreUsuario = 'Usuario';
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarNombreUsuario();
+  }
+
+  Future<void> _cargarNombreUsuario() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    if (!mounted) return;
+
+    setState(() {
+      final nombre =
+      prefs.getString('usuario_nombre')?.trim();
+
+      nombreUsuario =
+      (nombre == null || nombre.isEmpty)
+          ? 'Usuario'
+          : nombre;
+    });
+  }
+
+  // ========================================
+  // ABRIR PERFIL
+  // ========================================
+
+  Future<void> _abrirPerfil() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const PerfilView(),
+      ),
+    );
+
+    if (mounted) {
+      await _cargarNombreUsuario();
+    }
+  }
+
+  // ========================================
+  // ABRIR CONFIGURACIÓN
+  // ========================================
+
+  Future<void> _abrirConfiguracion() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ConfiguracionView(
+          controller: configuracionController,
+        ),
+      ),
+    );
+
+    if (!mounted) return;
+
+    setState(() {});
+  }
+
+  // ========================================
   // ÚLTIMA SIMULACIÓN SELECCIONADA
+  // ========================================
+
   String ultimaLeccion = 'Realizar llamada';
 
   String descripcionLeccion =
       'Haz una llamada a un contacto conocido';
 
-  IconData iconoLeccion = Icons.phone_in_talk_rounded;
+  IconData iconoLeccion =
+      Icons.phone_in_talk_rounded;
 
-  // PANTALLA DE LA ÚLTIMA SIMULACIÓN
   Widget? ultimaPantalla;
 
-  // ACTUALIZAR LA ÚLTIMA PRÁCTICA
+  // ========================================
+  // ACTUALIZAR ÚLTIMA PRÁCTICA
+  // ========================================
+
   void _actualizarUltimaLeccion(
       String nombre,
       String descripcion,
@@ -46,13 +130,17 @@ class _InicioViewState extends State<InicioView> {
     });
   }
 
+  // ========================================
   // ABRIR MENÚ DE LECCIONES
+  // ========================================
+
   Future<void> _abrirLecciones() async {
     await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => SimuladorView(
-          onSeleccionarPractica: _actualizarUltimaLeccion,
+          onSeleccionarPractica:
+          _actualizarUltimaLeccion,
         ),
       ),
     );
@@ -62,7 +150,10 @@ class _InicioViewState extends State<InicioView> {
     setState(() {});
   }
 
+  // ========================================
   // CONTINUAR ÚLTIMA LECCIÓN
+  // ========================================
+
   Future<void> _continuarLeccion() async {
     if (ultimaPantalla == null) {
       await _abrirLecciones();
@@ -81,7 +172,10 @@ class _InicioViewState extends State<InicioView> {
     setState(() {});
   }
 
-  // ABRIR VENTANA DE PROGRESO GENERAL
+  // ========================================
+  // ABRIR PROGRESO GENERAL
+  // ========================================
+
   void _abrirProgresoGeneral() {
     Navigator.push(
       context,
@@ -93,6 +187,10 @@ class _InicioViewState extends State<InicioView> {
     );
   }
 
+  // ========================================
+  // INTERFAZ PRINCIPAL
+  // ========================================
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,14 +199,18 @@ class _InicioViewState extends State<InicioView> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+            CrossAxisAlignment.start,
             children: [
+              // ===================================
               // ENCABEZADO
+              // ===================================
+
               Row(
                 mainAxisAlignment:
                 MainAxisAlignment.spaceBetween,
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'SafeTap',
                       style: TextStyle(
@@ -118,13 +220,16 @@ class _InicioViewState extends State<InicioView> {
                       ),
                     ),
                   ),
+
                   Container(
                     decoration: BoxDecoration(
                       color: amarillo,
-                      borderRadius: BorderRadius.circular(13),
+                      borderRadius:
+                      BorderRadius.circular(13),
                     ),
                     child: IconButton(
-                      onPressed: null,
+                      tooltip: 'Abrir configuración',
+                      onPressed: _abrirConfiguracion,
                       icon: const Icon(
                         Icons.settings,
                         color: Colors.white,
@@ -137,9 +242,12 @@ class _InicioViewState extends State<InicioView> {
 
               const SizedBox(height: 30),
 
-              // SALUDO
-              const Text(
-                '¡Hola, Usuario!',
+              // ===================================
+              // SALUDO PERSONALIZADO
+              // ===================================
+
+              Text(
+                '¡Hola, $nombreUsuario!',
                 style: TextStyle(
                   fontSize: 21,
                   fontWeight: FontWeight.bold,
@@ -149,7 +257,10 @@ class _InicioViewState extends State<InicioView> {
 
               const SizedBox(height: 28),
 
+              // ===================================
               // SECCIÓN PRINCIPAL
+              // ===================================
+
               Row(
                 crossAxisAlignment:
                 CrossAxisAlignment.center,
@@ -158,7 +269,9 @@ class _InicioViewState extends State<InicioView> {
                     flex: 5,
                     child: _tarjetaContinuar(),
                   ),
+
                   const SizedBox(width: 13),
+
                   Expanded(
                     flex: 5,
                     child: _tarjetaProgreso(),
@@ -168,7 +281,10 @@ class _InicioViewState extends State<InicioView> {
 
               const SizedBox(height: 28),
 
+              // ===================================
               // OPCIONES PRINCIPALES
+              // ===================================
+
               GridView.count(
                 crossAxisCount: 2,
                 shrinkWrap: true,
@@ -185,7 +301,7 @@ class _InicioViewState extends State<InicioView> {
                     onTap: _abrirLecciones,
                   ),
 
-                  // REPASO
+                  // ACTIVIDADES DE REPASO
                   _tarjetaOpcion(
                     icono: Icons.extension_rounded,
                     titulo: 'Actividades de repaso',
@@ -202,6 +318,7 @@ class _InicioViewState extends State<InicioView> {
                   _tarjetaOpcion(
                     icono: Icons.person_outline_rounded,
                     titulo: 'Mi perfil',
+                    onTap: _abrirPerfil,
                   ),
                 ],
               ),
@@ -214,9 +331,9 @@ class _InicioViewState extends State<InicioView> {
     );
   }
 
-  // ==========================================
+  // ========================================
   // TARJETA SIGUE CON TU LECCIÓN
-  // ==========================================
+  // ========================================
 
   Widget _tarjetaContinuar() {
     return InkWell(
@@ -226,17 +343,17 @@ class _InicioViewState extends State<InicioView> {
         height: 270,
         padding: const EdgeInsets.all(11),
         decoration: BoxDecoration(
-          color: naranja.withOpacity(0.18),
+          color: naranja.withValues(alpha: 0.18),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: naranja.withOpacity(0.35),
+            color: naranja.withValues(alpha: 0.35),
           ),
         ),
         child: Column(
           mainAxisAlignment:
           MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'Sigue con tu lección',
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -255,7 +372,7 @@ class _InicioViewState extends State<InicioView> {
             Text(
               descripcionLeccion,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 color: texto,
               ),
@@ -263,16 +380,18 @@ class _InicioViewState extends State<InicioView> {
 
             Container(
               width: double.infinity,
-              padding:
-              const EdgeInsets.symmetric(vertical: 11),
+              padding: const EdgeInsets.symmetric(
+                vertical: 11,
+              ),
               decoration: BoxDecoration(
                 color: naranja,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius:
+                BorderRadius.circular(12),
               ),
               child: Text(
                 ultimaLeccion,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   color: blanco,
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
@@ -285,30 +404,36 @@ class _InicioViewState extends State<InicioView> {
     );
   }
 
-  // ==========================================
+  // ========================================
   // TARJETA DE PROGRESO GENERAL
-  // SOLO INFORMATIVA, NO ES UN BOTÓN
-  // ==========================================
+  // SOLO INFORMATIVA
+  // ========================================
 
   Widget _tarjetaProgreso() {
     return AnimatedBuilder(
       animation: progresoGeneralController,
       builder: (context, child) {
         final progreso =
-        progresoGeneralController.obtenerProgresoGeneral();
+        progresoGeneralController
+            .obtenerProgresoGeneral();
 
         final double porcentaje =
-        progreso.porcentajeGeneral.clamp(0.0, 100.0);
+        progreso.porcentajeGeneral.clamp(
+          0.0,
+          100.0,
+        );
 
-        final int porcentajeTexto = porcentaje.round();
+        final int porcentajeTexto =
+        porcentaje.round();
 
         final int leccionesCompletadas =
-            progresoGeneralController.totalLeccionesCompletadas;
+            progresoGeneralController
+                .totalLeccionesCompletadas;
 
         final int totalLecciones =
-            progresoGeneralController.totalLecciones;
+            progresoGeneralController
+                .totalLecciones;
 
-        // AQUÍ YA NO HAY INKWELL NI ONTAP
         return Container(
           height: 250,
           padding: const EdgeInsets.symmetric(
@@ -326,7 +451,7 @@ class _InicioViewState extends State<InicioView> {
                 MainAxisAlignment.spaceEvenly,
                 children: [
                   // TÍTULO
-                  const Text(
+                  Text(
                     'Tu progreso General',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -347,14 +472,18 @@ class _InicioViewState extends State<InicioView> {
                         Transform.rotate(
                           angle: 1.57,
                           child: SizedBox.expand(
-                            child: CircularProgressIndicator(
+                            child:
+                            CircularProgressIndicator(
                               value: porcentaje / 100,
                               strokeWidth: 15,
-                              strokeCap: StrokeCap.round,
+                              strokeCap:
+                              StrokeCap.round,
                               backgroundColor:
-                              const Color(0xFFBFCFD4),
+                              Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest,
                               valueColor:
-                              const AlwaysStoppedAnimation<Color>(
+                              AlwaysStoppedAnimation<Color>(
                                 naranja,
                               ),
                             ),
@@ -366,7 +495,7 @@ class _InicioViewState extends State<InicioView> {
                           fit: BoxFit.scaleDown,
                           child: Text(
                             '$porcentajeTexto%',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 35,
                               fontWeight: FontWeight.bold,
                               color: texto,
@@ -382,7 +511,7 @@ class _InicioViewState extends State<InicioView> {
                     'Has realizado $leccionesCompletadas de '
                         '$totalLecciones lecciones',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       height: 1.9,
                       fontWeight: FontWeight.bold,
@@ -398,9 +527,9 @@ class _InicioViewState extends State<InicioView> {
     );
   }
 
-  // ==========================================
+  // ========================================
   // TARJETAS DEL MENÚ
-  // ==========================================
+  // ========================================
 
   Widget _tarjetaOpcion({
     required IconData icono,
@@ -412,10 +541,10 @@ class _InicioViewState extends State<InicioView> {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: naranja.withOpacity(0.17),
+          color: naranja.withValues(alpha: 0.17),
           borderRadius: BorderRadius.circular(19),
           border: Border.all(
-            color: naranja.withOpacity(0.30),
+            color: naranja.withValues(alpha: 0.30),
           ),
         ),
         child: Column(
@@ -427,14 +556,17 @@ class _InicioViewState extends State<InicioView> {
               size: 50,
               color: naranja,
             ),
+
             const SizedBox(height: 10),
+
             Padding(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 5),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 5,
+              ),
               child: Text(
                 titulo,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13.9,
                   fontWeight: FontWeight.bold,
                   color: texto,

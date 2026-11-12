@@ -21,6 +21,7 @@ class _PracticaConocerCalendarioViewState
   static const Color azul = Color(0xFF92AFBC);
   static const Color fondo = Color(0xFFF7F9FA);
   static const Color verde = Color(0xFF299764);
+  static const Color textoOscuro = Color(0xFF202C33);
 
   late DateTime mesActual;
   late DateTime diaSeleccionado;
@@ -58,6 +59,10 @@ class _PracticaConocerCalendarioViewState
     }
   }
 
+  // ==========================================
+  // NOMBRE DEL MES
+  // ==========================================
+
   String nombreMes(int mes) {
     const meses = [
       'Enero',
@@ -77,6 +82,10 @@ class _PracticaConocerCalendarioViewState
     return meses[mes - 1];
   }
 
+  // ==========================================
+  // AVANZAR MES
+  // ==========================================
+
   void avanzarMes() {
     setState(() {
       mesActual = DateTime(
@@ -90,6 +99,10 @@ class _PracticaConocerCalendarioViewState
       }
     });
   }
+
+  // ==========================================
+  // RETROCEDER MES
+  // ==========================================
 
   void retrocederMes() {
     setState(() {
@@ -105,6 +118,10 @@ class _PracticaConocerCalendarioViewState
     });
   }
 
+  // ==========================================
+  // SELECCIONAR DÍA
+  // ==========================================
+
   void seleccionarDia(DateTime fecha) {
     setState(() {
       diaSeleccionado = fecha;
@@ -115,6 +132,10 @@ class _PracticaConocerCalendarioViewState
       }
     });
   }
+
+  // ==========================================
+  // REGRESAR A HOY
+  // ==========================================
 
   void volverHoy() {
     final hoy = DateTime.now();
@@ -129,6 +150,10 @@ class _PracticaConocerCalendarioViewState
       }
     });
   }
+
+  // ==========================================
+  // CONSTRUIR CALENDARIO
+  // ==========================================
 
   Widget construirCalendario() {
     final primerDia = DateTime(
@@ -149,6 +174,10 @@ class _PracticaConocerCalendarioViewState
 
     return Column(
       children: [
+        // ======================================
+        // NAVEGACIÓN ENTRE MESES
+        // ======================================
+
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -157,20 +186,25 @@ class _PracticaConocerCalendarioViewState
               icon: const Icon(
                 Icons.chevron_left_rounded,
                 size: 34,
+                color: textoOscuro,
               ),
             ),
+
             Text(
               '${nombreMes(mesActual.month)} ${mesActual.year}',
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: textoOscuro,
               ),
             ),
+
             IconButton(
               onPressed: avanzarMes,
               icon: const Icon(
                 Icons.chevron_right_rounded,
                 size: 34,
+                color: textoOscuro,
               ),
             ),
           ],
@@ -178,19 +212,97 @@ class _PracticaConocerCalendarioViewState
 
         const SizedBox(height: 15),
 
+        // ======================================
+        // DÍAS DE LA SEMANA
+        // ======================================
+
         const Row(
           children: [
-            Expanded(child: Center(child: Text('L'))),
-            Expanded(child: Center(child: Text('M'))),
-            Expanded(child: Center(child: Text('M'))),
-            Expanded(child: Center(child: Text('J'))),
-            Expanded(child: Center(child: Text('V'))),
-            Expanded(child: Center(child: Text('S'))),
-            Expanded(child: Center(child: Text('D'))),
+            Expanded(
+              child: Center(
+                child: Text(
+                  'L',
+                  style: TextStyle(
+                    color: textoOscuro,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Center(
+                child: Text(
+                  'M',
+                  style: TextStyle(
+                    color: textoOscuro,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Center(
+                child: Text(
+                  'M',
+                  style: TextStyle(
+                    color: textoOscuro,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Center(
+                child: Text(
+                  'J',
+                  style: TextStyle(
+                    color: textoOscuro,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Center(
+                child: Text(
+                  'V',
+                  style: TextStyle(
+                    color: textoOscuro,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Center(
+                child: Text(
+                  'S',
+                  style: TextStyle(
+                    color: textoOscuro,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Center(
+                child: Text(
+                  'D',
+                  style: TextStyle(
+                    color: textoOscuro,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
 
         const SizedBox(height: 10),
+
+        // ======================================
+        // CUADRÍCULA DEL CALENDARIO
+        // ======================================
 
         GridView.builder(
           shrinkWrap: true,
@@ -215,8 +327,7 @@ class _PracticaConocerCalendarioViewState
               numeroDia,
             );
 
-            final seleccionado =
-            widget.controller.mismaFecha(
+            final seleccionado = widget.controller.mismaFecha(
               fecha,
               diaSeleccionado,
             );
@@ -252,7 +363,7 @@ class _PracticaConocerCalendarioViewState
                         : FontWeight.normal,
                     color: seleccionado
                         ? Colors.white
-                        : Colors.black87,
+                        : textoOscuro,
                   ),
                 ),
               ),
@@ -261,6 +372,10 @@ class _PracticaConocerCalendarioViewState
         ),
 
         const SizedBox(height: 15),
+
+        // ======================================
+        // BOTÓN HOY
+        // ======================================
 
         SizedBox(
           width: double.infinity,
@@ -272,7 +387,10 @@ class _PracticaConocerCalendarioViewState
               style: TextStyle(fontSize: 16),
             ),
             style: OutlinedButton.styleFrom(
-              foregroundColor: azul,
+              foregroundColor: const Color(0xFF496A79),
+              side: const BorderSide(
+                color: azul,
+              ),
               padding: const EdgeInsets.symmetric(
                 vertical: 14,
               ),
@@ -283,10 +401,15 @@ class _PracticaConocerCalendarioViewState
     );
   }
 
+  // ==========================================
+  // PANTALLA PRINCIPAL
+  // ==========================================
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: fondo,
+
       appBar: AppBar(
         backgroundColor: azul,
         foregroundColor: Colors.white,
@@ -295,17 +418,24 @@ class _PracticaConocerCalendarioViewState
           'Conocer el calendario',
           style: TextStyle(
             fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
       ),
+
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
+          // ======================================
+          // ENCABEZADO
+          // ======================================
+
           const Text(
             'Aprende a utilizar el calendario',
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
+              color: textoOscuro,
             ),
           ),
 
@@ -321,6 +451,10 @@ class _PracticaConocerCalendarioViewState
           ),
 
           const SizedBox(height: 22),
+
+          // ======================================
+          // GUÍA PASO A PASO
+          // ======================================
 
           Container(
             padding: const EdgeInsets.all(18),
@@ -338,6 +472,7 @@ class _PracticaConocerCalendarioViewState
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
+                    color: textoOscuro,
                   ),
                 ),
 
@@ -351,6 +486,7 @@ class _PracticaConocerCalendarioViewState
                   style: const TextStyle(
                     fontSize: 16,
                     height: 1.5,
+                    color: textoOscuro,
                   ),
                 ),
 
@@ -372,6 +508,10 @@ class _PracticaConocerCalendarioViewState
 
           const SizedBox(height: 22),
 
+          // ======================================
+          // CALENDARIO
+          // ======================================
+
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -382,6 +522,10 @@ class _PracticaConocerCalendarioViewState
           ),
 
           const SizedBox(height: 25),
+
+          // ======================================
+          // FINALIZAR PRÁCTICA
+          // ======================================
 
           if (pasoActual == 4)
             SizedBox(
@@ -399,6 +543,7 @@ class _PracticaConocerCalendarioViewState
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(

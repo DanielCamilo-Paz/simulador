@@ -1,7 +1,9 @@
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'inicio_view.dart';
+import '../usuario/registro_view.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -22,15 +24,24 @@ class _SplashViewState extends State<SplashView> {
   }
 
   Future<void> _iniciarAplicacion() async {
-    // Esperar 5 segundos antes de entrar a la aplicación
-    await Future.delayed(const Duration(seconds: 5));
+    // Mostrar el logo durante 5 segundos.
+    final espera = Future.delayed(const Duration(seconds: 2));
+
+    // Comprobar si el adulto mayor ya se registró.
+    final preferencias = await SharedPreferences.getInstance();
+    final registrado =
+        preferencias.getBool('usuario_registrado') ?? false;
+
+    await espera;
 
     if (!mounted) return;
 
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => const InicioView(),
+        builder: (_) => registrado
+            ? const InicioView()
+            : const RegistroView(),
       ),
     );
   }
@@ -44,7 +55,6 @@ class _SplashViewState extends State<SplashView> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-
               // LOGO OFICIAL DE SAFETAP
               Image.asset(
                 'assets/images/safeTapLogo.png',

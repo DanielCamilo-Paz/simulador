@@ -1,6 +1,9 @@
+
 import 'package:flutter/material.dart';
 
 import '../../controllers/camara_controller.dart';
+import '../compartido/tema_simulador.dart';
+
 import 'practica_camara_view.dart';
 import 'practica_galeria_view.dart';
 
@@ -8,15 +11,24 @@ class PantallaCamaraSim extends StatefulWidget {
   const PantallaCamaraSim({super.key});
 
   @override
-  State<PantallaCamaraSim> createState() => _PantallaCamaraSimState();
+  State<PantallaCamaraSim> createState() =>
+      _PantallaCamaraSimState();
 }
 
 class _PantallaCamaraSimState extends State<PantallaCamaraSim> {
   late final CamaraController controller;
 
+  // ========================================
+  // COLORES ORIGINALES DEL SIMULADOR
+  // ========================================
+
   static const Color azul = Color(0xFF92AFBC);
   static const Color fondo = Color(0xFFF7F9FA);
   static const Color verde = Color(0xFF299764);
+
+  // ========================================
+  // INICIALIZAR CONTROLADOR
+  // ========================================
 
   @override
   void initState() {
@@ -26,11 +38,19 @@ class _PantallaCamaraSimState extends State<PantallaCamaraSim> {
     controller.iniciar();
   }
 
+  // ========================================
+  // LIBERAR CONTROLADOR
+  // ========================================
+
   @override
   void dispose() {
     controller.dispose();
     super.dispose();
   }
+
+  // ========================================
+  // REINICIAR TODO EL PROGRESO
+  // ========================================
 
   Future<void> _reiniciarTodo() async {
     final confirmar = await showDialog<bool>(
@@ -78,6 +98,10 @@ class _PantallaCamaraSimState extends State<PantallaCamaraSim> {
     );
   }
 
+  // ========================================
+  // TARJETA DE CADA PRÁCTICA
+  // ========================================
+
   Widget _tarjetaPractica({
     required String titulo,
     required String descripcion,
@@ -111,7 +135,9 @@ class _PantallaCamaraSimState extends State<PantallaCamaraSim> {
                   size: 30,
                 ),
               ),
+
               const SizedBox(width: 15),
+
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,9 +147,12 @@ class _PantallaCamaraSimState extends State<PantallaCamaraSim> {
                       style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
                     ),
+
                     const SizedBox(height: 5),
+
                     Text(
                       descripcion,
                       style: const TextStyle(
@@ -131,7 +160,9 @@ class _PantallaCamaraSimState extends State<PantallaCamaraSim> {
                         fontSize: 13,
                       ),
                     ),
+
                     const SizedBox(height: 8),
+
                     Text(
                       progreso,
                       style: const TextStyle(
@@ -143,6 +174,7 @@ class _PantallaCamaraSimState extends State<PantallaCamaraSim> {
                   ],
                 ),
               ),
+
               const Icon(
                 Icons.arrow_forward_ios_rounded,
                 color: azul,
@@ -155,20 +187,28 @@ class _PantallaCamaraSimState extends State<PantallaCamaraSim> {
     );
   }
 
+  // ========================================
+  // PANTALLA PRINCIPAL DEL SIMULADOR
+  // ========================================
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: fondo,
+
       appBar: AppBar(
         backgroundColor: azul,
         foregroundColor: Colors.white,
         elevation: 0,
         title: const Text(
           'Práctica de cámara',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         centerTitle: true,
       ),
+
       body: AnimatedBuilder(
         animation: controller,
         builder: (context, child) {
@@ -182,9 +222,12 @@ class _PantallaCamaraSimState extends State<PantallaCamaraSim> {
                 style: TextStyle(
                   fontSize: 23,
                   fontWeight: FontWeight.bold,
+                  color: Colors.black87,
                 ),
               ),
+
               const SizedBox(height: 8),
+
               const Text(
                 'Practica tomando fotografías y administrándolas '
                     'desde la galería de tu teléfono.',
@@ -197,6 +240,10 @@ class _PantallaCamaraSimState extends State<PantallaCamaraSim> {
 
               const SizedBox(height: 24),
 
+              // ===================================
+              // PROGRESO GENERAL
+              // ===================================
+
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
@@ -207,15 +254,18 @@ class _PantallaCamaraSimState extends State<PantallaCamaraSim> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment:
+                      MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
                           'Progreso general',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
+                            color: Colors.black87,
                           ),
                         ),
+
                         Text(
                           '${estado.progresoGeneral}%',
                           style: const TextStyle(
@@ -226,7 +276,9 @@ class _PantallaCamaraSimState extends State<PantallaCamaraSim> {
                         ),
                       ],
                     ),
+
                     const SizedBox(height: 12),
+
                     ClipRRect(
                       borderRadius: BorderRadius.circular(20),
                       child: LinearProgressIndicator(
@@ -234,10 +286,14 @@ class _PantallaCamaraSimState extends State<PantallaCamaraSim> {
                         minHeight: 10,
                         backgroundColor: Colors.grey.shade200,
                         valueColor:
-                        const AlwaysStoppedAnimation<Color>(verde),
+                        const AlwaysStoppedAnimation<Color>(
+                          verde,
+                        ),
                       ),
                     ),
+
                     const SizedBox(height: 8),
+
                     Text(
                       estado.progresoGeneral == 100
                           ? '¡Has completado todas las prácticas!'
@@ -253,6 +309,11 @@ class _PantallaCamaraSimState extends State<PantallaCamaraSim> {
 
               const SizedBox(height: 22),
 
+              // ===================================
+              // PRÁCTICA 1: TOMAR FOTOGRAFÍAS
+              // PROTEGIDA DEL MODO OSCURO
+              // ===================================
+
               _tarjetaPractica(
                 titulo: 'Tomar fotografías',
                 descripcion: 'Aprende a tomar fotos y selfies.',
@@ -263,8 +324,10 @@ class _PantallaCamaraSimState extends State<PantallaCamaraSim> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => PracticaFotografiasView(
-                        controller: controller,
+                      builder: (_) => TemaSimulador(
+                        child: PracticaFotografiasView(
+                          controller: controller,
+                        ),
                       ),
                     ),
                   );
@@ -272,6 +335,11 @@ class _PantallaCamaraSimState extends State<PantallaCamaraSim> {
               ),
 
               const SizedBox(height: 14),
+
+              // ===================================
+              // PRÁCTICA 2: ADMINISTRAR FOTOGRAFÍAS
+              // PROTEGIDA DEL MODO OSCURO
+              // ===================================
 
               _tarjetaPractica(
                 titulo: 'Administrar fotografías',
@@ -283,8 +351,10 @@ class _PantallaCamaraSimState extends State<PantallaCamaraSim> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => PracticaGaleriaView(
-                        controller: controller,
+                      builder: (_) => TemaSimulador(
+                        child: PracticaGaleriaView(
+                          controller: controller,
+                        ),
                       ),
                     ),
                   );
@@ -293,22 +363,30 @@ class _PantallaCamaraSimState extends State<PantallaCamaraSim> {
 
               const SizedBox(height: 28),
 
-              // ÚNICO BOTÓN DE REINICIO DE TODO EL MÓDULO.
+              // ===================================
+              // REINICIAR TODO EL MÓDULO
+              // ===================================
+
               OutlinedButton.icon(
                 onPressed: _reiniciarTodo,
-                icon: const Icon(Icons.restart_alt_rounded),
+                icon: const Icon(
+                  Icons.restart_alt_rounded,
+                ),
                 label: const Text('Reiniciar todo'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.red.shade700,
                   side: BorderSide(
                     color: Colors.red.shade300,
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 15,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
               ),
+
               const SizedBox(height: 12),
             ],
           );

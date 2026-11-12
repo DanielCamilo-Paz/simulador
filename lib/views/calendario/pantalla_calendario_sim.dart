@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 import '../../controllers/calendario_controller.dart';
+import '../compartido/tema_simulador.dart';
 
 import 'practica_conocer_calendario_view.dart';
 import 'practica_crear_evento_view.dart';
@@ -20,9 +21,17 @@ class _PantallaCalendarioSimState
     extends State<PantallaCalendarioSim> {
   late final CalendarioController controller;
 
+  // ========================================
+  // COLORES DEL SIMULADOR
+  // ========================================
+
   static const Color azul = Color(0xFF92AFBC);
   static const Color fondo = Color(0xFFF7F9FA);
   static const Color verde = Color(0xFF299764);
+
+  // ========================================
+  // INICIALIZAR CONTROLADOR
+  // ========================================
 
   @override
   void initState() {
@@ -32,13 +41,19 @@ class _PantallaCalendarioSimState
     controller.iniciar();
   }
 
+  // ========================================
+  // LIBERAR CONTROLADOR
+  // ========================================
+
   @override
   void dispose() {
     controller.dispose();
     super.dispose();
   }
 
+  // ========================================
   // REINICIAR TODAS LAS PRÁCTICAS
+  // ========================================
 
   Future<void> _reiniciarTodo() async {
     final confirmar = await showDialog<bool>(
@@ -92,7 +107,9 @@ class _PantallaCalendarioSimState
     );
   }
 
+  // ========================================
   // TARJETA REUTILIZABLE DE CADA PRÁCTICA
+  // ========================================
 
   Widget _tarjetaPractica({
     required String titulo,
@@ -139,6 +156,7 @@ class _PantallaCalendarioSimState
                       style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
                     ),
 
@@ -178,64 +196,87 @@ class _PantallaCalendarioSimState
     );
   }
 
+  // ========================================
   // PRÁCTICA 1: CONOCER EL CALENDARIO
+  // PROTEGIDA DEL MODO OSCURO
+  // ========================================
 
   void _abrirConocerCalendario() {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => PracticaConocerCalendarioView(
-          controller: controller,
+        builder: (_) => TemaSimulador(
+          child: PracticaConocerCalendarioView(
+            controller: controller,
+          ),
         ),
       ),
     );
   }
 
+  // ========================================
   // PRÁCTICA 2: CREAR UN EVENTO
+  // PROTEGIDA DEL MODO OSCURO
+  // ========================================
 
   void _abrirCrearEvento() {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => PracticaCrearEventoView(
-          controller: controller,
+        builder: (_) => TemaSimulador(
+          child: PracticaCrearEventoView(
+            controller: controller,
+          ),
         ),
       ),
     );
   }
 
+  // ========================================
   // PRÁCTICA 3: CONSULTAR EVENTOS
+  // PROTEGIDA DEL MODO OSCURO
+  // ========================================
 
   void _abrirConsultarEventos() {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => PracticaConsultarEventosView(
-          controller: controller,
+        builder: (_) => TemaSimulador(
+          child: PracticaConsultarEventosView(
+            controller: controller,
+          ),
         ),
       ),
     );
   }
 
+  // ========================================
   // PRÁCTICA 4: EDITAR Y ELIMINAR EVENTOS
+  // PROTEGIDA DEL MODO OSCURO
+  // ========================================
 
   void _abrirEditarEliminar() {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => PracticaEditarEliminarView(
-          controller: controller,
+        builder: (_) => TemaSimulador(
+          child: PracticaEditarEliminarView(
+            controller: controller,
+          ),
         ),
       ),
     );
   }
 
-  // PANTALLA PRINCIPAL
+  // ========================================
+  // PANTALLA PRINCIPAL DEL CALENDARIO
+  // ========================================
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: fondo,
+
       appBar: AppBar(
         backgroundColor: azul,
         foregroundColor: Colors.white,
@@ -248,10 +289,15 @@ class _PantallaCalendarioSimState
         ),
         centerTitle: true,
       ),
+
       body: AnimatedBuilder(
         animation: controller,
         builder: (context, child) {
           final estado = controller.estado;
+
+          // ===================================
+          // CARGANDO INFORMACIÓN
+          // ===================================
 
           if (controller.cargando) {
             return const Center(
@@ -262,13 +308,16 @@ class _PantallaCalendarioSimState
           return ListView(
             padding: const EdgeInsets.all(20),
             children: [
+              // ===================================
               // ENCABEZADO
+              // ===================================
 
               const Text(
                 'Aprendamos a usar el calendario',
                 style: TextStyle(
                   fontSize: 23,
                   fontWeight: FontWeight.bold,
+                  color: Colors.black87,
                 ),
               ),
 
@@ -287,7 +336,9 @@ class _PantallaCalendarioSimState
 
               const SizedBox(height: 24),
 
+              // ===================================
               // PROGRESO GENERAL
+              // ===================================
 
               Container(
                 padding: const EdgeInsets.all(18),
@@ -307,6 +358,7 @@ class _PantallaCalendarioSimState
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
+                            color: Colors.black87,
                           ),
                         ),
 
@@ -356,7 +408,9 @@ class _PantallaCalendarioSimState
 
               const SizedBox(height: 22),
 
-              // PRÁCTICA 1
+              // ===================================
+              // PRÁCTICA 1: CONOCER CALENDARIO
+              // ===================================
 
               _tarjetaPractica(
                 titulo: 'Conocer el calendario',
@@ -370,7 +424,9 @@ class _PantallaCalendarioSimState
 
               const SizedBox(height: 14),
 
-              // PRÁCTICA 2
+              // ===================================
+              // PRÁCTICA 2: CREAR EVENTO
+              // ===================================
 
               _tarjetaPractica(
                 titulo: 'Crear un evento',
@@ -384,7 +440,9 @@ class _PantallaCalendarioSimState
 
               const SizedBox(height: 14),
 
-              // PRÁCTICA 3
+              // ===================================
+              // PRÁCTICA 3: CONSULTAR EVENTOS
+              // ===================================
 
               _tarjetaPractica(
                 titulo: 'Consultar eventos',
@@ -398,7 +456,9 @@ class _PantallaCalendarioSimState
 
               const SizedBox(height: 14),
 
-              // PRÁCTICA 4
+              // ===================================
+              // PRÁCTICA 4: EDITAR Y ELIMINAR
+              // ===================================
 
               _tarjetaPractica(
                 titulo: 'Editar y eliminar eventos',
@@ -412,7 +472,9 @@ class _PantallaCalendarioSimState
 
               const SizedBox(height: 28),
 
+              // ===================================
               // BOTÓN REINICIAR TODO
+              // ===================================
 
               OutlinedButton.icon(
                 onPressed: _reiniciarTodo,
@@ -425,8 +487,9 @@ class _PantallaCalendarioSimState
                   side: BorderSide(
                     color: Colors.red.shade300,
                   ),
-                  padding:
-                  const EdgeInsets.symmetric(vertical: 15),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 15,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),

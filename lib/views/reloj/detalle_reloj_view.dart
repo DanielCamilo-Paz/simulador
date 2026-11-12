@@ -2,28 +2,44 @@
 import 'package:flutter/material.dart';
 
 import 'pantalla_reloj_sim.dart';
+import '../compartido/tema_simulador.dart';
 
 class DetalleRelojView extends StatelessWidget {
   const DetalleRelojView({
     super.key,
   });
 
-  // PALETA PRINCIPAL ORIGINAL
-  static const Color fondo = Color(0xFFEFF6FF);
-  static const Color naranja = Color(0xFF4D67BC);
-  static const Color naranjaSuave = Color(0x2B4D67BC);
-  static const Color texto = Color(0xFF333333);
-  static const Color blanco = Colors.white;
-
   @override
   Widget build(BuildContext context) {
+    // ========================================
+    // COLORES DINÁMICOS DEL TEMA SELECCIONADO
+    // ========================================
+
+    final tema = Theme.of(context);
+    final colores = tema.colorScheme;
+
+    final Color fondo = tema.scaffoldBackgroundColor;
+    final Color colorPrincipal = colores.primary;
+    final Color colorSobrePrincipal = colores.onPrimary;
+    final Color colorTexto = colores.onSurface;
+    final Color colorSecundario = colores.onSurfaceVariant;
+    final Color colorTarjeta = colores.surface;
+
+    // Color suave basado en el color seleccionado.
+    final Color colorSuave =
+    colorPrincipal.withValues(alpha: 0.15);
+
     return Scaffold(
       backgroundColor: fondo,
+
+      // ========================================
+      // BARRA SUPERIOR
+      // ========================================
 
       appBar: AppBar(
         backgroundColor: fondo,
         elevation: 0,
-        foregroundColor: texto,
+        foregroundColor: colorTexto,
         title: const Text(
           'Realizar práctica',
           style: TextStyle(
@@ -39,53 +55,65 @@ class DetalleRelojView extends StatelessWidget {
             children: [
               const SizedBox(height: 25),
 
+              // ===================================
               // ICONO DEL RELOJ
+              // ===================================
+
               Container(
                 width: 140,
                 height: 140,
                 decoration: BoxDecoration(
-                  color: naranjaSuave,
+                  color: colorSuave,
                   borderRadius: BorderRadius.circular(30),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.watch_later_rounded,
                   size: 85,
-                  color: naranja,
+                  color: colorPrincipal,
                 ),
               ),
 
               const SizedBox(height: 28),
 
+              // ===================================
               // TÍTULO
-              const Text(
+              // ===================================
+
+              Text(
                 'Reloj, Alarmas y Cronómetro',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: texto,
+                  color: colorTexto,
                 ),
               ),
 
               const SizedBox(height: 14),
 
+              // ===================================
               // DESCRIPCIÓN
-              const Text(
+              // ===================================
+
+              Text(
                 'Aprende a ver la hora actual, crear y editar alarmas. '
                     'Conoce la hora de otras ciudades del mundo y usa el cronómetro.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
                   height: 1.5,
-                  color: Colors.black54,
+                  color: colorSecundario,
                 ),
               ),
 
               const SizedBox(height: 30),
 
+              // ===================================
               // TARJETA DE DURACIÓN Y NIVEL
+              // ===================================
+
               Card(
-                color: blanco,
+                color: colorTarjeta,
                 elevation: 1,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(18),
@@ -102,6 +130,9 @@ class DetalleRelojView extends StatelessWidget {
                           Icons.access_time,
                           'Duración',
                           '10 minutos',
+                          colorPrincipal,
+                          colorTexto,
+                          colorSecundario,
                         ),
                       ),
 
@@ -111,7 +142,7 @@ class DetalleRelojView extends StatelessWidget {
                         margin: const EdgeInsets.symmetric(
                           horizontal: 10,
                         ),
-                        color: Colors.black12,
+                        color: colores.outlineVariant,
                       ),
 
                       Expanded(
@@ -119,6 +150,9 @@ class DetalleRelojView extends StatelessWidget {
                           Icons.signal_cellular_alt,
                           'Nivel',
                           'Fácil',
+                          colorPrincipal,
+                          colorTexto,
+                          colorSecundario,
                         ),
                       ),
                     ],
@@ -128,7 +162,10 @@ class DetalleRelojView extends StatelessWidget {
 
               const SizedBox(height: 30),
 
+              // ===================================
               // BOTÓN COMENZAR LECCIÓN
+              // ===================================
+
               SizedBox(
                 width: double.infinity,
                 height: 58,
@@ -137,23 +174,30 @@ class DetalleRelojView extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) =>
-                        const PantallaRelojSim(),
+                        builder: (_) => const TemaSimulador(
+                          child: PantallaRelojSim(),
+                        ),
                       ),
                     );
                   },
+
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: naranja,
-                    foregroundColor: texto,
+                    backgroundColor: colorPrincipal,
+                    foregroundColor: colorSobrePrincipal,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius:
+                      BorderRadius.circular(16),
                     ),
                   ),
-                  child: const Text(
+
+                  child: Text(
                     'Comenzar lección',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 19,
                       fontWeight: FontWeight.bold,
+                      color: colorSobrePrincipal,
                     ),
                   ),
                 ),
@@ -161,7 +205,10 @@ class DetalleRelojView extends StatelessWidget {
 
               const SizedBox(height: 15),
 
+              // ===================================
               // BOTÓN REGRESAR A PRÁCTICAS
+              // ===================================
+
               SizedBox(
                 width: double.infinity,
                 height: 58,
@@ -169,10 +216,12 @@ class DetalleRelojView extends StatelessWidget {
                   onPressed: () {
                     Navigator.pop(context);
                   },
+
                   icon: const Icon(
                     Icons.arrow_back_rounded,
                     size: 25,
                   ),
+
                   label: const Text(
                     'Regresar a prácticas',
                     style: TextStyle(
@@ -180,14 +229,16 @@ class DetalleRelojView extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: naranja,
-                    side: const BorderSide(
-                      color: naranja,
+                    foregroundColor: colorPrincipal,
+                    side: BorderSide(
+                      color: colorPrincipal,
                       width: 2,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius:
+                      BorderRadius.circular(16),
                     ),
                   ),
                 ),
@@ -201,17 +252,23 @@ class DetalleRelojView extends StatelessWidget {
     );
   }
 
+  // ========================================
   // INFORMACIÓN DE DURACIÓN Y NIVEL
+  // ========================================
+
   Widget _dato(
       IconData icono,
       String titulo,
       String valor,
+      Color colorPrincipal,
+      Color colorTexto,
+      Color colorSecundario,
       ) {
     return Column(
       children: [
         Icon(
           icono,
-          color: naranja,
+          color: colorPrincipal,
           size: 30,
         ),
 
@@ -219,8 +276,8 @@ class DetalleRelojView extends StatelessWidget {
 
         Text(
           titulo,
-          style: const TextStyle(
-            color: Colors.black54,
+          style: TextStyle(
+            color: colorSecundario,
             fontSize: 14,
           ),
         ),
@@ -229,10 +286,10 @@ class DetalleRelojView extends StatelessWidget {
 
         Text(
           valor,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
-            color: texto,
+            color: colorTexto,
           ),
         ),
       ],

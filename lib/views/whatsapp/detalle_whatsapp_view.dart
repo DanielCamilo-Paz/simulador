@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../controllers/whatsapp_controller.dart';
 import 'pantalla_whatsapp_sim.dart';
+import '../compartido/tema_simulador.dart';
 
 class DetalleWhatsappView extends StatefulWidget {
   const DetalleWhatsappView({super.key});
@@ -12,22 +13,30 @@ class DetalleWhatsappView extends StatefulWidget {
       _DetalleWhatsappViewState();
 }
 
-class _DetalleWhatsappViewState extends State<DetalleWhatsappView> {
-  // PALETA PRINCIPAL
-  static const Color fondo = Color(0xFFEFF6FF);
-  static const Color naranja = Color(0xFF4D67BC);
-  static const Color naranjaSuave = Color(0x2B4D67BC);
-  static const Color texto = Color(0xFF333333);
-  static const Color blanco = Colors.white;
+class _DetalleWhatsappViewState
+    extends State<DetalleWhatsappView> {
+
+  // ========================================
+  // CONTROLADOR DE WHATSAPP
+  // ========================================
 
   late final WhatsappController controller;
+
+  // ========================================
+  // INICIALIZAR CONTROLADOR Y PROGRESO
+  // ========================================
 
   @override
   void initState() {
     super.initState();
+
     controller = WhatsappController();
     controller.cargarProgreso();
   }
+
+  // ========================================
+  // LIBERAR CONTROLADOR
+  // ========================================
 
   @override
   void dispose() {
@@ -35,12 +44,19 @@ class _DetalleWhatsappViewState extends State<DetalleWhatsappView> {
     super.dispose();
   }
 
+  // ========================================
+  // ABRIR SIMULADOR DE WHATSAPP
+  // CON TEMA CLARO INDEPENDIENTE
+  // ========================================
+
   void _abrirPractica() {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => PantallaWhatsappSim(
-          controller: controller,
+        builder: (_) => TemaSimulador(
+          child: PantallaWhatsappSim(
+            controller: controller,
+          ),
         ),
       ),
     );
@@ -48,141 +64,209 @@ class _DetalleWhatsappViewState extends State<DetalleWhatsappView> {
 
   @override
   Widget build(BuildContext context) {
+
+    // ========================================
+    // COLORES DINÁMICOS DEL TEMA SELECCIONADO
+    // ========================================
+
+    final tema = Theme.of(context);
+    final colores = tema.colorScheme;
+
+    final Color fondo = tema.scaffoldBackgroundColor;
+    final Color colorPrincipal = colores.primary;
+    final Color colorSobrePrincipal = colores.onPrimary;
+    final Color colorTexto = colores.onSurface;
+    final Color colorSecundario = colores.onSurfaceVariant;
+    final Color colorTarjeta = colores.surface;
+
+    // Color suave basado en el color elegido.
+    final Color colorSuave =
+    colorPrincipal.withValues(alpha: 0.15);
+
     return Scaffold(
       backgroundColor: fondo,
 
+      // ========================================
+      // BARRA SUPERIOR
+      // ========================================
+
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Realizar práctica',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: texto,
+            color: colorTexto,
           ),
         ),
         backgroundColor: fondo,
-        foregroundColor: texto,
+        foregroundColor: colorTexto,
         elevation: 0,
       ),
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(22),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(22),
 
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
 
-            const SizedBox(height: 10),
+              const SizedBox(height: 10),
 
-            // ICONO PRINCIPAL
-            Container(
-              width: 125,
-              height: 125,
-              decoration: BoxDecoration(
-                color: naranja,
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: const Icon(
-                Icons.chat_rounded,
-                size: 75,
-                color: blanco,
-              ),
-            ),
+              // ===================================
+              // ICONO PRINCIPAL
+              // ===================================
 
-            const SizedBox(height: 22),
-
-            // TITULO
-            const Text(
-              'WhatsApp',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: texto,
-              ),
-              textAlign: TextAlign.center,
-            ),
-
-            const SizedBox(height: 12),
-
-            // DESCRIPCION
-            const Text(
-              'Aprende a utilizar WhatsApp de manera sencilla. '
-                  'Practica cómo enviar mensajes, compartir audios y fotos, '
-                  'realizar llamadas, publicar estados y buscar contactos.',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black54,
-                height: 1.5,
-              ),
-              textAlign: TextAlign.center,
-            ),
-
-            const SizedBox(height: 26),
-
-            // INFORMACION DE LA PRACTICA
-            Container(
-              padding: const EdgeInsets.symmetric(
-                vertical: 20,
-                horizontal: 12,
-              ),
-              decoration: BoxDecoration(
-                color: naranjaSuave,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _dato(
-                    Icons.access_time_rounded,
-                    'Duración',
-                    '20 minutos',
-                  ),
-                  _dato(
-                    Icons.trending_up_rounded,
-                    'Nivel',
-                    'Fácil',
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 35),
-
-            // BOTON PRINCIPAL
-            SizedBox(
-              width: double.infinity,
-              height: 62,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: naranja,
-                  foregroundColor: blanco,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+              Container(
+                width: 125,
+                height: 125,
+                decoration: BoxDecoration(
+                  color: colorPrincipal,
+                  borderRadius: BorderRadius.circular(30),
                 ),
-                onPressed: _abrirPractica,
-                child: const Text(
-                  'Aprender a usar WhatsApp',
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Icon(
+                  Icons.chat_rounded,
+                  size: 75,
+                  color: colorSobrePrincipal,
                 ),
               ),
-            ),
 
-            const SizedBox(height: 15),
-          ],
+              const SizedBox(height: 22),
+
+              // ===================================
+              // TÍTULO
+              // ===================================
+
+              Text(
+                'WhatsApp',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: colorTexto,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 12),
+
+              // ===================================
+              // DESCRIPCIÓN
+              // ===================================
+
+              Text(
+                'Aprende a utilizar WhatsApp de manera sencilla. '
+                    'Practica cómo enviar mensajes, compartir audios y fotos, '
+                    'realizar llamadas, publicar estados y buscar contactos.',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: colorSecundario,
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 26),
+
+              // ===================================
+              // INFORMACIÓN DE LA PRÁCTICA
+              // ===================================
+
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 20,
+                  horizontal: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: colorSuave,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Row(
+                  mainAxisAlignment:
+                  MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      child: _dato(
+                        Icons.access_time_rounded,
+                        'Duración',
+                        '20 minutos',
+                        colorPrincipal,
+                        colorTexto,
+                        colorSecundario,
+                        colorTarjeta,
+                      ),
+                    ),
+
+                    const SizedBox(width: 12),
+
+                    Expanded(
+                      child: _dato(
+                        Icons.trending_up_rounded,
+                        'Nivel',
+                        'Fácil',
+                        colorPrincipal,
+                        colorTexto,
+                        colorSecundario,
+                        colorTarjeta,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 35),
+
+              // ===================================
+              // BOTÓN PRINCIPAL
+              // ===================================
+
+              SizedBox(
+                width: double.infinity,
+                height: 62,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorPrincipal,
+                    foregroundColor: colorSobrePrincipal,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                      BorderRadius.circular(20),
+                    ),
+                  ),
+
+                  onPressed: _abrirPractica,
+
+                  child: Text(
+                    'Aprender a usar WhatsApp',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: colorSobrePrincipal,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 15),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // DATOS DE LA PRACTICA
+  // ========================================
+  // INFORMACIÓN DE DURACIÓN Y NIVEL
+  // ========================================
+
   Widget _dato(
       IconData icono,
       String etiqueta,
       String valor,
+      Color colorPrincipal,
+      Color colorTexto,
+      Color colorSecundario,
+      Color colorTarjeta,
       ) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -191,13 +275,13 @@ class _DetalleWhatsappViewState extends State<DetalleWhatsappView> {
           width: 64,
           height: 64,
           decoration: BoxDecoration(
-            color: blanco,
+            color: colorTarjeta,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Icon(
             icono,
             size: 32,
-            color: naranja,
+            color: colorPrincipal,
           ),
         ),
 
@@ -205,10 +289,10 @@ class _DetalleWhatsappViewState extends State<DetalleWhatsappView> {
 
         Text(
           etiqueta,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
-            color: texto,
+            color: colorTexto,
           ),
         ),
 
@@ -216,8 +300,8 @@ class _DetalleWhatsappViewState extends State<DetalleWhatsappView> {
 
         Text(
           valor,
-          style: const TextStyle(
-            color: Colors.black54,
+          style: TextStyle(
+            color: colorSecundario,
             fontSize: 14,
           ),
         ),
