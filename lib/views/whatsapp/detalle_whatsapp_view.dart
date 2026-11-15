@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../controllers/whatsapp_controller.dart';
 import 'pantalla_whatsapp_sim.dart';
@@ -114,20 +115,24 @@ class _DetalleWhatsappViewState
               const SizedBox(height: 10),
 
               // ===================================
-              // ICONO PRINCIPAL
+              // LOGO PRINCIPAL DE WHATSAPP
               // ===================================
 
               Container(
                 width: 125,
                 height: 125,
+
                 decoration: BoxDecoration(
-                  color: colorPrincipal,
+                  color: const Color(0xFF25D366),
                   borderRadius: BorderRadius.circular(30),
                 ),
-                child: Icon(
-                  Icons.chat_rounded,
-                  size: 75,
-                  color: colorSobrePrincipal,
+
+                child: const Center(
+                  child: FaIcon(
+                    FontAwesomeIcons.whatsapp,
+                    size: 75,
+                    color: Colors.white,
+                  ),
                 ),
               ),
 
@@ -176,14 +181,18 @@ class _DetalleWhatsappViewState
                   vertical: 20,
                   horizontal: 12,
                 ),
+
                 decoration: BoxDecoration(
                   color: colorSuave,
                   borderRadius: BorderRadius.circular(24),
                 ),
+
                 child: Row(
                   mainAxisAlignment:
                   MainAxisAlignment.spaceEvenly,
+
                   children: [
+
                     Expanded(
                       child: _dato(
                         Icons.access_time_rounded,
@@ -222,14 +231,15 @@ class _DetalleWhatsappViewState
               SizedBox(
                 width: double.infinity,
                 height: 62,
+
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colorPrincipal,
                     foregroundColor: colorSobrePrincipal,
                     elevation: 0,
+
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                      BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                   ),
 
@@ -238,6 +248,7 @@ class _DetalleWhatsappViewState
                   child: Text(
                     'Aprender a usar WhatsApp',
                     textAlign: TextAlign.center,
+
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
@@ -270,14 +281,18 @@ class _DetalleWhatsappViewState
       ) {
     return Column(
       mainAxisSize: MainAxisSize.min,
+
       children: [
+
         Container(
           width: 64,
           height: 64,
+
           decoration: BoxDecoration(
             color: colorTarjeta,
             borderRadius: BorderRadius.circular(20),
           ),
+
           child: Icon(
             icono,
             size: 32,

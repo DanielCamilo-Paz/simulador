@@ -9,7 +9,6 @@ import 'controllers/reloj_controller.dart';
 import 'controllers/calendario_controller.dart';
 import 'controllers/whatsapp_controller.dart';
 import 'controllers/configuracion_controller.dart';
-import 'controllers/progreso_general_controller.dart';
 
 // ========================================
 // CONTROLADORES GLOBALES DE SAFETAP
@@ -17,7 +16,9 @@ import 'controllers/progreso_general_controller.dart';
 
 final configuracionController = ConfiguracionController();
 
-final progresoGeneralController = ProgresoGeneralController();
+// Esta instancia se mantiene viva durante toda la aplicación.
+// No crear otro WhatsappController en las pantallas.
+final whatsappController = WhatsappController();
 
 // ========================================
 // FUNCIÓN PRINCIPAL
@@ -56,7 +57,7 @@ Future<void> main() async {
   }
 
   // ========================================
-  // CARGAR CONFIGURACIÓN GUARDADA
+  // CARGAR CONFIGURACIÓN
   // ========================================
 
   try {
@@ -68,7 +69,24 @@ Future<void> main() async {
   }
 
   // ========================================
-  // CARGAR PROGRESO GUARDADO
+  // CARGAR PROGRESO DE WHATSAPP
+  // ========================================
+
+  try {
+    await whatsappController.cargarProgreso();
+
+    debugPrint('Progreso de WhatsApp cargado correctamente.');
+
+    debugPrint(
+      'Lecciones completadas: '
+          '${whatsappController.progreso.cantidadCompletadas}',
+    );
+  } catch (e) {
+    debugPrint('Error al cargar progreso de WhatsApp: $e');
+  }
+
+  // ========================================
+  // CARGAR PROGRESO DE LOS DEMÁS MÓDULOS
   // ========================================
 
   await cargarProgresoGeneral();
@@ -81,7 +99,7 @@ Future<void> main() async {
 }
 
 // ========================================
-// CARGAR PROGRESO GENERAL
+// CARGAR PROGRESO DE OTROS MÓDULOS
 // ========================================
 
 Future<void> cargarProgresoGeneral() async {
@@ -93,7 +111,6 @@ Future<void> cargarProgresoGeneral() async {
 
   try {
     await camaraController.cargarProgreso();
-
     debugPrint('Progreso de Cámara cargado.');
   } catch (e) {
     debugPrint('Error al cargar progreso de Cámara: $e');
@@ -109,7 +126,6 @@ Future<void> cargarProgresoGeneral() async {
 
   try {
     await relojController.iniciarProgreso();
-
     debugPrint('Progreso de Reloj cargado.');
   } catch (e) {
     debugPrint('Error al cargar progreso de Reloj: $e');
@@ -125,28 +141,11 @@ Future<void> cargarProgresoGeneral() async {
 
   try {
     await calendarioController.cargarDatos();
-
     debugPrint('Progreso de Calendario cargado.');
   } catch (e) {
     debugPrint('Error al cargar progreso de Calendario: $e');
   } finally {
     calendarioController.dispose();
-  }
-
-  // ========================================
-  // WHATSAPP
-  // ========================================
-
-  final whatsappController = WhatsappController();
-
-  try {
-    await whatsappController.cargarProgreso();
-
-    debugPrint('Progreso de WhatsApp cargado.');
-  } catch (e) {
-    debugPrint('Error al cargar progreso de WhatsApp: $e');
-  } finally {
-    whatsappController.dispose();
   }
 
   debugPrint('Carga inicial del progreso finalizada.');
@@ -178,8 +177,7 @@ class MiApp extends StatelessWidget {
           theme: ThemeData(
             useMaterial3: true,
             brightness: Brightness.light,
-            scaffoldBackgroundColor:
-            const Color(0xFFEFF6FF),
+            scaffoldBackgroundColor: const Color(0xFFEFF6FF),
             colorScheme: ColorScheme.fromSeed(
               seedColor: color,
               brightness: Brightness.light,
@@ -197,8 +195,7 @@ class MiApp extends StatelessWidget {
           darkTheme: ThemeData(
             useMaterial3: true,
             brightness: Brightness.dark,
-            scaffoldBackgroundColor:
-            const Color(0xFF121826),
+            scaffoldBackgroundColor: const Color(0xFF121826),
             colorScheme: ColorScheme.fromSeed(
               seedColor: color,
               brightness: Brightness.dark,

@@ -4,15 +4,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/whatsapp/leccion_whatsapp_model.dart';
 import '../models/whatsapp/progreso_whatsapp_model.dart';
-
 import 'progreso_general_controller.dart';
 
 class WhatsappController extends ChangeNotifier {
   static const String _claveProgreso = 'progreso_whatsapp';
 
-  // --------------------------------------------------
+  // ========================================
   // LECCIONES DISPONIBLES
-  // --------------------------------------------------
+  // ========================================
 
   final List<LeccionWhatsappModel> lecciones = const [
     LeccionWhatsappModel(
@@ -65,9 +64,9 @@ class WhatsappController extends ChangeNotifier {
     ),
   ];
 
-  // --------------------------------------------------
+  // ========================================
   // PROGRESO GENERAL DE SAFETAP
-  // --------------------------------------------------
+  // ========================================
 
   final ProgresoGeneralController _progresoGeneral =
       progresoGeneralController;
@@ -94,9 +93,6 @@ class WhatsappController extends ChangeNotifier {
     );
   }
 
-  // SINCRONIZAR EL PROGRESO INDIVIDUAL
-  // CON EL PROGRESO GENERAL DE SAFETAP
-
   void _sincronizarProgresoGeneral() {
     for (final leccion in lecciones) {
       if (progreso.estaCompletada(leccion.id)) {
@@ -113,14 +109,19 @@ class WhatsappController extends ChangeNotifier {
     }
   }
 
-  // --------------------------------------------------
-  // PROGRESO INDIVIDUAL DE WHATSAPP
-  // --------------------------------------------------
+  // ========================================
+  // PROGRESO INDIVIDUAL
+  // ========================================
 
   final ProgresoWhatsappModel progreso =
   ProgresoWhatsappModel();
 
   bool cargando = true;
+  bool _disposed = false;
+
+  Future<void>? _cargaEnProceso;
+
+  Future<void> _colaGuardado = Future.value();
 
   int get totalLecciones => lecciones.length;
 
@@ -137,13 +138,29 @@ class WhatsappController extends ChangeNotifier {
     return progreso.estaCompletada(id);
   }
 
-  // --------------------------------------------------
-  // CARGAR PROGRESO GUARDADO
-  // --------------------------------------------------
+  void _notificar() {
+    if (!_disposed) {
+      notifyListeners();
+    }
+  }
 
-  Future<void> cargarProgreso() async {
+  // ========================================
+  // CARGAR PROGRESO GUARDADO
+  // ========================================
+
+  Future<void> cargarProgreso() {
+    if (_cargaEnProceso != null) {
+      return _cargaEnProceso!;
+    }
+
+    _cargaEnProceso = _cargarProgresoInterno();
+
+    return _cargaEnProceso!;
+  }
+
+  Future<void> _cargarProgresoInterno() async {
     cargando = true;
-    notifyListeners();
+    _notificar();
 
     try {
       final preferencias =
@@ -162,21 +179,25 @@ class WhatsappController extends ChangeNotifier {
           ),
         );
 
-      // RECUPERAR EL PROGRESO GENERAL
       _sincronizarProgresoGeneral();
+
+      debugPrint(
+        'WhatsApp: ${progreso.cantidadCompletadas} '
+            'lecciones recuperadas.',
+      );
     } catch (e) {
       debugPrint(
         'Error al cargar el progreso de WhatsApp: $e',
       );
+    } finally {
+      cargando = false;
+      _notificar();
     }
-
-    cargando = false;
-    notifyListeners();
   }
 
-  // --------------------------------------------------
+  // ========================================
   // MARCAR LECCIÓN COMO COMPLETADA
-  // --------------------------------------------------
+  // ========================================
 
   Future<void> marcarCompletada(String id) async {
     final existe = lecciones.any(
@@ -187,77 +208,98 @@ class WhatsappController extends ChangeNotifier {
       return;
     }
 
-    // ACTUALIZAR PROGRESO INDIVIDUAL
+    // Actualizar progreso individual.
     progreso.marcarCompletada(id);
 
-    // ACTUALIZAR PROGRESO GENERAL
+    // Actualizar progreso general.
     _progresoGeneral.completarActividad(
       'whatsapp',
       id,
     );
 
-    notifyListeners();
+    debugPrint('Lección completada: $id');
+
+    _notificar();
 
     await _guardarProgreso();
   }
 
-  // --------------------------------------------------
-  // QUITAR UNA LECCIÓN DEL PROGRESO
-  // --------------------------------------------------
+  // ========================================
+  // QUITAR LECCIÓN COMPLETADA
+  // ========================================
 
   Future<void> quitarCompletada(String id) async {
     if (!estaCompletada(id)) {
       return;
     }
 
-    // ACTUALIZAR PROGRESO INDIVIDUAL
     progreso.quitarCompletada(id);
 
-    // ACTUALIZAR PROGRESO GENERAL
     _progresoGeneral.reiniciarActividad(
       'whatsapp',
       id,
     );
 
-    notifyListeners();
+    _notificar();
 
     await _guardarProgreso();
   }
 
-  // --------------------------------------------------
-  // GUARDAR EN EL TELÉFONO
-  // --------------------------------------------------
+  // ========================================
+  // GUARDAR PROGRESO
+  // ========================================
 
-  Future<void> _guardarProgreso() async {
-    try {
-      final preferencias =
-      await SharedPreferences.getInstance();
+  Future<void> _guardarProgreso() {
+    final datos = progreso.leccionesCompletadas.toList();
 
-      await preferencias.setStringList(
-        _claveProgreso,
-        progreso.leccionesCompletadas.toList(),
-      );
-    } catch (e) {
-      debugPrint(
-        'Error al guardar el progreso de WhatsApp: $e',
-      );
-    }
+    _colaGuardado = _colaGuardado.then((_) async {
+      try {
+        final preferencias =
+        await SharedPreferences.getInstance();
+
+        await preferencias.setStringList(
+          _claveProgreso,
+          datos,
+        );
+
+        debugPrint(
+          'Progreso de WhatsApp guardado: $datos',
+        );
+      } catch (e) {
+        debugPrint(
+          'Error al guardar el progreso de WhatsApp: $e',
+        );
+      }
+    });
+
+    return _colaGuardado;
   }
 
-  // --------------------------------------------------
+  // ========================================
   // REINICIAR TODO EL PROGRESO
-  // --------------------------------------------------
+  // ========================================
 
   Future<void> reiniciarProgreso() async {
     progreso.leccionesCompletadas.clear();
 
-    // REINICIAR TAMBIÉN EL PROGRESO GENERAL
     _progresoGeneral.reiniciarAplicacion(
       'whatsapp',
     );
 
-    notifyListeners();
+    _notificar();
 
     await _guardarProgreso();
+
+    debugPrint('Progreso de WhatsApp reiniciado.');
+  }
+
+  // ========================================
+  // LIBERAR CONTROLADOR
+  // ========================================
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 }

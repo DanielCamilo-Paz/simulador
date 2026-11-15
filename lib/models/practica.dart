@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';  // ← Para IconData
-import 'paso.dart';                      // ← Para la clase Paso
+
+import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'paso.dart';
 
 class Practica {
   final String id;
@@ -7,7 +9,7 @@ class Practica {
   final String descripcion;
   final String duracion;
   final String nivel;
-  final IconData icono;
+  final Object icono;
   final List<Paso> pasos;
 
   Practica({

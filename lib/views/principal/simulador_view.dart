@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../controllers/progreso_controller.dart';
 
@@ -13,7 +14,7 @@ class SimuladorView extends StatefulWidget {
   final Function(
       String nombre,
       String descripcion,
-      IconData icono,
+      Object icono,
       Widget pantalla,
       )? onSeleccionarPractica;
 
@@ -23,8 +24,7 @@ class SimuladorView extends StatefulWidget {
   });
 
   @override
-  State<SimuladorView> createState() =>
-      _SimuladorViewState();
+  State<SimuladorView> createState() => _SimuladorViewState();
 }
 
 class _SimuladorViewState extends State<SimuladorView> {
@@ -53,7 +53,7 @@ class _SimuladorViewState extends State<SimuladorView> {
   void _abrirPractica({
     required String nombre,
     required String descripcion,
-    required IconData icono,
+    required Object icono,
     required Widget pantalla,
   }) {
     widget.onSeleccionarPractica?.call(
@@ -110,24 +110,17 @@ class _SimuladorViewState extends State<SimuladorView> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            // El tamaño de letra seleccionado
-            // determina el espacio de las tarjetas.
             final escala = MediaQuery.textScalerOf(
               context,
             ).scale(1.0);
 
-            // Si la letra es muy grande,
-            // usamos una columna para evitar
-            // que los textos se amontonen.
             final bool unaColumna =
                 constraints.maxWidth < 340 ||
                     escala >= 1.3;
 
-            final int columnas =
-            unaColumna ? 1 : 2;
+            final int columnas = unaColumna ? 1 : 2;
 
-            final double alturaTarjeta =
-            unaColumna
+            final double alturaTarjeta = unaColumna
                 ? 185 + (escala - 1.0) * 45
                 : 205 + (escala - 1.0) * 65;
 
@@ -140,6 +133,7 @@ class _SimuladorViewState extends State<SimuladorView> {
                 mainAxisSpacing: 14,
                 mainAxisExtent: alturaTarjeta,
               ),
+
               children: [
                 // ===================================
                 // LLAMADAS
@@ -153,10 +147,8 @@ class _SimuladorViewState extends State<SimuladorView> {
                       nombre: 'Realizar llamada',
                       descripcion:
                       'Haz una llamada a un contacto conocido',
-                      icono:
-                      Icons.phone_in_talk_rounded,
-                      pantalla:
-                      const DetallePracticaView(),
+                      icono: Icons.phone_in_talk_rounded,
+                      pantalla: const DetallePracticaView(),
                     );
                   },
                 ),
@@ -173,10 +165,8 @@ class _SimuladorViewState extends State<SimuladorView> {
                       nombre: 'Cámara y galería',
                       descripcion:
                       'Aprende a tomar fotos y administrar imágenes',
-                      icono:
-                      Icons.camera_alt_rounded,
-                      pantalla:
-                      const DetalleCamaraView(),
+                      icono: Icons.camera_alt_rounded,
+                      pantalla: const DetalleCamaraView(),
                     );
                   },
                 ),
@@ -193,10 +183,8 @@ class _SimuladorViewState extends State<SimuladorView> {
                       nombre: 'Reloj y alarmas',
                       descripcion:
                       'Aprende a utilizar el reloj y configurar alarmas',
-                      icono:
-                      Icons.access_time_rounded,
-                      pantalla:
-                      const DetalleRelojView(),
+                      icono: Icons.access_time_rounded,
+                      pantalla: const DetalleRelojView(),
                     );
                   },
                 ),
@@ -213,10 +201,8 @@ class _SimuladorViewState extends State<SimuladorView> {
                       nombre: 'Calendario',
                       descripcion:
                       'Aprende a organizar tus eventos y actividades',
-                      icono:
-                      Icons.calendar_month_rounded,
-                      pantalla:
-                      const DetalleCalendarioView(),
+                      icono: Icons.calendar_month_rounded,
+                      pantalla: const DetalleCalendarioView(),
                     );
                   },
                 ),
@@ -226,16 +212,15 @@ class _SimuladorViewState extends State<SimuladorView> {
                 // ===================================
 
                 _tarjeta(
-                  icono: Icons.message,
+                  icono: FontAwesomeIcons.whatsapp,
                   titulo: 'WhatsApp',
                   onTap: () {
                     _abrirPractica(
                       nombre: 'WhatsApp',
                       descripcion:
                       'Aprende a enviar mensajes y compartir fotos',
-                      icono: Icons.message_rounded,
-                      pantalla:
-                      const DetalleWhatsappView(),
+                      icono: FontAwesomeIcons.whatsapp,
+                      pantalla: const DetalleWhatsappView(),
                     );
                   },
                 ),
@@ -252,7 +237,7 @@ class _SimuladorViewState extends State<SimuladorView> {
   // ========================================
 
   Widget _tarjeta({
-    required IconData icono,
+    required Object icono,
     required String titulo,
     required VoidCallback onTap,
   }) {
@@ -262,8 +247,9 @@ class _SimuladorViewState extends State<SimuladorView> {
     final Color colorTexto = colores.onSurface;
     final Color colorIcono = colores.onPrimary;
 
-    final Color colorTarjeta =
-    Color.alphaBlend(
+    final bool esWhatsApp = titulo == 'WhatsApp';
+
+    final Color colorTarjeta = Color.alphaBlend(
       colorPrincipal.withValues(alpha: 0.13),
       colores.surface,
     );
@@ -276,9 +262,7 @@ class _SimuladorViewState extends State<SimuladorView> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(22),
         side: BorderSide(
-          color: colorPrincipal.withValues(
-            alpha: 0.30,
-          ),
+          color: colorPrincipal.withValues(alpha: 0.30),
           width: 1,
         ),
       ),
@@ -287,16 +271,14 @@ class _SimuladorViewState extends State<SimuladorView> {
 
       child: InkWell(
         onTap: onTap,
-        splashColor: colorPrincipal.withValues(
-          alpha: 0.15,
-        ),
+        splashColor: colorPrincipal.withValues(alpha: 0.15),
 
         child: Padding(
           padding: const EdgeInsets.all(12),
 
           child: Column(
-            mainAxisAlignment:
-            MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+
             children: [
               // ===================================
               // ICONO
@@ -305,15 +287,26 @@ class _SimuladorViewState extends State<SimuladorView> {
               Container(
                 width: 76,
                 height: 76,
+
                 decoration: BoxDecoration(
-                  color: colorPrincipal,
-                  borderRadius:
-                  BorderRadius.circular(20),
+                  color: esWhatsApp
+                      ? const Color(0xFF25D366)
+                      : colorPrincipal,
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                child: Icon(
-                  icono,
-                  size: 43,
-                  color: colorIcono,
+
+                child: Center(
+                  child: icono is IconData
+                      ? Icon(
+                    icono,
+                    size: 43,
+                    color: colorIcono,
+                  )
+                      : FaIcon(
+                    icono as FaIconData,
+                    size: 43,
+                    color: Colors.white,
+                  ),
                 ),
               ),
 
@@ -327,6 +320,7 @@ class _SimuladorViewState extends State<SimuladorView> {
                 titulo,
                 textAlign: TextAlign.center,
                 softWrap: true,
+
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

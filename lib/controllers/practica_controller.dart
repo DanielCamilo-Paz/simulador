@@ -1,4 +1,6 @@
+
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../models/practica.dart';
 import '../models/paso.dart';
 
@@ -48,7 +50,7 @@ class PracticaController extends ChangeNotifier {
       descripcion: 'Aprende a enviar un mensaje por WhatsApp sin necesidad de saber escribir',
       duracion: '5 minutos',
       nivel: 'Fácil',
-      icono: Icons.message,
+      icono: FontAwesomeIcons.whatsapp,
     ),
   ];
 
@@ -61,7 +63,8 @@ class PracticaController extends ChangeNotifier {
   }
 
   void avanzarPaso() {
-    if (practicaSeleccionada != null && pasoActual < practicaSeleccionada!.pasos.length - 1) {
+    if (practicaSeleccionada != null &&
+        pasoActual < practicaSeleccionada!.pasos.length - 1) {
       pasoActual++;
       notifyListeners();
     }
