@@ -63,13 +63,73 @@ class DetalleRelojView extends StatelessWidget {
                 width: 140,
                 height: 140,
                 decoration: BoxDecoration(
-                  color: colorSuave,
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFF455A64),
+                      Color(0xFF263238),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF263238)
+                          .withValues(alpha: 0.25),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-                child: Icon(
-                  Icons.watch_later_rounded,
-                  size: 85,
-                  color: colorPrincipal,
+                child: Center(
+                  child: Container(
+                    width: 105,
+                    height: 105,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Manecilla de la hora
+                        Positioned(
+                          top: 24,
+                          child: Container(
+                            width: 8,
+                            height: 34,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF263238),
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                          ),
+                        ),
+
+                        // Manecilla de los minutos
+                        Positioned(
+                          right: 24,
+                          child: Container(
+                            width: 34,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF263238),
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                          ),
+                        ),
+
+                        // Centro del reloj
+                        Container(
+                          width: 12,
+                          height: 12,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFE5A12A),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
 

@@ -62,14 +62,55 @@ class DetalleCalendarioView extends StatelessWidget {
               Container(
                 width: 140,
                 height: 140,
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: colorSuave,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.15),
+                      blurRadius: 15,
+                      offset: const Offset(0, 7),
+                    ),
+                  ],
                 ),
-                child: Icon(
-                  Icons.calendar_month,
-                  size: 85,
-                  color: colorPrincipal,
+                child: Column(
+                  children: [
+                    Container(
+                      height: 32,
+                      width: double.infinity,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFE53935),
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(9),
+                        ),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'CAL',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 2,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          DateTime.now().day.toString(),
+                          style: TextStyle(
+                            color: Colors.grey.shade900,
+                            fontSize: 54,
+                            fontWeight: FontWeight.bold,
+                            height: 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
 

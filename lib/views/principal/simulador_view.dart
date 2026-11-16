@@ -28,6 +28,7 @@ class SimuladorView extends StatefulWidget {
 }
 
 class _SimuladorViewState extends State<SimuladorView> {
+
   // ========================================
   // CONTROLADOR COMPARTIDO
   // ========================================
@@ -38,6 +39,7 @@ class _SimuladorViewState extends State<SimuladorView> {
   void initState() {
     super.initState();
     progresoController = ProgresoController();
+
   }
 
   @override
@@ -126,6 +128,7 @@ class _SimuladorViewState extends State<SimuladorView> {
 
             return GridView(
               padding: const EdgeInsets.all(16),
+
               gridDelegate:
               SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: columnas,
@@ -135,8 +138,9 @@ class _SimuladorViewState extends State<SimuladorView> {
               ),
 
               children: [
+
                 // ===================================
-                // LLAMADAS
+                // TELÉFONO
                 // ===================================
 
                 _tarjeta(
@@ -245,9 +249,6 @@ class _SimuladorViewState extends State<SimuladorView> {
 
     final Color colorPrincipal = colores.primary;
     final Color colorTexto = colores.onSurface;
-    final Color colorIcono = colores.onPrimary;
-
-    final bool esWhatsApp = titulo == 'WhatsApp';
 
     final Color colorTarjeta = Color.alphaBlend(
       colorPrincipal.withValues(alpha: 0.13),
@@ -280,34 +281,14 @@ class _SimuladorViewState extends State<SimuladorView> {
             mainAxisAlignment: MainAxisAlignment.center,
 
             children: [
+
               // ===================================
-              // ICONO
+              // ICONOS DE APLICACIONES DEL CELULAR
               // ===================================
 
-              Container(
-                width: 76,
-                height: 76,
-
-                decoration: BoxDecoration(
-                  color: esWhatsApp
-                      ? const Color(0xFF25D366)
-                      : colorPrincipal,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-
-                child: Center(
-                  child: icono is IconData
-                      ? Icon(
-                    icono,
-                    size: 43,
-                    color: colorIcono,
-                  )
-                      : FaIcon(
-                    icono as FaIconData,
-                    size: 43,
-                    color: Colors.white,
-                  ),
-                ),
+              _iconoAplicacion(
+                titulo,
+                icono,
               ),
 
               const SizedBox(height: 14),
@@ -342,6 +323,354 @@ class _SimuladorViewState extends State<SimuladorView> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  // ========================================
+  // DISEÑO PERSONALIZADO DE CADA APLICACIÓN
+  // ========================================
+
+  Widget _iconoAplicacion(
+      String titulo,
+      Object icono,
+      ) {
+
+    // ========================================
+    // TELÉFONO
+    // ========================================
+
+    if (titulo == 'Realizar llamada') {
+      return Container(
+        width: 76,
+        height: 76,
+
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFF35D878),
+              Color(0xFF159447),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(21),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF159447).withValues(alpha: 0.25),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+
+        child: const Center(
+          child: Icon(
+            Icons.call,
+            size: 43,
+            color: Colors.white,
+          ),
+        ),
+      );
+    }
+
+    // ========================================
+    // CÁMARA
+    // ========================================
+
+    if (titulo == 'Cámara y galería') {
+      return Container(
+        width: 76,
+        height: 76,
+
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFF527CEB),
+              Color(0xFF7048C9),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(21),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF527CEB).withValues(alpha: 0.25),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+
+        child: Center(
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 53,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+
+              Positioned(
+                top: 14,
+                left: 18,
+                child: Container(
+                  width: 16,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+
+              Container(
+                width: 25,
+                height: 25,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFF4770D9),
+                  border: Border.all(
+                    color: const Color(0xFF263E88),
+                    width: 3,
+                  ),
+                ),
+                child: Center(
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xFFB7D9FF),
+                    ),
+                  ),
+                ),
+              ),
+
+              Positioned(
+                right: 14,
+                top: 22,
+                child: Container(
+                  width: 5,
+                  height: 5,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFFFFD66B),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // ========================================
+    // RELOJ
+    // ========================================
+
+    if (titulo == 'Reloj y alarmas') {
+      return Container(
+        width: 76,
+        height: 76,
+
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFF455A64),
+              Color(0xFF263238),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(21),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF263238).withValues(alpha: 0.25),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+
+        child: Center(
+          child: Container(
+            width: 53,
+            height: 53,
+
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+
+                // Manecilla de la hora
+                Positioned(
+                  top: 12,
+                  child: Container(
+                    width: 4,
+                    height: 17,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF263238),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
+                ),
+
+                // Manecilla de los minutos
+                Positioned(
+                  right: 12,
+                  child: Container(
+                    width: 17,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF263238),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
+                ),
+
+                // Centro del reloj
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFE5A12A),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // ========================================
+    // CALENDARIO
+    // ========================================
+
+    if (titulo == 'Calendario') {
+      return Container(
+        width: 76,
+        height: 76,
+
+        padding: const EdgeInsets.all(9),
+
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+
+        child: Column(
+          children: [
+
+            // Encabezado rojo
+            Container(
+              height: 17,
+              width: double.infinity,
+
+              decoration: const BoxDecoration(
+                color: Color(0xFFE53935),
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(6),
+                ),
+              ),
+
+              child: const Center(
+                child: Text(
+                  'CAL',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+            ),
+
+            // Número del calendario
+            // Número del calendario: fecha real del dispositivo
+            Expanded(
+              child: Center(
+                child: Text(
+                  DateTime.now().day.toString(),
+                  style: TextStyle(
+                    color: Colors.grey.shade900,
+                    fontSize: 29,
+                    fontWeight: FontWeight.bold,
+                    height: 1,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // ========================================
+    // WHATSAPP
+    // ========================================
+
+    if (titulo == 'WhatsApp') {
+      return Container(
+        width: 76,
+        height: 76,
+
+        decoration: BoxDecoration(
+          color: const Color(0xFF25D366),
+          borderRadius: BorderRadius.circular(21),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF25D366).withValues(alpha: 0.25),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+
+        child: const Center(
+          child: FaIcon(
+            FontAwesomeIcons.whatsapp,
+            size: 43,
+            color: Colors.white,
+          ),
+        ),
+      );
+    }
+
+    // Icono de respaldo
+    return Container(
+      width: 76,
+      height: 76,
+
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary,
+        borderRadius: BorderRadius.circular(21),
+      ),
+
+      child: Center(
+        child: Icon(
+          icono is IconData ? icono : Icons.apps,
+          size: 43,
+          color: Colors.white,
         ),
       ),
     );

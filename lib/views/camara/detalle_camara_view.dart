@@ -70,13 +70,87 @@ class DetalleCamaraView extends StatelessWidget {
                 width: 140,
                 height: 140,
                 decoration: BoxDecoration(
-                  color: colorPrincipal,
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFF527CEB),
+                      Color(0xFF7048C9),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF527CEB)
+                          .withValues(alpha: 0.25),
+                      blurRadius: 15,
+                      offset: const Offset(0, 7),
+                    ),
+                  ],
                 ),
-                child: Icon(
-                  Icons.camera_alt_rounded,
-                  size: 90,
-                  color: colorSobrePrincipal,
+                child: Center(
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        width: 98,
+                        height: 70,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                      ),
+
+                      Positioned(
+                        top: 26,
+                        left: 33,
+                        child: Container(
+                          width: 29,
+                          height: 11,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(7),
+                          ),
+                        ),
+                      ),
+
+                      Container(
+                        width: 46,
+                        height: 46,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF4770D9),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: const Color(0xFF263E88),
+                            width: 5,
+                          ),
+                        ),
+                        child: Center(
+                          child: Container(
+                            width: 19,
+                            height: 19,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFB7D9FF),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      Positioned(
+                        right: 26,
+                        top: 40,
+                        child: Container(
+                          width: 9,
+                          height: 9,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFFFD66B),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
 

@@ -9,10 +9,7 @@ class DetallePracticaView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ========================================
     // COLORES DINÁMICOS DEL TEMA SELECCIONADO
-    // ========================================
-
     final tema = Theme.of(context);
     final colores = tema.colorScheme;
 
@@ -23,16 +20,10 @@ class DetallePracticaView extends StatelessWidget {
     final Color colorSecundario = colores.onSurfaceVariant;
     final Color colorTarjeta = colores.surface;
 
-    final Color colorSuave =
-    colorPrincipal.withValues(alpha: 0.15);
+    final Color colorSuave = colorPrincipal.withValues(alpha: 0.15);
 
     return Scaffold(
       backgroundColor: fondo,
-
-      // ========================================
-      // BARRA SUPERIOR
-      // ========================================
-
       appBar: AppBar(
         title: Text(
           'Realizar práctica',
@@ -45,46 +36,50 @@ class DetallePracticaView extends StatelessWidget {
         foregroundColor: colorTexto,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_rounded,
-            color: colorTexto,
-          ),
+          icon: Icon(Icons.arrow_back_rounded, color: colorTexto),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
-
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 10),
 
-              // ===================================
               // ICONO PRINCIPAL
-              // ===================================
-
               Container(
                 width: 140,
                 height: 140,
                 decoration: BoxDecoration(
-                  color: colorPrincipal,
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFF35D878),
+                      Color(0xFF159447),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF159447).withValues(alpha: 0.25),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-                child: Icon(
-                  Icons.phone_rounded,
-                  size: 90,
-                  color: colorSobrePrincipal,
+                child: const Center(
+                  child: Icon(
+                    Icons.call,
+                    size: 82,
+                    color: Colors.white,
+                  ),
                 ),
               ),
 
               const SizedBox(height: 24),
-
-              // ===================================
-              // TÍTULO DE LA PRÁCTICA
-              // ===================================
 
               Text(
                 'Realizar llamada\ntelefónica',
@@ -99,10 +94,6 @@ class DetallePracticaView extends StatelessWidget {
 
               const SizedBox(height: 12),
 
-              // ===================================
-              // DESCRIPCIÓN
-              // ===================================
-
               Text(
                 'Aprende a hacer una llamada telefónica '
                     'al contacto que tú desees.',
@@ -116,10 +107,7 @@ class DetallePracticaView extends StatelessWidget {
 
               const SizedBox(height: 32),
 
-              // ===================================
               // INFORMACIÓN DE LA LECCIÓN
-              // ===================================
-
               Container(
                 padding: const EdgeInsets.symmetric(
                   vertical: 20,
@@ -130,8 +118,7 @@ class DetallePracticaView extends StatelessWidget {
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: Row(
-                  mainAxisAlignment:
-                  MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Expanded(
                       child: _dato(
@@ -144,9 +131,7 @@ class DetallePracticaView extends StatelessWidget {
                         colorTarjeta,
                       ),
                     ),
-
                     const SizedBox(width: 12),
-
                     Expanded(
                       child: _dato(
                         Icons.trending_up_rounded,
@@ -164,10 +149,7 @@ class DetallePracticaView extends StatelessWidget {
 
               const SizedBox(height: 32),
 
-              // ===================================
               // BOTÓN COMENZAR LECCIÓN
-              // ===================================
-
               SizedBox(
                 width: double.infinity,
                 height: 62,
@@ -177,11 +159,9 @@ class DetallePracticaView extends StatelessWidget {
                     foregroundColor: colorSobrePrincipal,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                      BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -192,7 +172,6 @@ class DetallePracticaView extends StatelessWidget {
                       ),
                     );
                   },
-
                   child: Text(
                     'Comenzar lección',
                     textAlign: TextAlign.center,
@@ -207,10 +186,7 @@ class DetallePracticaView extends StatelessWidget {
 
               const SizedBox(height: 15),
 
-              // ===================================
               // BOTÓN REGRESAR A PRÁCTICAS
-              // ===================================
-
               SizedBox(
                 width: double.infinity,
                 height: 58,
@@ -236,8 +212,7 @@ class DetallePracticaView extends StatelessWidget {
                       width: 2,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                      BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                 ),
@@ -251,10 +226,7 @@ class DetallePracticaView extends StatelessWidget {
     );
   }
 
-  // ========================================
   // INFORMACIÓN: DURACIÓN Y NIVEL
-  // ========================================
-
   Widget _dato(
       IconData icono,
       String etiqueta,
@@ -280,9 +252,7 @@ class DetallePracticaView extends StatelessWidget {
             color: colorPrincipal,
           ),
         ),
-
         const SizedBox(height: 10),
-
         Text(
           etiqueta,
           style: TextStyle(
@@ -291,9 +261,7 @@ class DetallePracticaView extends StatelessWidget {
             color: colorTexto,
           ),
         ),
-
         const SizedBox(height: 4),
-
         Text(
           valor,
           style: TextStyle(

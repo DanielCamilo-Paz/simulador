@@ -403,18 +403,7 @@ class _InicioViewState extends State<InicioView> {
             Flexible(
               child: FittedBox(
                 fit: BoxFit.contain,
-
-                child: iconoLeccion is IconData
-                    ? Icon(
-                  iconoLeccion as IconData,
-                  size: 100 * escala,
-                  color: naranja,
-                )
-                    : FaIcon(
-                  iconoLeccion as FaIconData,
-                  size: 100 * escala,
-                  color: const Color(0xFF25D366),
-                ),
+                child: _iconoLeccionWidget(),
               ),
             ),
 
@@ -463,6 +452,360 @@ class _InicioViewState extends State<InicioView> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // ========================================
+  // ICONO PERSONALIZADO DE LA ÚLTIMA LECCIÓN
+  // ========================================
+
+  Widget _iconoLeccionWidget() {
+
+    // ========================================
+    // TELÉFONO
+    // ========================================
+
+    if (ultimaLeccion == 'Realizar llamada') {
+      return Container(
+        width: 76,
+        height: 76,
+
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFF35D878),
+              Color(0xFF159447),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(21),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF159447).withValues(alpha: 0.25),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+
+        child: const Center(
+          child: Icon(
+            Icons.call,
+            size: 43,
+            color: Colors.white,
+          ),
+        ),
+      );
+    }
+
+    // ========================================
+    // CÁMARA
+    // ========================================
+
+    if (ultimaLeccion == 'Cámara y galería') {
+      return Container(
+        width: 76,
+        height: 76,
+
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFF527CEB),
+              Color(0xFF7048C9),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(21),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF527CEB).withValues(alpha: 0.25),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+
+        child: Center(
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 53,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+
+              Positioned(
+                top: 14,
+                left: 18,
+                child: Container(
+                  width: 16,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+
+              Container(
+                width: 25,
+                height: 25,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFF4770D9),
+                  border: Border.all(
+                    color: const Color(0xFF263E88),
+                    width: 3,
+                  ),
+                ),
+                child: Center(
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xFFB7D9FF),
+                    ),
+                  ),
+                ),
+              ),
+
+              Positioned(
+                right: 14,
+                top: 22,
+                child: Container(
+                  width: 5,
+                  height: 5,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFFFFD66B),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // ========================================
+    // RELOJ
+    // ========================================
+
+    if (ultimaLeccion == 'Reloj y alarmas') {
+      return Container(
+        width: 76,
+        height: 76,
+
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFF455A64),
+              Color(0xFF263238),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(21),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF263238).withValues(alpha: 0.25),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+
+        child: Center(
+          child: Container(
+            width: 53,
+            height: 53,
+
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+
+                // Manecilla de la hora
+
+                Positioned(
+                  top: 12,
+                  child: Container(
+                    width: 4,
+                    height: 17,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF263238),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
+                ),
+
+                // Manecilla de los minutos
+
+                Positioned(
+                  right: 12,
+                  child: Container(
+                    width: 17,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF263238),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
+                ),
+
+                // Centro del reloj
+
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFE5A12A),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // ========================================
+    // CALENDARIO
+    // ========================================
+
+    if (ultimaLeccion == 'Calendario') {
+      return Container(
+        width: 76,
+        height: 76,
+
+        padding: const EdgeInsets.all(9),
+
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+
+        child: Column(
+          children: [
+
+            // Encabezado rojo
+
+            Container(
+              height: 17,
+              width: double.infinity,
+
+              decoration: const BoxDecoration(
+                color: Color(0xFFE53935),
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(6),
+                ),
+              ),
+
+              child: const Center(
+                child: Text(
+                  'CAL',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+            ),
+
+            // Número del calendario: fecha real del dispositivo
+
+            Expanded(
+              child: Center(
+                child: Text(
+                  DateTime.now().day.toString(),
+                  style: TextStyle(
+                    color: Colors.grey.shade900,
+                    fontSize: 29,
+                    fontWeight: FontWeight.bold,
+                    height: 1,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // ========================================
+    // WHATSAPP
+    // ========================================
+
+    if (ultimaLeccion == 'WhatsApp') {
+      return Container(
+        width: 76,
+        height: 76,
+
+        decoration: BoxDecoration(
+          color: const Color(0xFF25D366),
+          borderRadius: BorderRadius.circular(21),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF25D366).withValues(alpha: 0.25),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+
+        child: const Center(
+          child: FaIcon(
+            FontAwesomeIcons.whatsapp,
+            size: 43,
+            color: Colors.white,
+          ),
+        ),
+      );
+    }
+
+    // ========================================
+    // ICONO DE RESPALDO
+    // ========================================
+
+    return Container(
+      width: 76,
+      height: 76,
+
+      decoration: BoxDecoration(
+        color: naranja,
+        borderRadius: BorderRadius.circular(21),
+      ),
+
+      child: Center(
+        child: Icon(
+          iconoLeccion is IconData
+              ? iconoLeccion as IconData
+              : Icons.apps,
+          size: 43,
+          color: Colors.white,
         ),
       ),
     );
